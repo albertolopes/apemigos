@@ -63,13 +63,13 @@ export default async function Projects() {
                   style={{ objectFit: 'cover' }}
                 />
               </div>
-              <div className="bg-white sm:mt-[-50px] border-t-4 relative mx-6 px-2 pt-3 border-blue-site text-center">
+              <div className="bg-white sm:mt-[-50px] border-t-4 relative mx-6 px-2 pt-3 border-orange-500 text-center">
                 <h2 className="mb-10 font-site">{item.title}</h2>
                 <p className="text-sm mb-6">{item.shortDescription}</p>
                 <a
                   data-testid={testIds.PROJECTS_PAGE.PROJECT_ITEM_CTA}
                   href={`/projects/${item.slug}`}
-                  className="text-purple-site py-6 font-site"
+                  className="text-slate-500 py-6 font-site"
                 >
                   Saiba Mais
                 </a>
