@@ -24,9 +24,9 @@ const Footer = () => (
               Rua da Saúde, 123 <br /> Brasília - DF
             </p>
             <p className="mt-10">Telefone: (61) 0000-0000</p>
+            <p className="mt-10">Email: contato@esclerosevida.org</p>
           </div>
         </div>
-        <h3 className="text-4xl mt-10">contato@esclerosevida.org</h3>
       </div>
       <div className="basis-1/3 bg-gray-200 p-14 text-center">
         <h2 className="text-2xl sm:text-3xl font-bold">Fique Informado</h2>
