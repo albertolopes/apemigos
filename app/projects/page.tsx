@@ -20,6 +20,16 @@ export default async function Projects() {
         'Campanhas de conscientiza��ão sobre esclerose múltipla.',
       slug: 'projeto-2',
     },
+    {
+      _id: '3',
+      title: 'Rifa Solidária',
+      description: 'Participe da nossa rifa solidária e ajude nossa causa!',
+      cover:
+        'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=370&q=80',
+      shortDescription:
+        'Escolha um número e concorra a prêmios ajudando nossa ONG.',
+      slug: 'rifa',
+    },
   ];
 
   return (
