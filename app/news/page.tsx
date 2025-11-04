@@ -20,6 +20,7 @@ const ITEMS_PER_PAGE = 9;
 const API_URL =
   'https://gist.githubusercontent.com/albertolopes/0af1599909d672b1ccd3a8ff327868bb/raw/noticias.json';
 
+// 🔹 Fetch das notícias
 async function fetchAllCampaigns(): Promise<NewsItem[]> {
   try {
     const res = await fetch(API_URL, { cache: 'no-store' });
@@ -31,14 +32,18 @@ async function fetchAllCampaigns(): Promise<NewsItem[]> {
   }
 }
 
-// 🔹 Paginação local
-export async function getNewsPageData(page: number) {
+// 🔹 Função de paginação local (sem export, para não gerar erro de Page export)
+async function getNewsPageData(page: number) {
   const allData = await fetchAllCampaigns();
 
   // 🔸 Ordena do mais recente para o mais antigo
   const sortedData = allData.sort((a: any, b: any) => {
-    const dateA = new Date(a.date).getTime();
-    const dateB = new Date(b.date).getTime();
+    const dateA = new Date(
+      typeof a.date === 'string' ? a.date : a.date?.$date
+    ).getTime();
+    const dateB = new Date(
+      typeof b.date === 'string' ? b.date : b.date?.$date
+    ).getTime();
     return dateB - dateA; // mais recente primeiro
   });
 
@@ -121,7 +126,6 @@ export default function NewsPage() {
             data-testid={testIds.NEWS_PAGE.NEWS_LIST}
           >
             {items.map((item) => {
-              // ✅ Extração segura dos valores
               const id =
                 typeof item._id === 'string' ? item._id : item._id?.$oid;
               const date =
@@ -153,7 +157,7 @@ export default function NewsPage() {
                     </p>
                     <a
                       data-testid={testIds.NEWS_PAGE.NEWS_ITEM_CTA}
-                      href={`/news/${id}`} // ✅ usa o ID já tratado
+                      href={`/news/${id}`}
                       className="text-slate-500 py-6 font-site"
                     >
                       Saiba Mais
