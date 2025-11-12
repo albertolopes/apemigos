@@ -25,12 +25,12 @@ Este projeto é um portal informativo para uma ONG dedicada à conscientização
 
 1. **Instale as dependências:**
    ```bash
-   yarn install
+   npm install
    ```
 
 2. **Inicie o servidor de desenvolvimento:**
    ```bash
-   yarn dev
+   npm run dev
    ```
 
 3. **Acesse:**  
@@ -38,10 +38,10 @@ Este projeto é um portal informativo para uma ONG dedicada à conscientização
 
 ## Scripts úteis
 
-- `yarn dev` — Inicia o ambiente de desenvolvimento.
-- `yarn build` — Gera a build de produção.
-- `yarn start` — Inicia o servidor em modo produção.
-- `yarn lint` — Executa o linter e corrige problemas de formatação.
+- `npm run dev` — Inicia o ambiente de desenvolvimento.
+- `npm run build` — Gera a build de produção.
+- `npm run start` — Inicia o servidor em modo produção.
+- `npm run lint` — Executa o linter e corrige problemas de formatação.
 
 ## Contribuição
 
