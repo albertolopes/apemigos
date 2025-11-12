@@ -1,6 +1,6 @@
 # Portal de Notícias sobre Esclerose Múltipla
 
-Este projeto é um portal informativo para uma ONG dedicada à conscientização e divulgação de informações sobre Esclerose Múltipla. O site publica artigos jornalísticos, notícias, depoimentos e dados relevantes para pacientes, familiares, profissionais de saúde e o público em geral.
+Este projeto é um portal informativo para Apemigos, ONG dedicada à conscientização e divulgação de informações sobre Esclerose Múltipla. O site publica artigos jornalísticos, notícias, depoimentos e dados relevantes para pacientes, familiares, profissionais de saúde e o público em geral.
 
 ## Objetivo
 
