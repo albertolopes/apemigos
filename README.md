@@ -1,6 +1,6 @@
 # Portal de Notícias sobre Esclerose Múltipla
 
-Este projeto é um portal informativo para uma ONG dedicada à conscientização e divulgação de informações sobre Esclerose Múltipla. O site publica artigos jornalísticos, notícias, depoimentos e dados relevantes para pacientes, familiares, profissionais de saúde e o público em geral.
+Este projeto é um portal informativo para Apemigos, ONG dedicada à conscientização e divulgação de informações sobre Esclerose Múltipla. O site publica artigos jornalísticos, notícias, depoimentos e dados relevantes para pacientes, familiares, profissionais de saúde e o público em geral.
 
 ## Objetivo
 
@@ -25,12 +25,12 @@ Este projeto é um portal informativo para uma ONG dedicada à conscientização
 
 1. **Instale as dependências:**
    ```bash
-   yarn install
+   npm install
    ```
 
 2. **Inicie o servidor de desenvolvimento:**
    ```bash
-   yarn dev
+   npm run dev
    ```
 
 3. **Acesse:**  
@@ -38,10 +38,10 @@ Este projeto é um portal informativo para uma ONG dedicada à conscientização
 
 ## Scripts úteis
 
-- `yarn dev` — Inicia o ambiente de desenvolvimento.
-- `yarn build` — Gera a build de produção.
-- `yarn start` — Inicia o servidor em modo produção.
-- `yarn lint` — Executa o linter e corrige problemas de formatação.
+- `npm run dev` — Inicia o ambiente de desenvolvimento.
+- `npm run build` — Gera a build de produção.
+- `npm run start` — Inicia o servidor em modo produção.
+- `npm run lint` — Executa o linter e corrige problemas de formatação.
 
 ## Contribuição
 
