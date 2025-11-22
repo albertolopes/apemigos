@@ -3,63 +3,28 @@
 import Image from 'next/image';
 import { formatDate } from '@app/utils/date-formatter';
 import testIds from '@app/utils/test-ids';
-import { useState, useEffect } from 'react';
-
-// ✅ Interface ajustada para lidar com o formato MongoDB
-interface NewsItem {
-  _id: string | { $oid: string };
-  image: string;
-  title: string;
-  date: string | { $date: string };
-  shortDescription: string;
-  slug: string;
-}
+import { useState, useEffect, useRef } from 'react';
+import { newsService, NewsItem, NewsResponse } from '@services';
 
 const ITEMS_PER_PAGE = 9;
 
-const API_URL =
-  'https://gist.githubusercontent.com/albertolopes/0af1599909d672b1ccd3a8ff327868bb/raw/noticias.json';
-
-// 🔹 Fetch das notícias
-async function fetchAllCampaigns(): Promise<NewsItem[]> {
-  try {
-    const res = await fetch(API_URL, { cache: 'no-store' });
-    if (!res.ok) throw new Error(`Erro ao buscar dados: ${res.status}`);
-    return await res.json();
-  } catch (err) {
-    console.error('Erro ao buscar campanhas:', err);
-    return [];
-  }
-}
-
-// 🔹 Função de paginação local (sem export, para não gerar erro de Page export)
 async function getNewsPageData(page: number) {
-  const allData = await fetchAllCampaigns();
+  try {
+    const response: NewsResponse = await newsService.getNews(
+      page - 1,
+      ITEMS_PER_PAGE
+    );
 
-  // 🔸 Ordena do mais recente para o mais antigo
-  const sortedData = allData.sort((a: any, b: any) => {
-    const dateA = new Date(
-      typeof a.date === 'string' ? a.date : a.date?.$date
-    ).getTime();
-    const dateB = new Date(
-      typeof b.date === 'string' ? b.date : b.date?.$date
-    ).getTime();
-    return dateB - dateA; // mais recente primeiro
-  });
-
-  const total = sortedData.length;
-
-  const start = (page - 1) * ITEMS_PER_PAGE;
-  const end = start + ITEMS_PER_PAGE;
-
-  const pageItems = sortedData.slice(start, end);
-
-  return {
-    total,
-    pageItems,
-    currentPage: page,
-    totalPages: Math.ceil(total / ITEMS_PER_PAGE),
-  };
+    return {
+      total: response.totalElements,
+      pageItems: response.content,
+      currentPage: page,
+      totalPages: response.totalPages,
+    };
+  } catch (err) {
+    console.error('Erro ao buscar notícias:', err);
+    throw new Error('Falha ao carregar notícias');
+  }
 }
 
 export default function NewsPage() {
@@ -69,17 +34,29 @@ export default function NewsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // 🔥 ADICIONADO: Controle de chamadas duplicadas
+  const isFetchingRef = useRef(false);
+
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
   useEffect(() => {
+    // 🔥 ADICIONADO: Previne chamadas duplicadas
+    if (isFetchingRef.current) return;
+
+    isFetchingRef.current = true;
     setIsLoading(true);
+    setError(null);
+
     getNewsPageData(page)
       .then(({ total, pageItems }) => {
         setTotalItems(total);
         setItems(pageItems);
       })
       .catch((err) => setError(err.message))
-      .finally(() => setIsLoading(false));
+      .finally(() => {
+        setIsLoading(false);
+        isFetchingRef.current = false; // 🔥 ADICIONADO: Libera para próxima chamada
+      });
   }, [page]);
 
   return (
@@ -125,47 +102,40 @@ export default function NewsPage() {
             className="grid grid-cols-1 sm:grid-cols-3 gap-7 grid-flow-row mt-10"
             data-testid={testIds.NEWS_PAGE.NEWS_LIST}
           >
-            {items.map((item) => {
-              const id =
-                typeof item._id === 'string' ? item._id : item._id?.$oid;
-              const date =
-                typeof item.date === 'string' ? item.date : item.date?.$date;
-
-              return (
-                <div
-                  key={id}
-                  className="relative border"
-                  data-testid={testIds.NEWS_PAGE.NEWS_ITEM_CONTAINER}
-                >
-                  <div className="h-[320px] relative">
-                    <Image
-                      src={item.image}
-                      alt={item.title}
-                      fill
-                      style={{ objectFit: 'cover' }}
-                      unoptimized
-                    />
-                    <span className="bg-orange-500 text-white px-6 py-2 absolute bottom-[-20px] left-4">
-                      {formatDate(new Date(date))}
-                    </span>
-                  </div>
-
-                  <div className="bg-white relative mt-10 px-8 pb-10">
-                    <h2 className="mb-10 font-site">{item.title}</h2>
-                    <p className="text-slate-500 text-sm mb-6">
-                      {item.shortDescription}
-                    </p>
-                    <a
-                      data-testid={testIds.NEWS_PAGE.NEWS_ITEM_CTA}
-                      href={`/news/${id}`}
-                      className="text-slate-500 py-6 font-site"
-                    >
-                      Saiba Mais
-                    </a>
-                  </div>
+            {items.map((item) => (
+              <div
+                key={item.id}
+                className="relative border"
+                data-testid={testIds.NEWS_PAGE.NEWS_ITEM_CONTAINER}
+              >
+                <div className="h-[320px] relative">
+                  <Image
+                    src={item.image}
+                    alt={item.title}
+                    fill
+                    style={{ objectFit: 'cover' }}
+                    unoptimized
+                  />
+                  <span className="bg-orange-500 text-white px-6 py-2 absolute bottom-[-20px] left-4">
+                    {formatDate(new Date(item.date))}
+                  </span>
                 </div>
-              );
-            })}
+
+                <div className="bg-white relative mt-10 px-8 pb-10">
+                  <h2 className="mb-10 font-site">{item.title}</h2>
+                  <p className="text-slate-500 text-sm mb-6">
+                    {item.shortDescription}
+                  </p>
+                  <a
+                    data-testid={testIds.NEWS_PAGE.NEWS_ITEM_CTA}
+                    href={`/news/${item.id}`}
+                    className="text-slate-500 py-6 font-site"
+                  >
+                    Saiba Mais
+                  </a>
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
