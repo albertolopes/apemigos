@@ -1,11 +1,13 @@
 'use client';
 
 import { use, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { LongDescription } from './LongDescription';
 import { newsService, NewsContentResponse } from '@services';
 
 export default function New({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
+  const router = useRouter();
   const [item, setItem] = useState<NewsContentResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -16,16 +18,9 @@ export default function New({ params }: { params: Promise<{ slug: string }> }) {
         setIsLoading(true);
         setError(null);
 
-        // Converte o slug para ID (assumindo que o slug é o ID numérico)
-        const newsId = parseInt(slug);
-
-        if (isNaN(newsId)) {
-          throw new Error('ID da notícia inválido');
-        }
-
-        const response: NewsContentResponse = await newsService.getNewsContent(
-          newsId
-        );
+        // Busca o conteúdo usando slug via endpoint /conteudo/slug/{slug}
+        const response: NewsContentResponse =
+          await newsService.getNewsContentBySlug(slug);
 
         setItem(response);
       } catch (err) {
@@ -37,7 +32,7 @@ export default function New({ params }: { params: Promise<{ slug: string }> }) {
     }
 
     fetchData();
-  }, [slug]);
+  }, [slug, router]);
 
   if (isLoading) {
     return (

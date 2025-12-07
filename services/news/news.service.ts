@@ -56,7 +56,7 @@ export class NewsService {
   /**
    * Busca o conteúdo completo de uma notícia específica
    */
-  async getNewsContent(newsId: number): Promise<NewsContentResponse> {
+  async getNewsContent(newsId: string | number): Promise<NewsContentResponse> {
     try {
       const response = await api.get(`/api/noticias/conteudo/${newsId}`, {
         headers: { Accept: 'application/json' },
@@ -65,6 +65,27 @@ export class NewsService {
       return response.data;
     } catch (error: any) {
       console.error(`Erro ao buscar conteúdo da notícia ${newsId}:`, error);
+      throw new Error(
+        error.response?.data?.message || 'Erro ao carregar conteúdo da notícia'
+      );
+    }
+  }
+
+  /**
+   * Busca o conteúdo completo de uma notícia por slug
+   */
+  async getNewsContentBySlug(slug: string): Promise<NewsContentResponse> {
+    try {
+      const response = await api.get(`/api/noticias/conteudo/slug/${slug}`, {
+        headers: { Accept: 'application/json' },
+      });
+
+      return response.data;
+    } catch (error: any) {
+      console.error(
+        `Erro ao buscar conteúdo da notícia por slug ${slug}:`,
+        error
+      );
       throw new Error(
         error.response?.data?.message || 'Erro ao carregar conteúdo da notícia'
       );

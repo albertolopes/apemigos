@@ -22,7 +22,7 @@ export interface AuthError {
 export class AuthService {
   private readonly STORAGE_KEY = 'service_token';
   private readonly TOKEN_EXPIRY_KEY = 'token_expiry';
-  private readonly SERVICE_KEY = 'apemigos-service-key';
+  private readonly SERVICE_KEY = 'apemigos-service-key-2025-secure-version';
 
   /**
    * Verifica se o token existe e não expirou

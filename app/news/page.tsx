@@ -1,6 +1,8 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { formatDate } from '@app/utils/date-formatter';
 import testIds from '@app/utils/test-ids';
 import { useState, useEffect, useRef } from 'react';
@@ -28,16 +30,34 @@ async function getNewsPageData(page: number) {
 }
 
 export default function NewsPage() {
-  const [page, setPage] = useState(1);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const initialPage = (() => {
+    const p = parseInt(String(searchParams.get('page') || '1'), 10);
+    return isNaN(p) || p < 1 ? 1 : p;
+  })();
+
+  const [page, setPage] = useState(initialPage);
   const [items, setItems] = useState<NewsItem[]>([]);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 🔥 ADICIONADO: Controle de chamadas duplicadas
+  //  ADICIONADO: Controle de chamadas duplicadas
   const isFetchingRef = useRef(false);
 
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+
+  // Sincroniza quando a query string muda (ex.: back/forward)
+  useEffect(() => {
+    const p = parseInt(String(searchParams.get('page') || '1'), 10);
+    const normalized = isNaN(p) || p < 1 ? 1 : p;
+    if (normalized !== page) {
+      setPage(normalized);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   useEffect(() => {
     // 🔥 ADICIONADO: Previne chamadas duplicadas
@@ -58,6 +78,13 @@ export default function NewsPage() {
         isFetchingRef.current = false; // 🔥 ADICIONADO: Libera para próxima chamada
       });
   }, [page]);
+
+  function goToPage(n: number) {
+    const normalized = Math.max(1, Math.min(totalPages || 1, n));
+    // Atualiza URL para deep-link e histórico
+    router.push(`/news?page=${normalized}`);
+    setPage(normalized);
+  }
 
   return (
     <div className="relative">
@@ -126,13 +153,15 @@ export default function NewsPage() {
                   <p className="text-slate-500 text-sm mb-6">
                     {item.shortDescription}
                   </p>
-                  <a
+                  <Link
                     data-testid={testIds.NEWS_PAGE.NEWS_ITEM_CTA}
-                    href={`/news/${item.id}`}
+                    href={
+                      item.slug ? `/news/${item.slug}` : `/news/${item.id}`
+                    }
                     className="text-slate-500 py-6 font-site"
                   >
                     Saiba Mais
-                  </a>
+                  </Link>
                 </div>
               </div>
             ))}
@@ -143,7 +172,7 @@ export default function NewsPage() {
         {!isLoading && !error && (
           <div className="flex justify-center items-center gap-4 mt-8">
             <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              onClick={() => goToPage(page - 1)}
               disabled={page === 1}
               className="px-4 py-2 bg-slate-200 rounded disabled:opacity-50 hover:bg-slate-300 transition-colors"
             >
@@ -153,7 +182,7 @@ export default function NewsPage() {
               Página {page} de {totalPages || 1}
             </span>
             <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              onClick={() => goToPage(page + 1)}
               disabled={page === totalPages || totalPages === 0}
               className="px-4 py-2 bg-slate-200 rounded disabled:opacity-50 hover:bg-slate-300 transition-colors"
             >
