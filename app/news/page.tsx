@@ -155,9 +155,7 @@ export default function NewsPage() {
                   </p>
                   <Link
                     data-testid={testIds.NEWS_PAGE.NEWS_ITEM_CTA}
-                    href={
-                      item.slug ? `/news/${item.slug}` : `/news/${item.id}`
-                    }
+                    href={item.slug ? `/news/${item.slug}` : `/news/${item.id}`}
                     className="text-slate-500 py-6 font-site"
                   >
                     Saiba Mais
