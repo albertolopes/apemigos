@@ -1,7 +1,3 @@
-// Helper para resolver variáveis de ambiente públicas com possibilidade de override em runtime
-// Ordem de resolução (browser): window.__APEMIGOS_<KEY> -> process.env.NEXT_PUBLIC_<KEY> -> default
-// Em server/build-time (Node) apenas process.env.NEXT_PUBLIC_<KEY> -> default
-
 export function getPublicEnv(
   key: string,
   defaultValue?: string
@@ -13,12 +9,17 @@ export function getPublicEnv(
       ? (globalThis as any)[runtimeKey] ?? (window as any)[runtimeKey]
       : undefined;
 
-  const build =
+  const buildPublic =
     typeof process !== 'undefined'
       ? (process.env[`NEXT_PUBLIC_${key}` as keyof NodeJS.ProcessEnv] as
           | string
           | undefined)
       : undefined;
 
-  return runtime ?? build ?? defaultValue;
+  const buildPrivate =
+    typeof process !== 'undefined'
+      ? (process.env[key as keyof NodeJS.ProcessEnv] as string | undefined)
+      : undefined;
+
+  return runtime ?? buildPublic ?? buildPrivate ?? defaultValue;
 }
