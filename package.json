@@ -15,7 +15,7 @@
     "@netlify/plugin-nextjs": "^4.36.0",
     "flowbite": "^1.5.4",
     "flowbite-react": "^0.4.4",
-    "next": "^15.5.4",
+    "next": "15.5.9",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
