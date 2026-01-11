@@ -1,6 +1,7 @@
-import { CarouselClient } from '@app/components/Carousel/Carousel';
 import Image from 'next/image';
 import testIds from '@app/utils/test-ids';
+import SocialEmbeds from './components/SocialEmbeds/SocialEmbeds';
+import DonateBanner from './components/DonateBanner/DonateBanner';
 
 export default function Home() {
   return (
@@ -130,7 +131,8 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <CarouselClient />
+      <DonateBanner />
+      <SocialEmbeds />
     </div>
   );
 }
