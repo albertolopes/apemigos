@@ -23,7 +23,9 @@ export class AssociadosService {
     } catch (error: any) {
       console.error('Erro ao criar associado:', error);
       const message =
-        error.response?.data || error.response?.statusText || error.message ||
+        error.response?.data ||
+        error.response?.statusText ||
+        error.message ||
         'Erro ao criar associado';
       throw new Error(message);
     }

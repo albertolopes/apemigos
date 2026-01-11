@@ -1,14 +1,14 @@
-"use client";
-import { useEffect } from "react";
+'use client';
+import { useEffect } from 'react';
 
 export default function SocialEmbeds() {
   useEffect(() => {
     // Load Instagram embed script if not loaded
-    if (typeof window === "undefined") return;
+    if (typeof window === 'undefined') return;
     const anyWin = window as any;
     if (!anyWin.instgrm) {
-      const script = document.createElement("script");
-      script.src = "https://www.instagram.com/embed.js";
+      const script = document.createElement('script');
+      script.src = 'https://www.instagram.com/embed.js';
       script.async = true;
       script.onload = () => {
         try {
@@ -33,6 +33,12 @@ export default function SocialEmbeds() {
       <h2 className="text-center font-site text-2xl text-orange-500 mb-6">
         Acompanhe nas redes
       </h2>
+      <div className="max-w-3xl mx-auto text-center mb-8 px-4 sm:px-0">
+        <p className="text-slate-600 text-sm">
+          Acompanhe nossas ações nas redes sociais e participe da causa: curta,
+          compartilhe — sua participação faz a diferença.
+        </p>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
         {/* YouTube embed (single video) - fixed identical heights with Instagram */}
         <div className="bg-white border rounded-lg overflow-hidden shadow-sm">

@@ -212,7 +212,9 @@ export function buildAssociateEmail(data: AssociateData) {
   // Preferir mostrar o nome do convênio quando disponível
   const eDisplayConvenio = eConvenioNome ? eConvenioNome : eConvenio;
   // Texto final para exibir: "Convênio <nome>" ou "Convênio Sim/Não"
-  const displayConvenioLine = eDisplayConvenio ? `Convênio ${eDisplayConvenio}` : 'Convênio Não';
+  const displayConvenioLine = eDisplayConvenio
+    ? `Convênio ${eDisplayConvenio}`
+    : 'Convênio Não';
   const eObs = observacoes ? nl2br(escapeHtml(observacoes)) : '';
   // escaped address pieces
   const nLogradouro = normalizeVal(logradouro);
@@ -227,7 +229,9 @@ export function buildAssociateEmail(data: AssociateData) {
   const eCidade = nCidade ? escapeHtml(nCidade) : '';
   const eEstado = nEstado ? escapeHtml(nEstado) : '';
   const eCep = nCep ? escapeHtml(nCep) : '';
-  const eNomeContatoEmergencia = nNomeContatoEmergencia ? escapeHtml(nNomeContatoEmergencia) : '';
+  const eNomeContatoEmergencia = nNomeContatoEmergencia
+    ? escapeHtml(nNomeContatoEmergencia)
+    : '';
 
   // Build address line from available parts, avoid showing '-' when some parts are missing
   const addressParts: string[] = [];
@@ -313,12 +317,16 @@ export function buildAssociateEmail(data: AssociateData) {
                     <td style="padding:6px 0;color:#374151;">${eTelefoneEmergencia}</td>
                   </tr>
 
-                  ${eNomeContatoEmergencia ? `
+                  ${
+                    eNomeContatoEmergencia
+                      ? `
                   <tr>
                     <td style="padding:6px 0;font-weight:600;color:#374151;">Contato de emergência</td>
                     <td style="padding:6px 0;color:#374151;">${eNomeContatoEmergencia}</td>
                   </tr>
-                  ` : ''}
+                  `
+                      : ''
+                  }
 
                   <tr>
                     <td style="padding:6px 0;font-weight:600;color:#374151;">Médico responsável</td>
@@ -331,7 +339,9 @@ export function buildAssociateEmail(data: AssociateData) {
                   </tr>
 
                   <tr>
-                    <td colspan="2" style="padding:6px 0;color:#374151;font-weight:600;">${escapeHtml(displayConvenioLine)}</td>
+                    <td colspan="2" style="padding:6px 0;color:#374151;font-weight:600;">${escapeHtml(
+                      displayConvenioLine
+                    )}</td>
                   </tr>
 
                   <tr>

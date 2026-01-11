@@ -20,7 +20,11 @@ export class PixService {
       return response.data as PixStaticResponse;
     } catch (error: any) {
       // surface useful debug information
-      console.error('Erro ao criar PIX estático:', error?.response?.status, error?.response?.data || error.message);
+      console.error(
+        'Erro ao criar PIX estático:',
+        error?.response?.status,
+        error?.response?.data || error.message
+      );
       // rethrow so caller can decide fallback behavior
       throw error;
     }

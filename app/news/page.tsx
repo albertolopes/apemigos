@@ -35,7 +35,8 @@ export default function NewsPage() {
   const searchParams = useSearchParams();
 
   // keyword taken from querystring (optional)
-  const initialKeyword = (() => String(searchParams.get('keyword') || '').trim())();
+  const initialKeyword = (() =>
+    String(searchParams.get('keyword') || '').trim())();
 
   const initialPage = (() => {
     const p = parseInt(String(searchParams.get('page') || '1'), 10);
@@ -47,7 +48,8 @@ export default function NewsPage() {
   const [totalItems, setTotalItems] = useState(0);
   const [keyword, setKeyword] = useState<string>(initialKeyword);
   // submittedKeyword controls when a search is actually performed (only on submit or URL load)
-  const [submittedKeyword, setSubmittedKeyword] = useState<string>(initialKeyword);
+  const [submittedKeyword, setSubmittedKeyword] =
+    useState<string>(initialKeyword);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -57,13 +59,18 @@ export default function NewsPage() {
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
   // Atualiza a URL no browser sem forçar navegação do Next.js (evita recarregamento de página)
-  const updateUrlWithoutNavigation = (pageNum: number, kw?: string, replace = false) => {
+  const updateUrlWithoutNavigation = (
+    pageNum: number,
+    kw?: string,
+    replace = false
+  ) => {
     if (typeof window === 'undefined') return;
     try {
       const url = new URL(window.location.href);
       url.pathname = '/news';
       url.searchParams.set('page', String(pageNum));
-      if (kw && String(kw).trim()) url.searchParams.set('keyword', String(kw).trim());
+      if (kw && String(kw).trim())
+        url.searchParams.set('keyword', String(kw).trim());
       else url.searchParams.delete('keyword');
       if (replace) window.history.replaceState({}, '', url.toString());
       else window.history.pushState({}, '', url.toString());
@@ -194,7 +201,9 @@ export default function NewsPage() {
                       updateUrlWithoutNavigation(1, '', false);
                       setPage(1);
                       // focus the input after clearing
-                      const el = document.getElementById('newsKeyword') as HTMLInputElement | null;
+                      const el = document.getElementById(
+                        'newsKeyword'
+                      ) as HTMLInputElement | null;
                       if (el) el.focus();
                     }}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors text-base leading-none z-20 bg-transparent border-0"

@@ -2,7 +2,10 @@
 // Ordem de resolução (browser): window.__APEMIGOS_<KEY> -> process.env.NEXT_PUBLIC_<KEY> -> default
 // Em server/build-time (Node) apenas process.env.NEXT_PUBLIC_<KEY> -> default
 
-export function getPublicEnv(key: string, defaultValue?: string): string | undefined {
+export function getPublicEnv(
+  key: string,
+  defaultValue?: string
+): string | undefined {
   const runtimeKey = `__APEMIGOS_${key}`;
 
   const runtime =

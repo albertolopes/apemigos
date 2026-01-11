@@ -81,17 +81,25 @@ export default function DonateBanner() {
     }
 
     try {
-      const numeric = normalized ? Number(parseFloat(normalized).toFixed(2)) : undefined;
+      const numeric = normalized
+        ? Number(parseFloat(normalized).toFixed(2))
+        : undefined;
       const data = await pixService.createStatic(numeric);
 
       setLastResponse(data || null);
 
       if (data?.qrCodeBase64) {
-        const src = data.qrCodeBase64.startsWith('data:') ? data.qrCodeBase64 : `data:image/png;base64,${data.qrCodeBase64}`;
+        const src = data.qrCodeBase64.startsWith('data:')
+          ? data.qrCodeBase64
+          : `data:image/png;base64,${data.qrCodeBase64}`;
         setQrSrc(src);
       } else if (data?.payload) {
         // render the payload via an external QR generator (backend already returned payload)
-        setQrSrc(`https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(data.payload)}`);
+        setQrSrc(
+          `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(
+            data.payload
+          )}`
+        );
       } else {
         setQrSrc(null);
       }
@@ -106,7 +114,9 @@ export default function DonateBanner() {
       return data?.qrCodeBase64 || data?.payload || null;
     } catch (e: any) {
       console.error('Erro ao gerar pix via backend', e);
-      setError('Não foi possível gerar o QR no servidor. Tente novamente mais tarde.');
+      setError(
+        'Não foi possível gerar o QR no servidor. Tente novamente mais tarde.'
+      );
       setLoading(false);
       return null;
     }
@@ -149,7 +159,13 @@ export default function DonateBanner() {
               pessoas com esclerose múltipla. Toda doação faz diferença — mesmo
               valores pequenos nos ajudam a continuar o trabalho.
             </p>
-            <p className="text-slate-500 text-sm mt-2">Doe ou <a href="/contact" className="text-orange-500 underline">entre em contato</a> para saber mais.</p>
+            <p className="text-slate-500 text-sm mt-2">
+              Doe ou{' '}
+              <a href="/contact" className="text-orange-500 underline">
+                entre em contato
+              </a>{' '}
+              para saber mais.
+            </p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -178,14 +194,25 @@ export default function DonateBanner() {
       {/* Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black opacity-40" onClick={() => setModalOpen(false)} />
+          <div
+            className="absolute inset-0 bg-black opacity-40"
+            onClick={() => setModalOpen(false)}
+          />
           <div className="relative bg-white rounded-lg shadow-lg w-full max-w-md mx-4 p-6 z-10">
             <div className="flex justify-between items-center mb-4">
               <h4 className="font-site text-lg">Doar</h4>
-              <button onClick={() => setModalOpen(false)} aria-label="Fechar" className="text-slate-500 hover:text-slate-700">✕</button>
+              <button
+                onClick={() => setModalOpen(false)}
+                aria-label="Fechar"
+                className="text-slate-500 hover:text-slate-700"
+              >
+                ✕
+              </button>
             </div>
 
-            <label className="text-xs text-slate-500 font-semibold block mb-1">Valor da doação (R$)</label>
+            <label className="text-xs text-slate-500 font-semibold block mb-1">
+              Valor da doação (R$)
+            </label>
             <input
               value={modalAmount}
               onChange={handleModalAmountChange}
@@ -202,9 +229,25 @@ export default function DonateBanner() {
               >
                 {loading ? (
                   <>
-                    <svg className="animate-spin mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 100 8v4a8 8 0 01-8-8z"></path>
+                    <svg
+                      className="animate-spin mr-2 h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 100 8v4a8 8 0 01-8-8z"
+                      ></path>
                     </svg>
                     Gerando...
                   </>
@@ -212,47 +255,57 @@ export default function DonateBanner() {
                   'Gerar QR Pix'
                 )}
               </button>
-
-              <button
-                onClick={handleCopyKey}
-                className="px-3 py-2 border border-slate-200 rounded text-slate-700 hover:bg-slate-50"
-                disabled={loading}
-              >
-                {copied ? 'Copiado' : 'Copiar chave PIX'}
-              </button>
             </div>
 
             {error && <p className="text-sm text-red-600 mb-2">{error}</p>}
 
             {qrSrc ? (
-               <div className="flex flex-col items-center gap-3">
-                 <img src={qrSrc} alt="QR Pix" className="w-48 h-48 object-contain" />
-                 <p className="text-sm">Chave PIX: <strong>{pixKey}</strong></p>
-                 <p className="text-sm text-slate-500 text-center">Abra seu app bancário, escaneie o QR ou copie a chave para efetuar a doação.</p>
+              <div className="flex flex-col items-center gap-3">
+                <img
+                  src={qrSrc}
+                  alt="QR Pix"
+                  className="w-48 h-48 object-contain"
+                />
+                <p className="text-sm">
+                  Chave PIX: <strong>{pixKey}</strong>
+                </p>
+                <p className="text-sm text-slate-500 text-center">
+                  Abra seu app bancário, escaneie o QR ou copie a chave para
+                  efetuar a doação.
+                </p>
 
-                 {/* Copiar payload logo abaixo do QR (se disponível) */}
-                 {lastResponse?.payload && (
-                   <div className="w-full mt-3 flex flex-col items-center">
-                     <div className="w-full bg-slate-50 border border-slate-100 p-2 rounded text-xs text-slate-700 break-words max-h-40 overflow-auto">
-                       {String(lastResponse.payload)}
-                     </div>
-                     <div className="flex gap-2 mt-2">
-                       <button
-                         onClick={handleCopyPayload}
-                         className="px-3 py-1 text-xs border rounded bg-white hover:bg-slate-50"
-                         disabled={!lastResponse.payload}
-                       >
-                         Copiar payload
-                       </button>
-                     </div>
-                   </div>
-                 )}
-               </div>
-             ) : (
-               <div className="text-sm text-slate-500">{loading ? 'Gerando QR Pix...' : 'Preencha um valor e clique em "Gerar QR Pix" para receber o QR.'}</div>
-             )}
+                {/* Copiar payload logo abaixo do QR (se disponível) */}
+                {lastResponse?.payload && (
+                  <div className="w-full mt-3 flex flex-col items-center">
+                    <div className="w-full bg-slate-50 border border-slate-100 p-2 rounded text-xs text-slate-700 break-words max-h-40 overflow-auto">
+                      {String(lastResponse.payload)}
+                    </div>
+                    <div className="flex gap-2 mt-2">
+                      <button
+                        onClick={handleCopyPayload}
+                        className="px-3 py-1 text-xs border rounded bg-white hover:bg-slate-50"
+                        disabled={!lastResponse.payload}
+                      >
+                        pix copia e cola
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-sm text-slate-500">
+                {loading
+                  ? 'Gerando QR Pix...'
+                  : 'Preencha um valor e clique em "Gerar QR Pix" para receber o QR.'}
+              </div>
+            )}
             <div className="mt-4 flex justify-end">
-              <button onClick={() => setModalOpen(false)} className="px-3 py-2 text-sm border rounded border-slate-200 hover:bg-slate-50">Fechar</button>
+              <button
+                onClick={() => setModalOpen(false)}
+                className="px-3 py-2 text-sm border rounded border-slate-200 hover:bg-slate-50"
+              >
+                Fechar
+              </button>
             </div>
           </div>
         </div>

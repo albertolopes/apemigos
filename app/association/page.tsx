@@ -326,15 +326,18 @@ export default function AssociesePage() {
       const subject = `Novo cadastro: ${nome} ${sobrenome}`;
 
       // DEBUG: log valores antes de gerar o email para ajudar a diagnosticar problemas
-      console.debug('[Associe-se] Valores antes de buildAssociateEmail:', {
-        nome,
-        sobrenome,
-        logradouro,
-        complemento,
-        cidade,
-        estado,
-        cep,
-      });
+      console.debug(
+        '[Cartão da pessoa com EM] Valores antes de buildAssociateEmail:',
+        {
+          nome,
+          sobrenome,
+          logradouro,
+          complemento,
+          cidade,
+          estado,
+          cep,
+        }
+      );
 
       const body = buildAssociateEmail({
         nome: String(fd.get('nome') || '').trim(),
@@ -342,7 +345,9 @@ export default function AssociesePage() {
         email: String(fd.get('email') || '').trim(),
         telefoneContato: String(fd.get('telefoneContato') || '').trim(),
         telefoneEmergencia: String(fd.get('telefoneEmergencia') || '').trim(),
-        nomeContatoEmergencia: String(fd.get('nomeContatoEmergencia') || '').trim(),
+        nomeContatoEmergencia: String(
+          fd.get('nomeContatoEmergencia') || ''
+        ).trim(),
         medicoResponsavel: String(fd.get('medicoResponsavel') || '').trim(),
         telefoneMedico: String(fd.get('telefoneMedico') || '').trim(),
         rg: String(fd.get('rg') || '').trim(),
@@ -354,13 +359,16 @@ export default function AssociesePage() {
         complemento: String(fd.get('complemento') || '').trim(),
         cep: String(fd.get('cep') || '').trim(),
         convenioSaude: convenio === 'sim' ? 'Sim' : 'Não',
-        convenioNome: convenio === 'sim' ? (convenioNome || '') : '',
+        convenioNome: convenio === 'sim' ? convenioNome || '' : '',
         observacoes: String(fd.get('observacoes') || '').trim(),
         files,
       });
 
       // DEBUG: log snippet of generated body to confirm address line appears
-      console.debug('[Associe-se] bodyHtml snippet:', body.replace(/\s+/g, ' ').slice(0, 400));
+      console.debug(
+        '[Cartão da pessoa com EM] bodyHtml snippet:',
+        body.replace(/\s+/g, ' ').slice(0, 400)
+      );
 
       try {
         // montar multipart/form-data
@@ -495,35 +503,42 @@ export default function AssociesePage() {
           // log FormData raw values for key 'logradouro' to ensure it's appended
           try {
             const rawLog = multipart.get('logradouro');
-            console.debug('[Associe-se] multipart.logradouro:', rawLog);
+            console.debug(
+              '[Cartão da pessoa com EM] multipart.logradouro:',
+              rawLog
+            );
           } catch (e) {
-            console.warn('[Associe-se] não foi possível ler multipart.logradouro', e);
+            console.warn(
+              '[Cartão da pessoa com EM] não foi possível ler multipart.logradouro',
+              e
+            );
           }
-           for (const entry of multipart.entries()) {
-             const [k, v] = entry as [string, any];
-             if (v instanceof File) {
-               console.debug(
-                 '[FormData] field:',
-                 k,
-                 'fileName:',
-                 v.name,
-                 'type:',
-                 v.type,
-                 'size:',
-                 v.size
-               );
-             } else {
-               console.debug('[FormData] field:', k, 'value:', v);
-             }
-           }
-         } catch (err) {
-           console.error('Erro ao iterar FormData:', err);
-         }
+          for (const entry of multipart.entries()) {
+            const [k, v] = entry as [string, any];
+            if (v instanceof File) {
+              console.debug(
+                '[FormData] field:',
+                k,
+                'fileName:',
+                v.name,
+                'type:',
+                v.type,
+                'size:',
+                v.size
+              );
+            } else {
+              console.debug('[FormData] field:', k, 'value:', v);
+            }
+          }
+        } catch (err) {
+          console.error('Erro ao iterar FormData:', err);
+        }
 
         const response = await associadosService.createAssociado(multipart);
 
         if (
-          response.status === 204 || (response.status >= 200 && response.status < 300)
+          response.status === 204 ||
+          (response.status >= 200 && response.status < 300)
         ) {
           setStatus('success');
           setMessage('Cadastro enviado com sucesso. Obrigado!');
@@ -631,7 +646,7 @@ export default function AssociesePage() {
       <div className="w-full h-[320px] relative">
         <Image
           src="https://static.wixstatic.com/media/0b340f_a5c250a81aed4d7fa68e005cff2132c8~mv2_d_3840_1960_s_2.jpg/v1/fill/w_3456,h_984,al_c,q_90,usm_0.66_1.00_0.01,enc_auto/0b340f_a5c250a81aed4d7fa68e005cff2132c8~mv2_d_3840_1960_s_2.jpg"
-          alt="Associe-se - Apemigos"
+          alt="Cartão da pessoa com EM - Apemigos"
           fill
           style={{ objectFit: 'cover' }}
           unoptimized
@@ -640,15 +655,15 @@ export default function AssociesePage() {
 
       <div className="max-w-7xl mx-auto mt-[-100px] relative bg-white px-6 sm:px-20 pb-12">
         <h1 className="text-center py-8 text-orange-500 font-site text-3xl">
-          Associe-se
+          Cartão da pessoa com EM
         </h1>
 
         <div className="max-w-3xl mx-auto text-center mb-6">
           <p className="text-slate-600 mt-3">
             O Cartão da Pessoa com Esclerose Múltipla é um instrumento que
-            auxilia na identificação da condição em estabelecimentos públicos
-            e privados. Para sua validade, é necessário apresentá-lo
-            juntamente com um documento oficial com foto.
+            auxilia na identificação da condição em estabelecimentos públicos e
+            privados. Para sua validade, é necessário apresentá-lo juntamente
+            com um documento oficial com foto.
           </p>
 
           <p className="text-slate-600 mt-2">
@@ -1014,7 +1029,10 @@ export default function AssociesePage() {
 
               <div className="grid grid-cols-2 gap-6 items-end">
                 <div>
-                  <label className="text-xs text-slate-500 font-semibold flex items-center gap-2" htmlFor="nomeContatoEmergencia">
+                  <label
+                    className="text-xs text-slate-500 font-semibold flex items-center gap-2"
+                    htmlFor="nomeContatoEmergencia"
+                  >
                     <span>Nome do contato de emergência</span>
                     <span className="text-xs text-slate-400">(opcional)</span>
                   </label>
