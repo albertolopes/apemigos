@@ -209,6 +209,10 @@ export function buildAssociateEmail(data: AssociateData) {
   const eDataNascimento = escapeHtml(dataNascimento || '-');
   const eConvenio = escapeHtml(convenioSaude || 'Não informado');
   const eConvenioNome = escapeHtml(convenioNome || '');
+  // Preferir mostrar o nome do convênio quando disponível
+  const eDisplayConvenio = eConvenioNome ? eConvenioNome : eConvenio;
+  // Texto final para exibir: "Convênio <nome>" ou "Convênio Sim/Não"
+  const displayConvenioLine = eDisplayConvenio ? `Convênio ${eDisplayConvenio}` : 'Convênio Não';
   const eObs = observacoes ? nl2br(escapeHtml(observacoes)) : '';
   // escaped address pieces
   const nLogradouro = normalizeVal(logradouro);
@@ -265,7 +269,7 @@ export function buildAssociateEmail(data: AssociateData) {
           <table role="presentation" width="700" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.08);">
             <tr>
               <td style="padding:20px 28px;background:linear-gradient(90deg,#ffedd5,#fff7ed);">
-                <h1 style="margin:0;font-size:20px;color:#c2410c">Nova solicitação de associação</h1>
+                <h1 style="margin:0;font-size:20px;color:#c2410c">Nova solicitação</h1>
               </td>
             </tr>
 
@@ -327,20 +331,8 @@ export function buildAssociateEmail(data: AssociateData) {
                   </tr>
 
                   <tr>
-                    <td style="padding:6px 0;font-weight:600;color:#374151;">Possui convênio</td>
-                    <td style="padding:6px 0;color:#374151;">${eConvenio}</td>
+                    <td colspan="2" style="padding:6px 0;color:#374151;font-weight:600;">${escapeHtml(displayConvenioLine)}</td>
                   </tr>
-
-                  ${
-                    eConvenioNome
-                      ? `
-                  <tr>
-                    <td style="padding:6px 0;font-weight:600;color:#374151;">Nome do convênio</td>
-                    <td style="padding:6px 0;color:#374151;">${eConvenioNome}</td>
-                  </tr>
-                  `
-                      : ''
-                  }
 
                   <tr>
                     <td style="padding:6px 0;font-weight:600;color:#374151;">Endereço</td>
@@ -386,7 +378,7 @@ export function buildAssociateEmail(data: AssociateData) {
 }
 
 function escapeHtml(str: string | undefined | null) {
-  if (!str) return '';
+  if (str === undefined || str === null) return '';
   return String(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -396,5 +388,5 @@ function escapeHtml(str: string | undefined | null) {
 }
 
 function nl2br(s: string) {
-  return s.replace(/\r?\n/g, '<br/>');
+  return String(s).replace(/\r?\n/g, '<br/>');
 }

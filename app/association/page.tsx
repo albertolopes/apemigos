@@ -353,9 +353,8 @@ export default function AssociesePage() {
         logradouro: String(fd.get('logradouro') || '').trim(),
         complemento: String(fd.get('complemento') || '').trim(),
         cep: String(fd.get('cep') || '').trim(),
-        convenioSaude:
-          convenio === 'sim' ? convenioNome || 'Sim (não especificado)' : 'Não',
-        convenioNome: convenio === 'sim' ? convenioNome || '' : '',
+        convenioSaude: convenio === 'sim' ? 'Sim' : 'Não',
+        convenioNome: convenio === 'sim' ? (convenioNome || '') : '',
         observacoes: String(fd.get('observacoes') || '').trim(),
         files,
       });
