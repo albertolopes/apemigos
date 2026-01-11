@@ -2,6 +2,7 @@
 
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { LongDescription } from './LongDescription';
 import { newsService, NewsContentResponse } from '@services';
 
@@ -57,10 +58,12 @@ export default function New({ params }: { params: Promise<{ slug: string }> }) {
   return (
     <div className="relative">
       <div className="w-full h-[400px] relative">
-        <img
+        <Image
           src={item.noticia.image}
           alt={item.noticia.title}
-          style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+          fill
+          style={{ objectFit: 'cover' }}
+          unoptimized
         />
       </div>
       <div className="max-w-7xl mx-auto mt-[-120px] relative bg-white px-8 sm:px-20">
@@ -69,10 +72,12 @@ export default function New({ params }: { params: Promise<{ slug: string }> }) {
           {item.noticia.shortDescription}
         </p>
         <div className="relative h-[400px]">
-          <img
+          <Image
             src={item.noticia.image}
             alt={item.noticia.title}
-            style={{ objectFit: 'contain', width: '100%', height: '100%' }}
+            fill
+            style={{ objectFit: 'contain' }}
+            unoptimized
           />
         </div>
         <LongDescription html={item.longDescription} />

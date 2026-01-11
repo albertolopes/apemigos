@@ -28,4 +28,3 @@ export interface ProjectResponse {
   numberOfElements: number;
   empty: boolean;
 }
-

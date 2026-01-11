@@ -48,7 +48,11 @@ api.interceptors.request.use(
 
     // Se o body for FormData, remover Content-Type para que o browser
     // ou axios definam o header 'multipart/form-data; boundary=...'
-    if (config.data && typeof FormData !== 'undefined' && config.data instanceof FormData) {
+    if (
+      config.data &&
+      typeof FormData !== 'undefined' &&
+      config.data instanceof FormData
+    ) {
       if (config.headers) {
         delete config.headers['Content-Type'];
         delete config.headers['content-type'];

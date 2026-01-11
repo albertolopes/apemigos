@@ -108,9 +108,9 @@ export default function NewsPage() {
           Notícias e Atualizações
         </h1>
         <p className="text-slate-600 pt-6 max-w-3xl text-center mx-auto">
-            Fique por dentro das últimas notícias, reportagens e comunicados.
-            Acompanhe coberturas de eventos, novidades de projetos e ações da ONG.
-            Informações atualizadas para manter a comunidade bem informada.
+          Fique por dentro das últimas notícias, reportagens e comunicados.
+          Acompanhe coberturas de eventos, novidades de projetos e ações da ONG.
+          Informações atualizadas para manter a comunidade bem informada.
         </p>
 
         {/* Erro */}

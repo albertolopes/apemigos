@@ -134,6 +134,15 @@ export type AssociateData = {
     size?: number;
     dataUrl?: string; // opcional, usado para imagens pequenas embutidas
   }[];
+  // endereço (opcionais)
+  logradouro?: string;
+  cidade?: string;
+  estado?: string;
+  complemento?: string;
+  cep?: string;
+  // mantemos campos antigos por segurança (não utilizados em template, mas podem vir do formulário)
+  bairro?: string;
+  numero?: string;
 };
 
 export function buildAssociateEmail(data: AssociateData) {
@@ -152,6 +161,12 @@ export function buildAssociateEmail(data: AssociateData) {
     convenioNome,
     observacoes,
     files,
+    // address fields
+    logradouro,
+    cidade,
+    estado,
+    complemento,
+    cep,
   } = data;
 
   const fullName = [nome, sobrenome].filter(Boolean).join(' ');
@@ -167,6 +182,12 @@ export function buildAssociateEmail(data: AssociateData) {
   const eConvenio = escapeHtml(convenioSaude || 'Não informado');
   const eConvenioNome = escapeHtml(convenioNome || '');
   const eObs = observacoes ? nl2br(escapeHtml(observacoes)) : '';
+  // escaped address pieces
+  const eLogradouro = escapeHtml(logradouro || '-');
+  const eComplemento = complemento ? escapeHtml(complemento) : '';
+  const eCidade = cidade ? escapeHtml(cidade) : '';
+  const eEstado = estado ? escapeHtml(estado) : '';
+  const eCep = cep ? escapeHtml(cep) : '';
 
   // Não exibir detalhes dos arquivos (nomes/tamanhos) — apenas indicar se houve anexos
   const hasFiles = (files || []).length > 0;
@@ -244,16 +265,24 @@ export function buildAssociateEmail(data: AssociateData) {
                     <td style="padding:6px 0;color:#374151;">${eConvenio}</td>
                   </tr>
 
-                  ${eConvenioNome ? `
+                  ${
+                    eConvenioNome
+                      ? `
                   <tr>
                     <td style="padding:6px 0;font-weight:600;color:#374151;">Nome do convênio</td>
                     <td style="padding:6px 0;color:#374151;">${eConvenioNome}</td>
                   </tr>
-                  ` : ''}
+                  `
+                      : ''
+                  }
 
                   <tr>
                     <td style="padding:6px 0;font-weight:600;color:#374151;">Endereço</td>
-                    <td style="padding:6px 0;color:#374151;">${escapeHtml(logradouro || '-')}${complemento ? ' • ' + escapeHtml(complemento) : ''}${cidade ? ' • ' + escapeHtml(cidade) : ''}${estado ? ' • ' + escapeHtml(estado) : ''}${cep ? ' • CEP ' + escapeHtml(cep) : ''}</td>
+                    <td style="padding:6px 0;color:#374151;">${eLogradouro}${
+    eComplemento ? ' • ' + eComplemento : ''
+  }${eCidade ? ' • ' + eCidade : ''}${eEstado ? ' • ' + eEstado : ''}${
+    eCep ? ' • CEP ' + eCep : ''
+  }</td>
                   </tr>
 
                   ${
@@ -268,7 +297,11 @@ export function buildAssociateEmail(data: AssociateData) {
                   }
                 </table>
 
-                ${hasFiles ? `<div style="margin-bottom:12px;color:#374151;font-size:14px;">Arquivos anexados: Laudo G35, Foto 3x4 e Documento.</div>` : ''}
+                ${
+                  hasFiles
+                    ? `<div style="margin-bottom:12px;color:#374151;font-size:14px;">Arquivos anexados: Laudo G35, Foto 3x4 e Documento.</div>`
+                    : ''
+                }
 
                 <div style="margin-top:18px;padding:12px;border-radius:6px;background:#f8fafc;border:1px solid #e6edf3;color:#111827;font-size:13px;">
                   <strong>Observação:</strong> arquivos pequenos de imagem (3x4) são embutidos no email quando possível.
