@@ -4,8 +4,6 @@ import Image from 'next/image';
 import { pixService } from '../../../services/pix/pix.service';
 
 export default function DonateBanner() {
-  // Use the NEXT_PUBLIC_API_URL when provided, otherwise default to localhost backend
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
   const pixKey = 'apemigos.em@gmail.com';
   const [amount, setAmount] = useState('');
   const [qrSrc, setQrSrc] = useState<string | null>(null);
