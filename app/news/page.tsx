@@ -188,14 +188,16 @@ export default function NewsPage() {
                   <button
                     type="button"
                     onClick={() => {
+                      if (!keyword && !submittedKeyword) return;
                       setKeyword('');
                       setSubmittedKeyword('');
                       updateUrlWithoutNavigation(1, '', false);
                       setPage(1);
+                      // focus the input after clearing
                       const el = document.getElementById('newsKeyword') as HTMLInputElement | null;
                       if (el) el.focus();
                     }}
-                    className="ml-1 inline-flex items-center justify-center w-5 h-5 text-sm text-slate-400 hover:text-slate-600 transition-colors rounded"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors text-base leading-none z-20 bg-transparent border-0"
                     aria-label="Limpar busca"
                     title="Limpar"
                   >
