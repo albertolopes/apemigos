@@ -6,10 +6,11 @@ import { usePathname } from 'next/navigation';
 
 const navbarItems = [
   { ref: '/', label: 'Início' },
-  { ref: '/about', label: 'Sobre a EM' },
+  { ref: '/about', label: 'Sobre a Apemigos' },
   { ref: '/news', label: 'Notícias' },
   { ref: '/projects', label: 'Projetos' },
   { ref: '/team', label: 'Equipe' },
+  { ref: '/association', label: 'Associe-se' },
   { ref: '/contact', label: 'Contato' },
 ];
 
@@ -33,11 +34,12 @@ const StyledNavLink = ({
 export function NavBar() {
   const [isMenuShown, setIsMenuShown] = useState(false);
   const pathname = usePathname();
-  const [linkRef, setLinkRef] = useState<LinkProps['href']>(pathname!);
+
   const toggleOpen = useCallback(
     () => setIsMenuShown(!isMenuShown),
     [isMenuShown]
   );
+
   return (
     <>
       <button
@@ -74,10 +76,9 @@ export function NavBar() {
           {navbarItems.map(({ ref, label }) => (
             <li key={ref} className="text-slate-500 relative">
               <StyledNavLink
-                isActive={ref === linkRef}
+                isActive={pathname === ref}
                 href={ref}
                 onClick={() => {
-                  setLinkRef(ref);
                   setIsMenuShown(false);
                 }}
               >

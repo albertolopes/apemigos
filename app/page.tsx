@@ -74,11 +74,9 @@ export default function Home() {
           <div className="border-y-4 border-orange-500 p-8 sm:w-60 relative bg-white sm:ml-32 sm:mt-[-430px]">
             <h3 className="text-2xl font-site">Nossa Missão</h3>
             <p className="text-slate-500 my-6 text-sm">
-              Acreditamos que informação de qualidade e apoio constante são
-              essenciais para transformar a vida de quem enfrenta a esclerose
-              múltipla. Nosso compromisso é compartilhar conhecimento, promover
-              pesquisas e fortalecer a comunidade para que todos tenham mais
-              qualidade de vida e esperança no futuro.
+              Promover a qualidade de vida e a inclusão social das pessoas com esclerose múltipla e
+              doenças raras no Distrito Federal, oferecendo apoio biopsicossocial, disseminando informações
+              qualificadas e lutando pela garantia de direitos e pelo acesso universal a tratamentos adequados.
             </p>
             <a href="/about" className="text-slate-500 py-6 font-site">
               Saiba Mais
@@ -118,53 +116,18 @@ export default function Home() {
             />
           </div>
           <div className="border-y-4 border-orange-500 p-8 sm:w-60 relative bg-white sm:ml-32 sm:mt-[-530px]">
-            <h3 className="text-2xl font-site">Participe</h3>
+            <h3 className="text-2xl font-site">Associe-se</h3>
             <p className="text-slate-500 my-6 text-sm">
               Sua participação faz a diferença. Seja como voluntário, parceiro
               ou apoiador, cada contribuição ajuda a fortalecer a comunidade e a
               levar esperança a quem convive com a esclerose múltipla.
             </p>
-            <a href="/contact" className="text-slate-500 py-6 font-site">
+            <a href="/association" className="text-slate-500 py-6 font-site">
               Read More
             </a>
           </div>
         </div>
       </div>
-      {/*<h2 className="text-3xl sm:text-5xl text-center mb-10 sm:mb-20 font-site">*/}
-      {/*  2035 in Numbers*/}
-      {/*</h2>*/}
-      {/*<div className="flex flex-col sm:flex-row gap-8 sm:justify-between items-center font-site">*/}
-      {/*  <div className="relative text-center sm:text-left">*/}
-      {/*    <span className="text-4xl sm:text-[200px] block sm:leading-[200px] text-purple-site">*/}
-      {/*      40K*/}
-      {/*    </span>*/}
-      {/*    <span className="border-t-4 block sm:inline-block border-purple-site text-xl sm:text-4xl sm:absolute sm:right-0 sm:top-[190px]">*/}
-      {/*      Dollars*/}
-      {/*      <br />*/}
-      {/*      Raised*/}
-      {/*    </span>*/}
-      {/*  </div>*/}
-      {/*  <div className="relative text-center sm:text-left">*/}
-      {/*    <span className="text-4xl sm:text-[200px] sm:leading-[200px] text-purple-site">*/}
-      {/*      8K*/}
-      {/*    </span>*/}
-      {/*    <span className="border-t-4 block sm:inline-block border-purple-site text-xl sm:text-4xl sm:absolute sm:top-[50px] sm:left-[130px] bg-white">*/}
-      {/*      Graduate*/}
-      {/*      <br />*/}
-      {/*      Students*/}
-      {/*    </span>*/}
-      {/*  </div>*/}
-      {/*  <div className="relative text-center sm:text-left">*/}
-      {/*    <span className="text-4xl sm:text-[200px] sm:leading-[200px] text-purple-site">*/}
-      {/*      120*/}
-      {/*    </span>*/}
-      {/*    <span className="border-t-4 block sm:inline-block border-purple-site text-xl sm:text-4xl sm:absolute sm:top-[130px] sm:left-[150px] bg-white">*/}
-      {/*      Technology*/}
-      {/*      <br />*/}
-      {/*      Centers*/}
-      {/*    </span>*/}
-      {/*  </div>*/}
-      {/*</div>*/}
       <CarouselClient />
     </div>
   );

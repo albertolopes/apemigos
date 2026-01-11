@@ -21,10 +21,10 @@ const Footer = () => (
           <div className="basis-1/3"></div>
           <div className="basis-1/2 border-b border-white pb-4">
             <p className="mt-10">
-              Rua da Saúde, 123 <br /> Brasília - DF
+              Qnd 28, lote 21, loja 1 <br /> Comercial Norte Taguatinga
             </p>
-            <p className="mt-10">Telefone: (61) 0000-0000</p>
-            <p className="mt-10">Email: contato@esclerosevida.org</p>
+            <p className="mt-10">Telefone: (61) 99217-6669</p>
+            <p className="mt-10">Email: apemigos.em@gmail.com</p>
           </div>
         </div>
       </div>
@@ -54,7 +54,7 @@ const Footer = () => (
           rel="noopener noreferrer"
           className="underline hover:text-slate-500"
         >
-          Alberto Lopes
+          Avocado Tech
         </a>
       </p>
     </div>
