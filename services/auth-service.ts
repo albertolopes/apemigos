@@ -1,6 +1,15 @@
 import axios from 'axios';
+import { getPublicEnv } from '../app/utils/env';
 // Evita import circular com api-service.ts usando axios direto
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+// BASE_URL agora é resolvido dinamicamente: prioriza uma variável global injetada em runtime
+// (window.__APEMIGOS_API_URL) -> process.env.NEXT_PUBLIC_API_URL (em build/time) -> fallback localhost
+const DEFAULT_BASE_URL = 'http://localhost:8080';
+
+function resolveBaseUrl(): string {
+  return getPublicEnv('API_URL', DEFAULT_BASE_URL) as string;
+}
+
+const BASE_URL = resolveBaseUrl();
 
 export interface ServiceLoginRequest {
   serviceKey: string;
@@ -25,11 +34,11 @@ export class AuthService {
   // Chaves e nomes de storage agora vêm de variáveis de ambiente (ver README/.env.local)
   // Usamos NEXT_PUBLIC_ para que fiquem disponíveis no código do cliente.
   private readonly STORAGE_KEY =
-    process.env.NEXT_PUBLIC_SERVICE_STORAGE_KEY ?? 'service_token';
+    (getPublicEnv('SERVICE_STORAGE_KEY') as string) ?? 'service_token';
   private readonly TOKEN_EXPIRY_KEY =
-    process.env.NEXT_PUBLIC_TOKEN_EXPIRY_KEY ?? 'token_expiry';
+    (getPublicEnv('TOKEN_EXPIRY_KEY') as string) ?? 'token_expiry';
   private readonly SERVICE_KEY =
-    process.env.NEXT_PUBLIC_SERVICE_KEY ??
+    (getPublicEnv('SERVICE_KEY') as string) ??
     'apemigos-service-key-2025-secure-version';
 
   /**

@@ -143,6 +143,7 @@ export type AssociateData = {
   // mantemos campos antigos por segurança (não utilizados em template, mas podem vir do formulário)
   bairro?: string;
   numero?: string;
+  nomeContatoEmergencia?: string;
 };
 
 export function buildAssociateEmail(data: AssociateData) {
@@ -167,7 +168,34 @@ export function buildAssociateEmail(data: AssociateData) {
     estado,
     complemento,
     cep,
+    nomeContatoEmergencia,
   } = data;
+
+  // helper to normalize values: accept plain strings or DOM elements (extract .value)
+  function normalizeVal(v: any): string {
+    if (v === undefined || v === null) return '';
+    // If it's an HTML input element (or other with 'value'), prefer its value
+    if (typeof v === 'object') {
+      try {
+        if ('value' in v && typeof (v as any).value !== 'undefined') {
+          const val = String((v as any).value).trim();
+          if (!val || /^-+$/.test(val)) return '';
+          if (/^\[object\s+/.test(val)) return '';
+          return val;
+        }
+      } catch (e) {
+        // fallback to string conversion
+      }
+      const s = String(v).trim();
+      if (!s || /^-+$/.test(s)) return '';
+      if (/^\[object\s+/.test(s)) return '';
+      return s;
+    }
+    const s = String(v).trim();
+    if (!s || /^-+$/.test(s)) return '';
+    if (/^\[object\s+/.test(s)) return '';
+    return s;
+  }
 
   const fullName = [nome, sobrenome].filter(Boolean).join(' ');
   const eFullName = escapeHtml(fullName);
@@ -183,11 +211,42 @@ export function buildAssociateEmail(data: AssociateData) {
   const eConvenioNome = escapeHtml(convenioNome || '');
   const eObs = observacoes ? nl2br(escapeHtml(observacoes)) : '';
   // escaped address pieces
-  const eLogradouro = escapeHtml(logradouro || '-');
-  const eComplemento = complemento ? escapeHtml(complemento) : '';
-  const eCidade = cidade ? escapeHtml(cidade) : '';
-  const eEstado = estado ? escapeHtml(estado) : '';
-  const eCep = cep ? escapeHtml(cep) : '';
+  const nLogradouro = normalizeVal(logradouro);
+  const nComplemento = normalizeVal(complemento);
+  const nCidade = normalizeVal(cidade);
+  const nEstado = normalizeVal(estado);
+  const nCep = normalizeVal(cep);
+  const nNomeContatoEmergencia = normalizeVal(nomeContatoEmergencia);
+
+  const eLogradouro = nLogradouro ? escapeHtml(nLogradouro) : '';
+  const eComplemento = nComplemento ? escapeHtml(nComplemento) : '';
+  const eCidade = nCidade ? escapeHtml(nCidade) : '';
+  const eEstado = nEstado ? escapeHtml(nEstado) : '';
+  const eCep = nCep ? escapeHtml(nCep) : '';
+  const eNomeContatoEmergencia = nNomeContatoEmergencia ? escapeHtml(nNomeContatoEmergencia) : '';
+
+  // Build address line from available parts, avoid showing '-' when some parts are missing
+  const addressParts: string[] = [];
+  // Prefer logradouro; fallback to complemento if logradouro is empty (some forms fill the field differently)
+  let complementoAlreadyUsed = false;
+  if (eLogradouro) {
+    addressParts.push(eLogradouro);
+  } else if (eComplemento) {
+    // if no logradouro but complemento exists, treat complemento as main part
+    addressParts.push(eComplemento);
+    complementoAlreadyUsed = true;
+  }
+  // only add complemento again if it wasn't used as fallback
+  if (eComplemento && !complementoAlreadyUsed) addressParts.push(eComplemento);
+  if (eCidade) addressParts.push(eCidade);
+  if (eEstado) addressParts.push(eEstado);
+  let addressLine = addressParts.length ? addressParts.join(' • ') : '';
+  if (eCep) {
+    addressLine = addressLine ? `${addressLine} • CEP ${eCep}` : `CEP ${eCep}`;
+  }
+  // remove accidental leading separators or dashes
+  addressLine = addressLine.replace(/^[\s\-•]+/, '');
+  if (!addressLine) addressLine = '-';
 
   // Não exibir detalhes dos arquivos (nomes/tamanhos) — apenas indicar se houve anexos
   const hasFiles = (files || []).length > 0;
@@ -206,7 +265,7 @@ export function buildAssociateEmail(data: AssociateData) {
           <table role="presentation" width="700" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.08);">
             <tr>
               <td style="padding:20px 28px;background:linear-gradient(90deg,#ffedd5,#fff7ed);">
-                <h1 style="margin:0;font-size:20px;color:#c2410c">Novo cadastro - Associe-se</h1>
+                <h1 style="margin:0;font-size:20px;color:#c2410c">Nova solicitação de associação</h1>
               </td>
             </tr>
 
@@ -250,6 +309,13 @@ export function buildAssociateEmail(data: AssociateData) {
                     <td style="padding:6px 0;color:#374151;">${eTelefoneEmergencia}</td>
                   </tr>
 
+                  ${eNomeContatoEmergencia ? `
+                  <tr>
+                    <td style="padding:6px 0;font-weight:600;color:#374151;">Contato de emergência</td>
+                    <td style="padding:6px 0;color:#374151;">${eNomeContatoEmergencia}</td>
+                  </tr>
+                  ` : ''}
+
                   <tr>
                     <td style="padding:6px 0;font-weight:600;color:#374151;">Médico responsável</td>
                     <td style="padding:6px 0;color:#374151;">${eMedico}</td>
@@ -278,11 +344,7 @@ export function buildAssociateEmail(data: AssociateData) {
 
                   <tr>
                     <td style="padding:6px 0;font-weight:600;color:#374151;">Endereço</td>
-                    <td style="padding:6px 0;color:#374151;">${eLogradouro}${
-    eComplemento ? ' • ' + eComplemento : ''
-  }${eCidade ? ' • ' + eCidade : ''}${eEstado ? ' • ' + eEstado : ''}${
-    eCep ? ' • CEP ' + eCep : ''
-  }</td>
+                    <td style="padding:6px 0;color:#374151;">${addressLine}</td>
                   </tr>
 
                   ${

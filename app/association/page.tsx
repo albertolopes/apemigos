@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import Image from 'next/image';
 import Notification from '../components/Notification/Notification';
 import api from '../../services/api-service';
+import { associadosService } from '@services';
 import { buildAssociateEmail } from '../utils/email-template';
 
 export default function AssociesePage() {
@@ -165,6 +166,9 @@ export default function AssociesePage() {
     const telefoneEmergencia = String(
       fd.get('telefoneEmergencia') || ''
     ).trim();
+    const nomeContatoEmergencia = String(
+      fd.get('nomeContatoEmergencia') || ''
+    ).trim();
     const medicoResponsavel = String(fd.get('medicoResponsavel') || '').trim();
     const telefoneMedico = String(fd.get('telefoneMedico') || '').trim();
     const rg = String(fd.get('rg') || '').trim();
@@ -190,10 +194,13 @@ export default function AssociesePage() {
       newErrors.telefoneContato = 'Telefone de contato é obrigatório.';
     else if (!validatePhone(telefoneContato))
       newErrors.telefoneContato = 'Telefone inválido.';
-    // endereço: manter apenas logradouro obrigatório
+    // endereço: todos os campos são obrigatórios agora
+    if (!cidade) newErrors.cidade = 'Cidade é obrigatória.';
+    if (!estado) newErrors.estado = 'Estado é obrigatório.';
     if (!logradouro) newErrors.logradouro = 'Logradouro é obrigatório.';
-    // cidade, estado, complemento e cep são opcionais
-    if (cep && onlyDigits(cep).length !== 8)
+    if (!complemento) newErrors.complemento = 'Complemento é obrigatório.';
+    if (!cep) newErrors.cep = 'CEP é obrigatório.';
+    else if (onlyDigits(cep).length !== 8)
       newErrors.cep = 'CEP inválido. Deve conter 8 dígitos.';
     // telefones opcionais: valida se preenchidos
     if (telefoneEmergencia && !validatePhone(telefoneEmergencia))
@@ -318,29 +325,43 @@ export default function AssociesePage() {
 
       const subject = `Novo cadastro: ${nome} ${sobrenome}`;
 
-      const body = buildAssociateEmail({
+      // DEBUG: log valores antes de gerar o email para ajudar a diagnosticar problemas
+      console.debug('[Associe-se] Valores antes de buildAssociateEmail:', {
         nome,
         sobrenome,
-        email,
-        telefoneContato,
-        telefoneEmergencia,
-        medicoResponsavel,
-        telefoneMedico,
-        rg,
-        cpf,
-        dataNascimento,
+        logradouro,
+        complemento,
         cidade,
         estado,
-        bairro,
-        numero,
-        complemento,
         cep,
+      });
+
+      const body = buildAssociateEmail({
+        nome: String(fd.get('nome') || '').trim(),
+        sobrenome: String(fd.get('sobrenome') || '').trim(),
+        email: String(fd.get('email') || '').trim(),
+        telefoneContato: String(fd.get('telefoneContato') || '').trim(),
+        telefoneEmergencia: String(fd.get('telefoneEmergencia') || '').trim(),
+        nomeContatoEmergencia: String(fd.get('nomeContatoEmergencia') || '').trim(),
+        medicoResponsavel: String(fd.get('medicoResponsavel') || '').trim(),
+        telefoneMedico: String(fd.get('telefoneMedico') || '').trim(),
+        rg: String(fd.get('rg') || '').trim(),
+        cpf: String(fd.get('cpf') || '').trim(),
+        dataNascimento: String(fd.get('dataNascimento') || '').trim(),
+        cidade: String(fd.get('cidade') || '').trim(),
+        estado: String(fd.get('estado') || '').trim(),
+        logradouro: String(fd.get('logradouro') || '').trim(),
+        complemento: String(fd.get('complemento') || '').trim(),
+        cep: String(fd.get('cep') || '').trim(),
         convenioSaude:
           convenio === 'sim' ? convenioNome || 'Sim (não especificado)' : 'Não',
         convenioNome: convenio === 'sim' ? convenioNome || '' : '',
-        observacoes,
+        observacoes: String(fd.get('observacoes') || '').trim(),
         files,
       });
+
+      // DEBUG: log snippet of generated body to confirm address line appears
+      console.debug('[Associe-se] bodyHtml snippet:', body.replace(/\s+/g, ' ').slice(0, 400));
 
       try {
         // montar multipart/form-data
@@ -359,16 +380,15 @@ export default function AssociesePage() {
         appendIf('email', email);
         appendIf('telefoneContato', telefoneContato);
         appendIf('telefoneEmergencia', telefoneEmergencia);
+        appendIf('nomeContatoEmergencia', nomeContatoEmergencia);
         appendIf('medicoResponsavel', medicoResponsavel);
+        appendIf('cidade', cidade);
+        appendIf('estado', estado);
+        appendIf('logradouro', logradouro);
+        appendIf('complemento', complemento);
+        appendIf('cep', cep);
         appendIf('telefoneMedico', telefoneMedico);
-
-        // possuiConvenio: front usa 'sim'/'nao' radio; converter para true/false ou omitir
-        //         if (convenio) {
-        //           const cv = String(convenio).toLowerCase();
-        //           if (cv === 'sim' || cv === 'true') multipart.append('possuiConvenio', 'true');
-        //           else if (cv === 'nao' || cv === 'false') multipart.append('possuiConvenio', 'false');
-        //         }
-
+        appendIf('observacoes', observacoes);
         appendIf('convenioNome', convenioNome);
 
         // anexar arquivos
@@ -473,37 +493,38 @@ export default function AssociesePage() {
         // enviar para o backend (usa instância api que adiciona Authorization)
         // DEBUG: log do FormData para depuração (mostra chaves e tipos de valores)
         try {
-          for (const entry of multipart.entries()) {
-            const [k, v] = entry as [string, any];
-            if (v instanceof File) {
-              console.debug(
-                '[FormData] field:',
-                k,
-                'fileName:',
-                v.name,
-                'type:',
-                v.type,
-                'size:',
-                v.size
-              );
-            } else {
-              console.debug('[FormData] field:', k, 'value:', v);
-            }
+          // log FormData raw values for key 'logradouro' to ensure it's appended
+          try {
+            const rawLog = multipart.get('logradouro');
+            console.debug('[Associe-se] multipart.logradouro:', rawLog);
+          } catch (e) {
+            console.warn('[Associe-se] não foi possível ler multipart.logradouro', e);
           }
-        } catch (err) {
-          console.error('Erro ao iterar FormData:', err);
-        }
+           for (const entry of multipart.entries()) {
+             const [k, v] = entry as [string, any];
+             if (v instanceof File) {
+               console.debug(
+                 '[FormData] field:',
+                 k,
+                 'fileName:',
+                 v.name,
+                 'type:',
+                 v.type,
+                 'size:',
+                 v.size
+               );
+             } else {
+               console.debug('[FormData] field:', k, 'value:', v);
+             }
+           }
+         } catch (err) {
+           console.error('Erro ao iterar FormData:', err);
+         }
 
-        const response = await api.post('/api/associados', multipart, {
-          headers: {
-            Accept: 'application/json',
-          },
-          timeout: 60000,
-        });
+        const response = await associadosService.createAssociado(multipart);
 
         if (
-          response.status === 204 ||
-          (response.status >= 200 && response.status < 300)
+          response.status === 204 || (response.status >= 200 && response.status < 300)
         ) {
           setStatus('success');
           setMessage('Cadastro enviado com sucesso. Obrigado!');
@@ -624,9 +645,23 @@ export default function AssociesePage() {
         </h1>
 
         <div className="max-w-3xl mx-auto text-center mb-6">
-          <p className="text-slate-600">
+          <p className="text-slate-600 mt-3">
+            O Cartão da Pessoa com Esclerose Múltipla é um instrumento que
+            auxilia na identificação da condição em estabelecimentos públicos
+            e privados. Para sua validade, é necessário apresentá-lo
+            juntamente com um documento oficial com foto.
+          </p>
+
+          <p className="text-slate-600 mt-2">
+            Além disso, o cartão pode garantir benefícios como descontos ou
+            condições especiais para acesso a shows, cinemas, parques e outros
+            eventos, conforme a legislação vigente do estado em que você
+            estiver.
+          </p>
+
+          <p className="text-slate-600 mt-4">
             Preencha o formulário abaixo para se associar à Apemigos. Campos com
-            * são obrigatórios.
+            <span className="text-orange-500"> *</span> são obrigatórios.
           </p>
         </div>
 
@@ -738,9 +773,6 @@ export default function AssociesePage() {
                     required
                     aria-describedby="cpfHelp"
                   />
-                  <div id="cpfHelp" className="text-xs text-slate-400 mt-1">
-                    Formato: 000.000.000-00 (pontos e traço são opcionais)
-                  </div>
                   {errors.cpf && (
                     <div className="text-xs text-red-600 mt-1">
                       {errors.cpf}
@@ -818,9 +850,6 @@ export default function AssociesePage() {
                     required
                     aria-describedby="telHelp"
                   />
-                  <div id="telHelp" className="text-xs text-slate-400 mt-1">
-                    Inclua o DDD — ex: (61) 99999-9999
-                  </div>
                   {errors.telefoneContato && (
                     <div className="text-xs text-red-600 mt-1">
                       {errors.telefoneContato}
@@ -831,7 +860,7 @@ export default function AssociesePage() {
                 {/* Endereço: cidade / estado */}
               </div>
 
-              <fieldset className="border border-slate-100 rounded-lg p-4">
+              <fieldset className="border border-slate-300 rounded-lg p-4">
                 <legend className="text-sm font-site text-slate-700 px-1">
                   Endereço
                 </legend>
@@ -841,9 +870,11 @@ export default function AssociesePage() {
                       className="text-xs text-slate-500 font-semibold"
                       htmlFor="cidade"
                     >
-                      Cidade
+                      Cidade <span className="text-orange-500">*</span>
                     </label>
                     <input
+                      aria-required="true"
+                      required
                       onInput={() =>
                         setErrors((s) => {
                           const c = { ...s };
@@ -867,9 +898,11 @@ export default function AssociesePage() {
                       className="text-xs text-slate-500 font-semibold"
                       htmlFor="estado"
                     >
-                      Estado
+                      Estado <span className="text-orange-500">*</span>
                     </label>
                     <input
+                      aria-required="true"
+                      required
                       onInput={() =>
                         setErrors((s) => {
                           const c = { ...s };
@@ -925,9 +958,11 @@ export default function AssociesePage() {
                       className="text-xs text-slate-500 font-semibold"
                       htmlFor="complemento"
                     >
-                      Complemento
+                      Complemento <span className="text-orange-500">*</span>
                     </label>
                     <input
+                      aria-required="true"
+                      required
                       onInput={() =>
                         setErrors((s) => {
                           const c = { ...s };
@@ -952,9 +987,11 @@ export default function AssociesePage() {
                       className="text-xs text-slate-500 font-semibold"
                       htmlFor="cep"
                     >
-                      CEP
+                      CEP <span className="text-orange-500">*</span>
                     </label>
                     <input
+                      aria-required="true"
+                      required
                       onInput={handleCEPInput}
                       placeholder="00000-000"
                       inputMode="numeric"
@@ -965,7 +1002,7 @@ export default function AssociesePage() {
                       aria-describedby="cepHelp"
                     />
                     <div id="cepHelp" className="text-xs text-slate-400 mt-1">
-                      Opcional — apenas números ou no formato 00000-000
+                      Informe o CEP no formato 00000-000
                     </div>
                     {errors.cep && (
                       <div className="text-xs text-red-600 mt-1">
@@ -976,31 +1013,56 @@ export default function AssociesePage() {
                 </div>
               </fieldset>
 
-              <div>
-                <label
-                  className="text-xs text-slate-500 font-semibold"
-                  htmlFor="telefoneEmergencia"
-                >
-                  Telefone de emergência
-                </label>
-                <input
-                  onInput={handlePhoneInput('telefoneEmergencia')}
-                  placeholder="(61) 98888-8888"
-                  inputMode="tel"
-                  className="input mt-1 w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  type="tel"
-                  name="telefoneEmergencia"
-                  id="telefoneEmergencia"
-                  aria-describedby="telEmergHelp"
-                />
-                <div id="telEmergHelp" className="text-xs text-slate-400 mt-1">
-                  Opcional — telefone de um familiar ou contato de emergência
+              <div className="grid grid-cols-2 gap-6 items-end">
+                <div>
+                  <label className="text-xs text-slate-500 font-semibold flex items-center gap-2" htmlFor="nomeContatoEmergencia">
+                    <span>Nome do contato de emergência</span>
+                    <span className="text-xs text-slate-400">(opcional)</span>
+                  </label>
+                  <input
+                    onInput={() =>
+                      setErrors((s) => {
+                        const c = { ...s };
+                        delete c.nomeContatoEmergencia;
+                        return c;
+                      })
+                    }
+                    className="input mt-1 w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    type="text"
+                    name="nomeContatoEmergencia"
+                    id="nomeContatoEmergencia"
+                  />
+                  {errors.nomeContatoEmergencia && (
+                    <div className="text-xs text-red-600 mt-1">
+                      {errors.nomeContatoEmergencia}
+                    </div>
+                  )}
                 </div>
-                {errors.telefoneEmergencia && (
-                  <div className="text-xs text-red-600 mt-1">
-                    {errors.telefoneEmergencia}
-                  </div>
-                )}
+
+                <div>
+                  <label
+                    className="text-xs text-slate-500 font-semibold"
+                    htmlFor="telefoneEmergencia"
+                  >
+                    Telefone de emergência
+                  </label>
+                  <input
+                    onInput={handlePhoneInput('telefoneEmergencia')}
+                    placeholder="(61) 99999-9999"
+                    inputMode="tel"
+                    className="input mt-1 w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    type="tel"
+                    name="telefoneEmergencia"
+                    id="telefoneEmergencia"
+                    aria-describedby="telEmergHelp"
+                  />
+                  {/* helper moved next to name label - remove duplicate under phone */}
+                  {errors.telefoneEmergencia && (
+                    <div className="text-xs text-red-600 mt-1">
+                      {errors.telefoneEmergencia}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-6">
@@ -1028,7 +1090,7 @@ export default function AssociesePage() {
                   </label>
                   <input
                     onInput={handlePhoneInput('telefoneMedico')}
-                    placeholder="(61) 98765-4321"
+                    placeholder="(61) 99999-9999"
                     inputMode="tel"
                     className="input mt-1 w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
                     type="tel"
@@ -1036,9 +1098,6 @@ export default function AssociesePage() {
                     id="telefoneMedico"
                     aria-describedby="telMedHelp"
                   />
-                  <div id="telMedHelp" className="text-xs text-slate-400 mt-1">
-                    Opcional — telefone do médico responsável
-                  </div>
                   {errors.telefoneMedico && (
                     <div className="text-xs text-red-600 mt-1">
                       {errors.telefoneMedico}
@@ -1105,7 +1164,7 @@ export default function AssociesePage() {
                 )}
               </div>
 
-              <fieldset className="border border-slate-100 rounded-lg p-4">
+              <fieldset className="border border-slate-300 rounded-lg p-4">
                 <legend className="text-sm font-site text-slate-700 px-1">
                   Documentos
                 </legend>
@@ -1114,7 +1173,7 @@ export default function AssociesePage() {
                     className="text-xs text-slate-500 font-semibold"
                     htmlFor="laudo"
                   >
-                    Laudo G35 (PDF / JPG / PNG){' '}
+                    Laudo PDF / JPG / PNG){' '}
                     <span className="text-orange-500">*</span>
                   </label>
                   <input

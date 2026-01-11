@@ -3,3 +3,4 @@ export * from './auth-service';
 export * from './news';
 export * from './projects';
 export * from './email';
+export * from './associados';
