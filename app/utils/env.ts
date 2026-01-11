@@ -12,13 +12,18 @@ export function getPublicEnv(
   // Check runtime-injected globals (useful for runtime config overrides)
   const runtime =
     typeof globalThis !== 'undefined'
-      ? (globalThis as any)[runtimeKey] ?? (typeof window !== 'undefined' ? (window as any)[runtimeKey] : undefined)
+      ? (globalThis as any)[runtimeKey] ??
+        (typeof window !== 'undefined'
+          ? (window as any)[runtimeKey]
+          : undefined)
       : undefined;
 
   // Build-time public env (exposed to client)
   const buildPublic =
     typeof process !== 'undefined'
-      ? (process.env[normalizedKey as keyof NodeJS.ProcessEnv] as string | undefined)
+      ? (process.env[normalizedKey as keyof NodeJS.ProcessEnv] as
+          | string
+          | undefined)
       : undefined;
 
   // Server-side/private env (available only on server/runtime)
