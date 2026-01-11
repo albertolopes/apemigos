@@ -74,9 +74,11 @@ export default function Home() {
           <div className="border-y-4 border-orange-500 p-8 sm:w-60 relative bg-white sm:ml-32 sm:mt-[-430px]">
             <h3 className="text-2xl font-site">Nossa Missão</h3>
             <p className="text-slate-500 my-6 text-sm">
-              Promover a qualidade de vida e a inclusão social das pessoas com esclerose múltipla e
-              doenças raras no Distrito Federal, oferecendo apoio biopsicossocial, disseminando informações
-              qualificadas e lutando pela garantia de direitos e pelo acesso universal a tratamentos adequados.
+              Promover a qualidade de vida e a inclusão social das pessoas com
+              esclerose múltipla e doenças raras no Distrito Federal, oferecendo
+              apoio biopsicossocial, disseminando informações qualificadas e
+              lutando pela garantia de direitos e pelo acesso universal a
+              tratamentos adequados.
             </p>
             <a href="/about" className="text-slate-500 py-6 font-site">
               Saiba Mais
