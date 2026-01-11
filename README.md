@@ -54,10 +54,17 @@ A página ficará disponível em http://localhost:3000 por padrão.
 
 ## Pré-requisitos
 
-- Node.js 18+ (recomendado). Verifique a versão instalada:
+- Node.js LTS (recomendado 18.x ou superior). Verifique com `node -v`.
+- npm (vem com Node) ou yarn/pnpm se preferir.
+
+Se não tem o Node instalado (Linux):
 
 ```bash
-node -v
+# usando nvm (recomendado)
+curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.6/install.sh | bash
+# feche/abra o terminal ou rode: source ~/.nvm/nvm.sh
+nvm install --lts
+nvm use --lts
 ```
 
 - Yarn 3.x é o gerenciador recomendado (o `package.json` usa `packageManager: "yarn@3.3.0"`). Se usar Yarn PnP/berry, execute `yarn install` normalmente.

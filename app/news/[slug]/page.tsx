@@ -36,7 +36,7 @@ export default function New({ params }: { params: Promise<{ slug: string }> }) {
 
   if (isLoading) {
     return (
-      <div className="text-center py-20 text-slate-500">
+      <div className="text-center py-20 text-slate-600">
         Carregando notícia...
       </div>
     );
@@ -48,7 +48,7 @@ export default function New({ params }: { params: Promise<{ slug: string }> }) {
 
   if (!item) {
     return (
-      <div className="text-center py-20 text-slate-500">
+      <div className="text-center py-20 text-slate-600">
         Notícia não encontrada.
       </div>
     );
@@ -65,7 +65,7 @@ export default function New({ params }: { params: Promise<{ slug: string }> }) {
       </div>
       <div className="max-w-7xl mx-auto mt-[-120px] relative bg-white px-8 sm:px-20">
         <h1 className="text-center py-8 font-site">{item.noticia.title}</h1>
-        <p className="text-slate-500 py-6 max-w-3xl text-lg mx-auto text-center">
+        <p className="text-slate-600 py-6 max-w-3xl text-lg mx-auto text-center">
           {item.noticia.shortDescription}
         </p>
         <div className="relative h-[400px]">

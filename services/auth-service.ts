@@ -1,4 +1,6 @@
-import api from './api-service';
+import axios from 'axios';
+// Evita import circular com api-service.ts usando axios direto
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 export interface ServiceLoginRequest {
   serviceKey: string;
@@ -20,9 +22,15 @@ export interface AuthError {
 }
 
 export class AuthService {
-  private readonly STORAGE_KEY = 'service_token';
-  private readonly TOKEN_EXPIRY_KEY = 'token_expiry';
-  private readonly SERVICE_KEY = 'apemigos-service-key-2025-secure-version';
+  // Chaves e nomes de storage agora vêm de variáveis de ambiente (ver README/.env.local)
+  // Usamos NEXT_PUBLIC_ para que fiquem disponíveis no código do cliente.
+  private readonly STORAGE_KEY =
+    process.env.NEXT_PUBLIC_SERVICE_STORAGE_KEY ?? 'service_token';
+  private readonly TOKEN_EXPIRY_KEY =
+    process.env.NEXT_PUBLIC_TOKEN_EXPIRY_KEY ?? 'token_expiry';
+  private readonly SERVICE_KEY =
+    process.env.NEXT_PUBLIC_SERVICE_KEY ??
+    'apemigos-service-key-2025-secure-version';
 
   /**
    * Verifica se o token existe e não expirou
@@ -56,12 +64,17 @@ export class AuthService {
         valid: true,
       };
 
-      const response = await api.post('/api/auth/login', credentials, {
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-      });
+      const response = await axios.post(
+        `${BASE_URL}/api/auth/login`,
+        credentials,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          timeout: 15000,
+        }
+      );
 
       const loginData: LoginResponse = response.data;
 

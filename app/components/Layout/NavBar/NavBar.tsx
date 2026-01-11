@@ -6,10 +6,11 @@ import { usePathname } from 'next/navigation';
 
 const navbarItems = [
   { ref: '/', label: 'Início' },
-  { ref: '/about', label: 'Sobre a EM' },
+  { ref: '/about', label: 'Sobre a Apemigos' },
   { ref: '/news', label: 'Notícias' },
   { ref: '/projects', label: 'Projetos' },
   { ref: '/team', label: 'Equipe' },
+  { ref: '/association', label: 'Associe-se' },
   { ref: '/contact', label: 'Contato' },
 ];
 

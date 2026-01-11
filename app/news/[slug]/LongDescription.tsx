@@ -7,7 +7,7 @@ type Props = {
 export function LongDescription({ html }: Props) {
   return (
     <div
-      className="text-slate-500 py-6 max-w-3xl text-sm mx-auto"
+      className="text-slate-600 py-6 max-w-3xl text-sm mx-auto"
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );

@@ -107,10 +107,10 @@ export default function NewsPage() {
         >
           Notícias e Atualizações
         </h1>
-        <p className="text-slate-500 pt-6 max-w-3xl text-sm text-center mx-auto">
-          Fique por dentro das iniciativas, eventos e projetos que promovemos
-          para apoiar pessoas com esclerose múltipla e aumentar a
-          conscientização.
+        <p className="text-slate-600 pt-6 max-w-3xl text-center mx-auto">
+            Fique por dentro das últimas notícias, reportagens e comunicados.
+            Acompanhe coberturas de eventos, novidades de projetos e ações da ONG.
+            Informações atualizadas para manter a comunidade bem informada.
         </p>
 
         {/* Erro */}
@@ -150,13 +150,13 @@ export default function NewsPage() {
 
                 <div className="bg-white relative mt-10 px-8 pb-10">
                   <h2 className="mb-10 font-site">{item.title}</h2>
-                  <p className="text-slate-500 text-sm mb-6">
+                  <p className="text-slate-600 text-sm mb-6">
                     {item.shortDescription}
                   </p>
                   <Link
                     data-testid={testIds.NEWS_PAGE.NEWS_ITEM_CTA}
                     href={item.slug ? `/news/${item.slug}` : `/news/${item.id}`}
-                    className="text-slate-500 py-6 font-site"
+                    className="text-slate-600 py-6 font-site"
                   >
                     Saiba Mais
                   </Link>
