@@ -5,10 +5,24 @@ import { NewsContentResponse } from './interfaces/news-content.interface';
 
 export class NewsService {
   /**
-   * Busca notícias paginadas
+   * Busca notícias paginadas. Se `keyword` for fornecido, usa o endpoint
+   * /api/noticias/search?keyword=... (backend espera keyword opcional).
    */
-  async getNews(page: number = 0, size: number = 10): Promise<NewsResponse> {
+  async getNews(
+    page: number = 0,
+    size: number = 10,
+    keyword?: string
+  ): Promise<NewsResponse> {
     try {
+      if (keyword && String(keyword).trim()) {
+        const response = await api.get('/api/noticias/search', {
+          params: { page, size, keyword: String(keyword).trim() },
+          headers: { Accept: 'application/json' },
+        });
+
+        return response.data;
+      }
+
       const response = await api.get('/api/noticias', {
         params: { page, size },
         headers: { Accept: 'application/json' },

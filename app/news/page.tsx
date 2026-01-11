@@ -2,19 +2,21 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { formatDate } from '@app/utils/date-formatter';
 import testIds from '@app/utils/test-ids';
 import { useState, useEffect, useRef } from 'react';
 import { newsService, NewsItem, NewsResponse } from '@services';
 
-const ITEMS_PER_PAGE = 9;
+const ITEMS_PER_PAGE = 12;
 
-async function getNewsPageData(page: number) {
+async function getNewsPageData(page: number, keyword?: string) {
   try {
+    // newsService.getNews expects page (0-based), size, and optionally keyword
     const response: NewsResponse = await newsService.getNews(
       page - 1,
-      ITEMS_PER_PAGE
+      ITEMS_PER_PAGE,
+      keyword && keyword.trim() ? keyword.trim() : undefined
     );
 
     return {
@@ -31,7 +33,9 @@ async function getNewsPageData(page: number) {
 
 export default function NewsPage() {
   const searchParams = useSearchParams();
-  const router = useRouter();
+
+  // keyword taken from querystring (optional)
+  const initialKeyword = (() => String(searchParams.get('keyword') || '').trim())();
 
   const initialPage = (() => {
     const p = parseInt(String(searchParams.get('page') || '1'), 10);
@@ -41,6 +45,9 @@ export default function NewsPage() {
   const [page, setPage] = useState(initialPage);
   const [items, setItems] = useState<NewsItem[]>([]);
   const [totalItems, setTotalItems] = useState(0);
+  const [keyword, setKeyword] = useState<string>(initialKeyword);
+  // submittedKeyword controls when a search is actually performed (only on submit or URL load)
+  const [submittedKeyword, setSubmittedKeyword] = useState<string>(initialKeyword);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,6 +56,22 @@ export default function NewsPage() {
 
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
+  // Atualiza a URL no browser sem forçar navegação do Next.js (evita recarregamento de página)
+  const updateUrlWithoutNavigation = (pageNum: number, kw?: string, replace = false) => {
+    if (typeof window === 'undefined') return;
+    try {
+      const url = new URL(window.location.href);
+      url.pathname = '/news';
+      url.searchParams.set('page', String(pageNum));
+      if (kw && String(kw).trim()) url.searchParams.set('keyword', String(kw).trim());
+      else url.searchParams.delete('keyword');
+      if (replace) window.history.replaceState({}, '', url.toString());
+      else window.history.pushState({}, '', url.toString());
+    } catch (e) {
+      console.warn('Não foi possível atualizar a URL sem navegação', e);
+    }
+  };
+
   // Sincroniza quando a query string muda (ex.: back/forward)
   useEffect(() => {
     const p = parseInt(String(searchParams.get('page') || '1'), 10);
@@ -56,6 +79,30 @@ export default function NewsPage() {
     if (normalized !== page) {
       setPage(normalized);
     }
+    // sync keyword from querystring into both input and submittedKeyword (URL load -> perform search)
+    const k = String(searchParams.get('keyword') || '').trim();
+    if (k !== keyword) setKeyword(k);
+    if (k !== submittedKeyword) setSubmittedKeyword(k);
+
+    // também sincroniza quando o usuário usa voltar/avançar (popstate)
+    const onPop = () => {
+      try {
+        const sp = new URL(window.location.href).searchParams;
+        const p2 = parseInt(String(sp.get('page') || '1'), 10);
+        const normalized2 = isNaN(p2) || p2 < 1 ? 1 : p2;
+        const k2 = String(sp.get('keyword') || '').trim();
+        setPage(normalized2);
+        setKeyword(k2);
+        setSubmittedKeyword(k2);
+      } catch (e) {
+        // ignore
+      }
+    };
+    window.addEventListener('popstate', onPop);
+
+    return () => {
+      window.removeEventListener('popstate', onPop);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
@@ -67,7 +114,8 @@ export default function NewsPage() {
     setIsLoading(true);
     setError(null);
 
-    getNewsPageData(page)
+    // only fetch using the submittedKeyword (search triggered by submit or URL)
+    getNewsPageData(page, submittedKeyword)
       .then(({ total, pageItems }) => {
         setTotalItems(total);
         setItems(pageItems);
@@ -77,13 +125,23 @@ export default function NewsPage() {
         setIsLoading(false);
         isFetchingRef.current = false; // 🔥 ADICIONADO: Libera para próxima chamada
       });
-  }, [page]);
+  }, [page, submittedKeyword]);
 
   function goToPage(n: number) {
     const normalized = Math.max(1, Math.min(totalPages || 1, n));
-    // Atualiza URL para deep-link e histórico
-    router.push(`/news?page=${normalized}`);
+    // Atualiza estado e URL sem navegação completa
     setPage(normalized);
+    updateUrlWithoutNavigation(normalized, submittedKeyword, false);
+  }
+
+  function handleSearchSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    // set submittedKeyword (triggers effect) and update URL
+    const k = keyword && keyword.trim() ? keyword.trim() : '';
+    setSubmittedKeyword(k);
+    setPage(1);
+    // atualiza apenas a URL no histórico (sem recarregar a página)
+    updateUrlWithoutNavigation(1, k, false);
   }
 
   return (
@@ -112,6 +170,50 @@ export default function NewsPage() {
           Acompanhe coberturas de eventos, novidades de projetos e ações da ONG.
           Informações atualizadas para manter a comunidade bem informada.
         </p>
+
+        {/* Search */}
+        <div className="mt-8 flex justify-center">
+          <form onSubmit={handleSearchSubmit} className="w-full max-w-md">
+            <div className="flex gap-2 items-start">
+              <div className="relative w-full">
+                <input
+                  id="newsKeyword"
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                  placeholder="Buscar por palavra-chave"
+                  className="w-full pr-12 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-3 focus:ring-orange-500"
+                  aria-label="Buscar notícias"
+                />
+                {(keyword || submittedKeyword) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setKeyword('');
+                      setSubmittedKeyword('');
+                      updateUrlWithoutNavigation(1, '', false);
+                      setPage(1);
+                      const el = document.getElementById('newsKeyword') as HTMLInputElement | null;
+                      if (el) el.focus();
+                    }}
+                    className="ml-1 inline-flex items-center justify-center w-5 h-5 text-sm text-slate-400 hover:text-slate-600 transition-colors rounded"
+                    aria-label="Limpar busca"
+                    title="Limpar"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors"
+                >
+                  Buscar
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
 
         {/* Erro */}
         {error && (
