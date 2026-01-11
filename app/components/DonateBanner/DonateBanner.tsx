@@ -1,5 +1,6 @@
 'use client';
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { pixService } from '../../../services/pix/pix.service';
 
 export default function DonateBanner() {
@@ -261,11 +262,15 @@ export default function DonateBanner() {
 
             {qrSrc ? (
               <div className="flex flex-col items-center gap-3">
-                <img
-                  src={qrSrc}
-                  alt="QR Pix"
-                  className="w-48 h-48 object-contain"
-                />
+                <div className="w-48 h-48 relative">
+                  <Image
+                    src={qrSrc as string}
+                    alt="QR Pix"
+                    className="object-contain"
+                    fill
+                    unoptimized
+                  />
+                </div>
                 <p className="text-sm">
                   Chave PIX: <strong>{pixKey}</strong>
                 </p>
