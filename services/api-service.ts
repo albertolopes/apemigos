@@ -3,8 +3,9 @@ import { authService } from './auth-service';
 import { getPublicEnv } from '../app/utils/env';
 
 const api = axios.create({
-  // Explicitly read NEXT_PUBLIC_API_URL (getPublicEnv normalizes keys that start with NEXT_PUBLIC_)
-  baseURL: getPublicEnv('NEXT_PUBLIC_API_URL', 'http://localhost:8080'),
+  // Prefer the explicit NEXT_PUBLIC_API_URL (set in Render); fallback to getPublicEnv and localhost
+  baseURL:
+    process.env.NEXT_PUBLIC_API_URL || getPublicEnv('API_URL', 'http://localhost:8080'),
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',

@@ -1,14 +1,12 @@
 import axios from 'axios';
 import { getPublicEnv } from '../app/utils/env';
 // Evita import circular com api-service.ts usando axios direto
-// BASE_URL agora é resolvido dinamicamente a partir da variável pública NEXT_PUBLIC_API_URL
+// Tenta usar a variável direta NEXT_PUBLIC_API_URL (definida no Render), com fallback para getPublicEnv e localhost
 const DEFAULT_BASE_URL = 'http://localhost:8080';
-
-function resolveBaseUrl(): string {
-  return (getPublicEnv('NEXT_PUBLIC_API_URL', DEFAULT_BASE_URL) as string) || DEFAULT_BASE_URL;
-}
-
-const BASE_URL = resolveBaseUrl();
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (getPublicEnv('API_URL', DEFAULT_BASE_URL) as string) ||
+  DEFAULT_BASE_URL;
 
 export interface ServiceLoginRequest {
   serviceKey: string;
@@ -31,13 +29,21 @@ export interface AuthError {
 
 export class AuthService {
   // Chaves e nomes de storage agora vêm de variáveis de ambiente (ver README/.env.local)
-  // Usamos NEXT_PUBLIC_ para que fiquem disponíveis no código do cliente.
+  // Usa process.env.NEXT_PUBLIC_* primariamente (para compatibilidade com Render),
+  // e getPublicEnv como fallback.
   private readonly STORAGE_KEY =
-    (getPublicEnv('NEXT_PUBLIC_SERVICE_STORAGE_KEY') as string) ?? 'service_token';
+    process.env.NEXT_PUBLIC_SERVICE_STORAGE_KEY ??
+    (getPublicEnv('SERVICE_STORAGE_KEY') as string) ??
+    'service_token';
+
   private readonly TOKEN_EXPIRY_KEY =
-    (getPublicEnv('NEXT_PUBLIC_TOKEN_EXPIRY_KEY') as string) ?? 'token_expiry';
+    process.env.NEXT_PUBLIC_TOKEN_EXPIRY_KEY ??
+    (getPublicEnv('TOKEN_EXPIRY_KEY') as string) ??
+    'token_expiry';
+
   private readonly SERVICE_KEY =
-    (getPublicEnv('NEXT_PUBLIC_SERVICE_KEY') as string) ??
+    process.env.NEXT_PUBLIC_SERVICE_KEY ??
+    (getPublicEnv('SERVICE_KEY') as string) ??
     'apemigos-service-key-2025-secure-version';
 
   /**
