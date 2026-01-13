@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
-  const serviceKey = process.env.SERVICE_KEY;
+  const serviceKey = process.env.NEXT_PUBLIC_SERVICE_KEY;
 
   console.log('service-login: SERVICE_KEY presente?', !!serviceKey);
 
