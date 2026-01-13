@@ -1,58 +1,97 @@
 import { NextResponse } from 'next/server';
 
+// In development, try loading .env for convenience
+if (process.env.NODE_ENV !== 'production' && !process.env.NEXT_PUBLIC_API_URL) {
+  try {
+    require('dotenv').config();
+    console.log('service-login: loaded .env via dotenv (dev)');
+  } catch (e) {
+    // ignore
+  }
+}
+
+// Required envs (no hard-coded fallbacks)
+const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL;
+const SERVICE_KEY =
+  process.env.SERVICE_KEY ?? process.env.NEXT_PUBLIC_SERVICE_KEY ?? undefined;
+const ALLOWED_ORIGINS: string[] = (process.env.NEXT_ALLOWED_ORIGINS || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+const API_ORIGIN = (() => {
+  try {
+    return API_URL ? new URL(API_URL).origin : '';
+  } catch (e) {
+    return '';
+  }
+})();
+
+// Dev/debug logs (do not print secrets)
+if (
+  process.env.NODE_ENV !== 'production' ||
+  process.env.DEBUG_PROXY === 'true'
+) {
+  console.log('service-login: API_URL present?', !!API_URL);
+  console.log('service-login: API_ORIGIN=', API_ORIGIN);
+  console.log('service-login: ALLOWED_ORIGINS=', ALLOWED_ORIGINS);
+  console.log('service-login: SERVICE_KEY present?', !!SERVICE_KEY);
+}
+
+function validateEnv(): NextResponse | null {
+  if (!API_URL) {
+    console.error(
+      'service-login: NEXT_PUBLIC_API_URL or API_URL is not configured'
+    );
+    return NextResponse.json(
+      { message: 'NEXT_PUBLIC_API_URL or API_URL not configured' },
+      { status: 500 }
+    );
+  }
+  if (!SERVICE_KEY) {
+    console.error('service-login: SERVICE_KEY is not configured');
+    return NextResponse.json(
+      { message: 'SERVICE_KEY not configured' },
+      { status: 500 }
+    );
+  }
+  if (!ALLOWED_ORIGINS || ALLOWED_ORIGINS.length === 0) {
+    console.error('service-login: NEXT_ALLOWED_ORIGINS is not configured');
+    return NextResponse.json(
+      { message: 'NEXT_ALLOWED_ORIGINS not configured' },
+      { status: 500 }
+    );
+  }
+  return null;
+}
+
 export async function POST(request: Request) {
+  const envErr = validateEnv();
+  if (envErr) return envErr;
+
   const isProd = process.env.NODE_ENV === 'production';
 
-  const apiUrl =
-    process.env.NEXT_PUBLIC_API_URL ||
-    process.env.API_URL ||
-    (!isProd ? 'http://localhost:8080' : undefined);
-
-  const serviceKey =
-    process.env.NEXT_PUBLIC_SERVICE_KEY ||
-    (!isProd ? 'apemigos-service-key-2025-secure-version' : undefined);
-
-  // determine caller origin (use incoming Origin header or sensible default)
-  const incomingOrigin = request.headers.get('origin');
-  const defaultLocalOrigin = 'http://localhost:3000';
-  const productionDefaultOrigin = 'https://apemigos.vercel.app';
-  const callerOrigin =
-    incomingOrigin || (!isProd ? defaultLocalOrigin : productionDefaultOrigin);
-
-  console.log('service-login: NODE_ENV=', process.env.NODE_ENV);
-  console.log('service-login: using apiUrl=', !!apiUrl);
-  console.log(
-    'service-login: NEXT_PUBLIC_SERVICE_KEY presente?',
-    !!process.env.NEXT_PUBLIC_SERVICE_KEY
-  );
-  console.log(
-    'service-login: using fallback key?',
-    !!(serviceKey && !process.env.NEXT_PUBLIC_SERVICE_KEY)
-  );
-  console.log('service-login: callerOrigin=', callerOrigin);
-
-  if (!apiUrl) {
-    return NextResponse.json(
-      {
-        message:
-          'NEXT_PUBLIC_API_URL ou API_URL não configurada. Defina NEXT_PUBLIC_API_URL em produção (ou API_URL/localmente) e reinicie a aplicação.',
-      },
-      { status: 500 }
-    );
+  // Determine caller origin and validate against allowed origins
+  const incomingOrigin = request.headers.get('origin') || '';
+  if (incomingOrigin && !ALLOWED_ORIGINS.includes(incomingOrigin)) {
+    if (process.env.NODE_ENV === 'production') {
+      console.warn('service-login: rejected origin', incomingOrigin);
+      return NextResponse.json(
+        { message: 'Origin not allowed' },
+        { status: 403 }
+      );
+    } else {
+      console.warn(
+        'service-login: origin not in whitelist but allowing in development:',
+        incomingOrigin
+      );
+    }
   }
 
-  if (!serviceKey) {
-    return NextResponse.json(
-      {
-        message:
-          'NEXT_PUBLIC_SERVICE_KEY não configurada. Defina a variável de ambiente NEXT_PUBLIC_SERVICE_KEY e reinicie a aplicação.',
-      },
-      { status: 500 }
-    );
-  }
+  const callerOrigin = incomingOrigin || ALLOWED_ORIGINS[0] || API_ORIGIN || '';
 
   try {
-    // First: if the request already includes the APEMIGOS_AUTH cookie, return it
+    // If APEMIGOS_AUTH cookie already present, return it
     const cookieHeader = request.headers.get('cookie') || '';
     const match = cookieHeader.match(/APEMIGOS_AUTH=([^;\s]+)/);
     if (match && match[1]) {
@@ -73,34 +112,77 @@ export async function POST(request: Request) {
       });
     }
 
-    const resp = await fetch(`${apiUrl}/api/auth/login`, {
+    // Call backend auth/login server-side
+    const resp = await fetch(`${API_URL}/api/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        // forward origin of caller to backend auth request
-        Origin: callerOrigin,
+        // Use API_ORIGIN so backend CORS acceptance matches requests coming from proxy
+        Origin: API_ORIGIN,
+        'X-Service-Token': SERVICE_KEY as string,
       },
-      body: JSON.stringify({
-        serviceKey,
-        userLogin: false,
-        serviceLogin: true,
-        valid: true,
-      }),
+      // send only serviceKey to match backend example
+      body: JSON.stringify({ serviceKey: SERVICE_KEY }),
     });
 
     const text = await resp.text();
 
+    // Dev-only debug: log snippet of backend response when not ok
+    const debug =
+      process.env.NODE_ENV !== 'production' ||
+      process.env.DEBUG_PROXY === 'true';
+    if (!resp.ok && debug) {
+      try {
+        console.warn(
+          'service-login: backend returned',
+          resp.status,
+          'snippet:',
+          text.slice(0, 400)
+        );
+      } catch (e) {
+        // ignore
+      }
+    }
+
     if (!resp.ok) {
-      // tenta parsear JSON de erro
       try {
         const parsed = text
           ? JSON.parse(text)
-          : { message: text || 'Erro no login de serviço' };
+          : { message: text || 'Service login error' };
+
+        // In debug, expose a small snippet header so client can inspect backend message
+        if (debug) {
+          const snippetHeader = encodeURIComponent((text || '').slice(0, 400));
+          return new NextResponse(JSON.stringify(parsed), {
+            status: resp.status,
+            headers: {
+              'Content-Type': 'application/json',
+              'x-backend-snippet': snippetHeader,
+              'Access-Control-Expose-Headers': 'x-backend-snippet',
+            },
+          });
+        }
+
         return NextResponse.json(parsed, { status: resp.status });
       } catch (e) {
+        if (debug) {
+          const snippetHeader = encodeURIComponent((text || '').slice(0, 400));
+          return new NextResponse(
+            JSON.stringify({ message: text || 'Service login error' }),
+            {
+              status: resp.status,
+              headers: {
+                'Content-Type': 'application/json',
+                'x-backend-snippet': snippetHeader,
+                'Access-Control-Expose-Headers': 'x-backend-snippet',
+              },
+            }
+          );
+        }
+
         return NextResponse.json(
-          { message: text || 'Erro no login de serviço' },
+          { message: text || 'Service login error' },
           { status: resp.status }
         );
       }
@@ -112,7 +194,7 @@ export async function POST(request: Request) {
 
     if (!token) {
       return NextResponse.json(
-        { message: 'Token não recebido do backend' },
+        { message: 'Token not received from backend' },
         { status: 500 }
       );
     }
@@ -121,14 +203,13 @@ export async function POST(request: Request) {
       ? Number(expiresIn)
       : 3600;
 
-    // Only set Secure flag for production (otherwise cookie won't be set over http localhost)
     const secureFlag = isProd ? '; Secure' : '';
     const cookie = `APEMIGOS_AUTH=${token}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${maxAge}${secureFlag}`;
 
-    // Determine if caller is authorized to receive token in body
+    // Determine if caller provided the service key in Authorization header
     const callerAuth = request.headers.get('authorization') || '';
     const callerProvidesServiceKey =
-      callerAuth.trim() === `Bearer ${process.env.NEXT_PUBLIC_SERVICE_KEY}`;
+      callerAuth.trim() === `Bearer ${SERVICE_KEY}`;
 
     const safeResp: any = { serviceLogin: true, expiresIn: maxAge };
     if (callerProvidesServiceKey) {
@@ -146,7 +227,7 @@ export async function POST(request: Request) {
   } catch (err: any) {
     console.error('Erro na rota /api/service-login:', err);
     return NextResponse.json(
-      { message: err.message || 'Erro interno' },
+      { message: err.message || 'Internal error' },
       { status: 500 }
     );
   }

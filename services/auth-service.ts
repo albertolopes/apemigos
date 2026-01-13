@@ -1,9 +1,12 @@
 import { getPublicEnv } from '../app/utils/env';
-const DEFAULT_BASE_URL = 'http://localhost:8080';
 const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  (getPublicEnv('API_URL', DEFAULT_BASE_URL) as string) ||
-  DEFAULT_BASE_URL;
+  process.env.NEXT_PUBLIC_API_URL || (getPublicEnv('API_URL') as string);
+
+if (!BASE_URL && process.env.NODE_ENV !== 'production') {
+  console.warn(
+    'AuthService: API base URL not configured (NEXT_PUBLIC_API_URL / API_URL)'
+  );
+}
 
 export interface ServiceLoginRequest {
   serviceKey: string;
@@ -145,7 +148,8 @@ export class AuthService {
         localStorage.setItem(this.STORAGE_KEY, token);
 
         const defaultExpiry = 60 * 60 * 1000;
-        const expiryTime = Date.now() + (expiresIn ? expiresIn * 1000 : defaultExpiry);
+        const expiryTime =
+          Date.now() + (expiresIn ? expiresIn * 1000 : defaultExpiry);
 
         localStorage.setItem(this.TOKEN_EXPIRY_KEY, expiryTime.toString());
 
@@ -173,8 +177,7 @@ export class AuthService {
         this.saveToken(cookieToken, undefined);
         return cookieToken;
       }
-    } catch (e) {
-    }
+    } catch (e) {}
 
     console.log('Token expirado ou não encontrado. Gerando novo...');
 

@@ -3,10 +3,8 @@ import { authService } from './auth-service';
 import { getPublicEnv } from '../app/utils/env';
 
 const api = axios.create({
-  // Prefer the explicit NEXT_PUBLIC_API_URL (set in Render); fallback to getPublicEnv and localhost
-  baseURL:
-    process.env.NEXT_PUBLIC_API_URL ||
-    getPublicEnv('API_URL', 'http://localhost:8080'),
+  // Force all frontend requests through the server-side proxy at /api/proxy
+  baseURL: '/api/proxy',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -54,7 +52,10 @@ api.interceptors.request.use(
         // Se temos token no cookie, usa ele diretamente (prioridade)
         if (!config.headers) config.headers = {} as any;
         config.headers.Authorization = `Bearer ${cookieToken}`;
-        console.log('🔐 Token obtido via cookie e adicionado à requisição:', config.url);
+        console.log(
+          '🔐 Token obtido via cookie e adicionado à requisição:',
+          config.url
+        );
         return config;
       }
 

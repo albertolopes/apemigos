@@ -14,6 +14,7 @@
   "dependencies": {
     "@netlify/plugin-nextjs": "^4.36.0",
     "axios": "^1.13.2",
+    "dotenv": "^17.2.3",
     "flowbite": "^1.5.4",
     "flowbite-react": "^0.4.4",
     "next": "15.5.9",
