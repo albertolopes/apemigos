@@ -1,17 +1,14 @@
 import { NextResponse } from 'next/server';
 
 // Rota server-side que realiza login de serviço usando a chave guardada no
-// ambiente do servidor (process.env.SERVICE_KEY ou NEXT_PUBLIC_SERVICE_KEY).
-// Retorna o JSON recebido do backend e seta um cookie HttpOnly com o token.
+// ambiente do servidor (process.env.SERVICE_KEY). Não usar fallback público.
 
 export async function POST(request: Request) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
-  const serviceKey =
-    process.env.SERVICE_KEY ||
-    process.env.NEXT_PUBLIC_SERVICE_KEY ||
-    /* fallback local para facilitar testes */
-    'apemigos-service-key-2025-secure-version';
+  const serviceKey = process.env.SERVICE_KEY;
+
+  console.log('service-login: SERVICE_KEY presente?', !!serviceKey);
 
   if (!serviceKey) {
     return NextResponse.json(
