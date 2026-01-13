@@ -75,8 +75,18 @@ export async function POST(request: Request) {
 
     const cookie = `APEMIGOS_AUTH=${token}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${maxAge}; Secure`;
 
-    // Retorna token no corpo para compatibilidade com o cliente (authService)
-    const safeResp = { serviceLogin: true, expiresIn: maxAge, token };
+    // Determine if caller is authorized to receive token in body
+    const callerAuth =
+      request.headers.get('authorization') ||
+      request.headers.get('Authorization') ||
+      '';
+    const callerProvidesServiceKey =
+      callerAuth.trim() === `Bearer ${serviceKey}`;
+
+    const safeResp: any = { serviceLogin: true, expiresIn: maxAge };
+    if (callerProvidesServiceKey) {
+      safeResp.token = token;
+    }
 
     return NextResponse.json(safeResp, {
       status: 200,
