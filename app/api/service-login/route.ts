@@ -38,6 +38,37 @@ if (
   console.log('service-login: SERVICE_KEY present?', !!SERVICE_KEY);
 }
 
+function normalizeOrigin(o: string) {
+  if (!o) return '';
+  try {
+    // keep protocol if present, but normalize trailing slash and lowercase
+    return o.trim().replace(/\/$/, '').toLowerCase();
+  } catch (e) {
+    return o.trim().replace(/\/$/, '').toLowerCase();
+  }
+}
+
+function originHostOnly(o: string) {
+  if (!o) return '';
+  // remove protocol if present
+  return o.replace(/^https?:\/\//i, '').replace(/\/$/, '').toLowerCase();
+}
+
+function isOriginAllowed(incomingOrigin: string) {
+  if (!incomingOrigin) return false;
+  const normIncoming = normalizeOrigin(incomingOrigin);
+  const hostIncoming = originHostOnly(incomingOrigin);
+
+  const normalizedAllowed = ALLOWED_ORIGINS.map((a) => normalizeOrigin(a));
+  const hostAllowed = ALLOWED_ORIGINS.map((a) => originHostOnly(a));
+
+  // direct match
+  if (normalizedAllowed.includes(normIncoming)) return true;
+  // match by host only (ignore protocol)
+  if (hostAllowed.includes(hostIncoming)) return true;
+  return false;
+}
+
 function validateEnv(): NextResponse | null {
   if (!API_URL) {
     console.error(
@@ -73,9 +104,16 @@ export async function POST(request: Request) {
 
   // Determine caller origin and validate against allowed origins
   const incomingOrigin = request.headers.get('origin') || '';
-  if (incomingOrigin && !ALLOWED_ORIGINS.includes(incomingOrigin)) {
+  if (incomingOrigin && !isOriginAllowed(incomingOrigin)) {
     if (process.env.NODE_ENV === 'production') {
+      // Log more details to help debug misconfiguration in prod
       console.warn('service-login: rejected origin', incomingOrigin);
+      console.warn('service-login: allowed (normalized)=',
+        ALLOWED_ORIGINS.map(normalizeOrigin));
+      console.warn('service-login: allowed (hosts)=',
+        ALLOWED_ORIGINS.map(originHostOnly));
+      console.warn('service-login: incoming (normalized)=', normalizeOrigin(incomingOrigin));
+      console.warn('service-login: incoming (host)=', originHostOnly(incomingOrigin));
       return NextResponse.json(
         { message: 'Origin not allowed' },
         { status: 403 }
