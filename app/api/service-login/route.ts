@@ -38,7 +38,6 @@ export async function POST(request: Request) {
     const text = await resp.text();
 
     if (!resp.ok) {
-
       try {
         const parsed = text
           ? JSON.parse(text)
