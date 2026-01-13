@@ -38,10 +38,31 @@ api.interceptors.request.use(
     }
 
     try {
+      // Primeiro tenta ler o cookie APEMIGOS_AUTH diretamente (útil em produção quando o
+      // backend setou o cookie e o frontend não tem localStorage preenchido).
+      let cookieToken: string | null = null;
+      try {
+        if (typeof document !== 'undefined' && document.cookie) {
+          const m = document.cookie.match(/(?:^|; )APEMIGOS_AUTH=([^;\s]+)/);
+          if (m && m[1]) cookieToken = decodeURIComponent(m[1]);
+        }
+      } catch (e) {
+        console.warn('Erro lendo cookie APEMIGOS_AUTH diretamente:', e);
+      }
+
+      if (cookieToken) {
+        // Se temos token no cookie, usa ele diretamente (prioridade)
+        if (!config.headers) config.headers = {} as any;
+        config.headers.Authorization = `Bearer ${cookieToken}`;
+        console.log('🔐 Token obtido via cookie e adicionado à requisição:', config.url);
+        return config;
+      }
+
       // Obtém token válido (renova automaticamente se expirado)
       const token = await authService.getValidToken();
 
       if (token) {
+        if (!config.headers) config.headers = {} as any;
         config.headers.Authorization = `Bearer ${token}`;
         console.log('🔐 Token adicionado à requisição:', config.url);
       } else {

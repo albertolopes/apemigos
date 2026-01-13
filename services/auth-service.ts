@@ -1,7 +1,4 @@
-import axios from 'axios';
 import { getPublicEnv } from '../app/utils/env';
-// Evita import circular com api-service.ts usando axios direto
-// Tenta usar a variável direta NEXT_PUBLIC_API_URL (definida no Render), com fallback para getPublicEnv e localhost
 const DEFAULT_BASE_URL = 'http://localhost:8080';
 const BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ||
@@ -28,9 +25,6 @@ export interface AuthError {
 }
 
 export class AuthService {
-  // Chaves e nomes de storage agora vêm de variáveis de ambiente (ver README/.env.local)
-  // Usa process.env.NEXT_PUBLIC_* primariamente (para compatibilidade com Render),
-  // e getPublicEnv como fallback.
   private readonly STORAGE_KEY =
     process.env.NEXT_PUBLIC_SERVICE_STORAGE_KEY ??
     (getPublicEnv('SERVICE_STORAGE_KEY') as string) ??
@@ -46,9 +40,6 @@ export class AuthService {
     (getPublicEnv('SERVICE_KEY') as string) ??
     'apemigos-service-key-2025-secure-version';
 
-  /**
-   * Verifica se o token existe e não expirou
-   */
   private isTokenValid(): boolean {
     if (typeof window === 'undefined') return false;
 
@@ -66,20 +57,20 @@ export class AuthService {
     return now < withMargin;
   }
 
-  /**
-   * Gera um novo token de serviço
-   */
+  private getTokenFromCookie(): string | null {
+    try {
+      if (typeof document === 'undefined' || !document.cookie) return null;
+      const match = document.cookie.match(/APEMIGOS_AUTH=([^;\s]+)/);
+      if (match && match[1]) return decodeURIComponent(match[1]);
+      return null;
+    } catch (e) {
+      console.warn('Erro lendo cookie APEMIGOS_AUTH:', e);
+      return null;
+    }
+  }
+
   private async generateServiceToken(): Promise<string> {
     try {
-      const credentials: ServiceLoginRequest = {
-        serviceKey: this.SERVICE_KEY,
-        userLogin: false,
-        serviceLogin: true,
-        valid: true,
-      };
-
-      // First attempt: ask the server to return the token if it already has the
-      // cookie APEMIGOS_AUTH set (cookie is HttpOnly so client cannot read it).
       try {
         const resCookie = await fetch('/api/service-login', {
           method: 'POST',
@@ -92,18 +83,22 @@ export class AuthService {
         });
 
         if (resCookie.ok) {
-          const dataCookie = await resCookie.json();
+          const dataCookie = await resCookie.json().catch(() => null);
           if (dataCookie && dataCookie.token) {
             this.saveToken(dataCookie.token, dataCookie.expiresIn);
             return dataCookie.token;
           }
+
+          const cookieToken = this.getTokenFromCookie();
+          if (cookieToken) {
+            this.saveToken(cookieToken, undefined);
+            return cookieToken;
+          }
         }
       } catch (e) {
-        // ignore and fall through to generate new token
         console.warn('service-login: could not recover token from cookie', e);
       }
 
-      // Fallback: request token generation by presenting the service key.
       const res = await fetch('/api/service-login', {
         method: 'POST',
         headers: {
@@ -111,9 +106,7 @@ export class AuthService {
           Accept: 'application/json',
           Authorization: `Bearer ${this.SERVICE_KEY}`,
         },
-        // permite que o browser aceite cookies Set-Cookie do mesmo origin
         credentials: 'same-origin',
-        // corpo vazio — a rota server-side lerá (ou usará) a chave do ambiente
         body: JSON.stringify({}),
       });
 
@@ -128,7 +121,6 @@ export class AuthService {
         throw new Error('Token não recebido na resposta');
       }
 
-      // Salva token e tempo de expiração
       this.saveToken(loginData.token, loginData.expiresIn);
 
       return loginData.token;
@@ -147,18 +139,13 @@ export class AuthService {
     }
   }
 
-  /**
-   * Salva token e tempo de expiração no storage
-   */
   private saveToken(token: string, expiresIn?: number): void {
     if (typeof window !== 'undefined') {
       try {
         localStorage.setItem(this.STORAGE_KEY, token);
 
-        // Calcula o timestamp de expiração (padrão: 1 hora se não informado)
-        const defaultExpiry = 60 * 60 * 1000; // 1 hora em ms
-        const expiryTime =
-          Date.now() + (expiresIn ? expiresIn * 1000 : defaultExpiry);
+        const defaultExpiry = 60 * 60 * 1000;
+        const expiryTime = Date.now() + (expiresIn ? expiresIn * 1000 : defaultExpiry);
 
         localStorage.setItem(this.TOKEN_EXPIRY_KEY, expiryTime.toString());
 
@@ -173,18 +160,25 @@ export class AuthService {
   }
 
   async getValidToken(): Promise<string> {
-    // Se o token atual é válido, retorna ele
     if (this.isTokenValid()) {
       const currentToken = localStorage.getItem(this.STORAGE_KEY);
       console.log('Token atual ainda válido');
       return currentToken!;
     }
 
+    try {
+      const cookieToken = this.getTokenFromCookie();
+      if (cookieToken) {
+        console.log('Token obtido via cookie APEMIGOS_AUTH');
+        this.saveToken(cookieToken, undefined);
+        return cookieToken;
+      }
+    } catch (e) {
+    }
+
     console.log('Token expirado ou não encontrado. Gerando novo...');
 
-    // Gera novo token
-    const newToken = await this.generateServiceToken();
-    return newToken;
+    return await this.generateServiceToken();
   }
 
   async refreshToken(): Promise<string> {
@@ -192,9 +186,6 @@ export class AuthService {
     return await this.generateServiceToken();
   }
 
-  /**
-   * Remove token do storage
-   */
   logout(): void {
     if (typeof window !== 'undefined') {
       localStorage.removeItem(this.STORAGE_KEY);

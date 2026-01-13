@@ -104,7 +104,9 @@ export async function POST(request: Request) {
       ? Number(expiresIn)
       : 3600;
 
-    const cookie = `APEMIGOS_AUTH=${token}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${maxAge}; Secure`;
+    // Only set Secure flag for production (otherwise cookie won't be set over http localhost)
+    const secureFlag = isProd ? '; Secure' : '';
+    const cookie = `APEMIGOS_AUTH=${token}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${maxAge}${secureFlag}`;
 
     // Determine if caller is authorized to receive token in body
     const callerAuth = request.headers.get('authorization') || '';
