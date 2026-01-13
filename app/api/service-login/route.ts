@@ -12,6 +12,13 @@ export async function POST(request: Request) {
     process.env.NEXT_PUBLIC_SERVICE_KEY ||
     (!isProd ? 'apemigos-service-key-2025-secure-version' : undefined);
 
+  // determine caller origin (use incoming Origin header or sensible default)
+  const incomingOrigin = request.headers.get('origin');
+  const defaultLocalOrigin = 'http://localhost:3000';
+  const productionDefaultOrigin = 'https://apemigos.vercel.app';
+  const callerOrigin =
+    incomingOrigin || (!isProd ? defaultLocalOrigin : productionDefaultOrigin);
+
   console.log('service-login: NODE_ENV=', process.env.NODE_ENV);
   console.log('service-login: using apiUrl=', !!apiUrl);
   console.log(
@@ -22,6 +29,7 @@ export async function POST(request: Request) {
     'service-login: using fallback key?',
     !!(serviceKey && !process.env.NEXT_PUBLIC_SERVICE_KEY)
   );
+  console.log('service-login: callerOrigin=', callerOrigin);
 
   if (!apiUrl) {
     return NextResponse.json(
@@ -55,7 +63,14 @@ export async function POST(request: Request) {
         expiresIn: null,
         token: existingToken,
       };
-      return NextResponse.json(safeResp, { status: 200 });
+
+      return NextResponse.json(safeResp, {
+        status: 200,
+        headers: {
+          'Access-Control-Allow-Origin': callerOrigin,
+          'Access-Control-Allow-Credentials': 'true',
+        },
+      });
     }
 
     const resp = await fetch(`${apiUrl}/api/auth/login`, {
@@ -63,6 +78,8 @@ export async function POST(request: Request) {
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
+        // forward origin of caller to backend auth request
+        Origin: callerOrigin,
       },
       body: JSON.stringify({
         serviceKey,
@@ -120,7 +137,11 @@ export async function POST(request: Request) {
 
     return NextResponse.json(safeResp, {
       status: 200,
-      headers: { 'Set-Cookie': cookie },
+      headers: {
+        'Set-Cookie': cookie,
+        'Access-Control-Allow-Origin': callerOrigin,
+        'Access-Control-Allow-Credentials': 'true',
+      },
     });
   } catch (err: any) {
     console.error('Erro na rota /api/service-login:', err);
