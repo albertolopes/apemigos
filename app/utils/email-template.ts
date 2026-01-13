@@ -338,11 +338,10 @@ export function buildAssociateEmail(data: AssociateData) {
                     <td style="padding:6px 0;color:#374151;">${eTelefoneMedico}</td>
                   </tr>
 
-                  <tr>
-                    <td colspan="2" style="padding:6px 0;color:#374151;font-weight:600;">${escapeHtml(
-                      displayConvenioLine
-                    )}</td>
-                  </tr>
+                    <tr>
+                      <td style="padding:6px 0;font-weight:600;color:#374151;">Convenio</td>
+                      <td style="padding:6px 0;color:#374151;">${displayConvenioLine}</td>
+                    </tr>
 
                   <tr>
                     <td style="padding:6px 0;font-weight:600;color:#374151;">Endereço</td>

@@ -78,19 +78,25 @@ export class AuthService {
         valid: true,
       };
 
-      const response = await axios.post(
-        `${BASE_URL}/api/auth/login`,
-        credentials,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          timeout: 15000,
-        }
-      );
+      // Em vez de enviar a chave do serviço do cliente, chamamos uma rota server-side
+      // que possui a credencial no ambiente do servidor. Isso evita expor a
+      // SERVICE_KEY ao inspecionar o tráfego do navegador.
+      const res = await fetch('/api/service-login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        // corpo vazio — a rota server-side lerá a chave do ambiente
+        body: JSON.stringify({}),
+      });
 
-      const loginData: LoginResponse = response.data;
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(`Erro ao autenticar serviço: ${res.status} ${txt}`);
+      }
+
+      const loginData: LoginResponse = await res.json();
 
       if (!loginData.token) {
         throw new Error('Token não recebido na resposta');
@@ -103,7 +109,7 @@ export class AuthService {
     } catch (error: any) {
       const authError: AuthError = {
         message:
-          error.response?.data?.message || 'Erro ao gerar token de serviço',
+          error.response?.data?.message || error.message || 'Erro ao gerar token de serviço',
         status: error.response?.status || 500,
         code: error.response?.data?.code,
       };
