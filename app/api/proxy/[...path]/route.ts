@@ -62,6 +62,20 @@ const API_ORIGIN = (() => {
   }
 })();
 
+function parseCookieValue(
+  cookieHeader: string | null,
+  name: string
+): string | null {
+  if (!cookieHeader) return null;
+  const parts = cookieHeader.split(';').map((p) => p.trim());
+  for (const p of parts) {
+    if (p.startsWith(name + '=')) {
+      return decodeURIComponent(p.substring(name.length + 1));
+    }
+  }
+  return null;
+}
+
 async function forward(request: Request, params: { path: string[] }) {
   const envErr = validateEnv();
   if (envErr) return envErr;
@@ -95,9 +109,17 @@ async function forward(request: Request, params: { path: string[] }) {
   // Forward the effective origin exactly (important for backend CORS checks)
   headers['Origin'] = effectiveOrigin || API_ORIGIN;
 
-  // Authorization: forward if present
+  // Authorization: forward if present; else try to extract from cookie APEMIGOS_AUTH
   const authorization = request.headers.get('authorization');
-  if (authorization) headers['Authorization'] = authorization;
+  const cookieHeader = request.headers.get('cookie');
+  let finalAuth = authorization || null;
+  if (!finalAuth) {
+    const cookieToken = parseCookieValue(cookieHeader, 'APEMIGOS_AUTH');
+    if (cookieToken) {
+      finalAuth = `Bearer ${cookieToken}`;
+    }
+  }
+  if (finalAuth) headers['Authorization'] = finalAuth;
 
   // Content-Type / Accept (forward if present)
   const contentType = request.headers.get('content-type');
@@ -107,12 +129,45 @@ async function forward(request: Request, params: { path: string[] }) {
   const acceptLang = request.headers.get('accept-language');
   if (acceptLang) headers['Accept-Language'] = acceptLang;
 
-  // Cookie: forward if present (allows session auth if backend expects cookies)
-  const cookie = request.headers.get('cookie');
-  if (cookie) headers['Cookie'] = cookie;
+  // Forward cookie (so backend can also read it if needed)
+  if (cookieHeader) headers['Cookie'] = cookieHeader;
 
   // Inject server-side X-Service-Token (must be present exactly as server key)
   headers['X-Service-Token'] = SERVER_KEY as string;
+
+  // Debug: show minimal headers being sent (mask sensitive values)
+  const debugHeaders = (() => {
+    if (
+      process.env.NODE_ENV === 'production' &&
+      process.env.DEBUG_PROXY !== 'true'
+    )
+      return null;
+    const copy: Record<string, string> = {};
+    Object.keys(headers).forEach((k) => {
+      if (k.toLowerCase() === 'x-service-token') {
+        const v = headers[k];
+        if (v && v.length > 8) {
+          copy[k] = `${v.slice(0, 4)}...${v.slice(-4)}`;
+        } else {
+          copy[k] = '***';
+        }
+      } else if (k.toLowerCase() === 'authorization') {
+        const v = headers[k];
+        if (v && v.startsWith('Bearer ')) {
+          copy[k] = 'Bearer *****';
+        } else if (v) {
+          copy[k] = '*****';
+        }
+      } else {
+        copy[k] = headers[k];
+      }
+    });
+    return copy;
+  })();
+
+  if (debugHeaders) {
+    console.log('proxy: headers summary being sent to backend:', debugHeaders);
+  }
 
   // Prepare body
   let body: ArrayBuffer | null = null;
@@ -175,18 +230,23 @@ async function forward(request: Request, params: { path: string[] }) {
 }
 
 export async function GET(request: Request, { params }: any) {
+  await params;
   return forward(request, { path: (await params)?.path || [] });
 }
 export async function POST(request: Request, { params }: any) {
+  await params;
   return forward(request, { path: (await params)?.path || [] });
 }
 export async function PUT(request: Request, { params }: any) {
+  await params;
   return forward(request, { path: (await params)?.path || [] });
 }
 export async function PATCH(request: Request, { params }: any) {
+  await params;
   return forward(request, { path: (await params)?.path || [] });
 }
 export async function DELETE(request: Request, { params }: any) {
+  await params;
   return forward(request, { path: (await params)?.path || [] });
 }
 export async function OPTIONS(request: Request, { params }: any) {
