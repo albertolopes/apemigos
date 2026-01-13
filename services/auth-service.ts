@@ -78,16 +78,42 @@ export class AuthService {
         valid: true,
       };
 
-      // Em vez de enviar a chave do serviço do cliente, chamamos uma rota server-side
-      // que possui a credencial no ambiente do servidor. Isso evita expor a
-      // SERVICE_KEY ao inspecionar o tráfego do navegador.
+      // First attempt: ask the server to return the token if it already has the
+      // cookie APEMIGOS_AUTH set (cookie is HttpOnly so client cannot read it).
+      try {
+        const resCookie = await fetch('/api/service-login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          credentials: 'same-origin',
+          body: JSON.stringify({}),
+        });
+
+        if (resCookie.ok) {
+          const dataCookie = await resCookie.json();
+          if (dataCookie && dataCookie.token) {
+            this.saveToken(dataCookie.token, dataCookie.expiresIn);
+            return dataCookie.token;
+          }
+        }
+      } catch (e) {
+        // ignore and fall through to generate new token
+        console.warn('service-login: could not recover token from cookie', e);
+      }
+
+      // Fallback: request token generation by presenting the service key.
       const res = await fetch('/api/service-login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
+          Authorization: `Bearer ${this.SERVICE_KEY}`,
         },
-        // corpo vazio — a rota server-side lerá a chave do ambiente
+        // permite que o browser aceite cookies Set-Cookie do mesmo origin
+        credentials: 'same-origin',
+        // corpo vazio — a rota server-side lerá (ou usará) a chave do ambiente
         body: JSON.stringify({}),
       });
 
@@ -109,7 +135,9 @@ export class AuthService {
     } catch (error: any) {
       const authError: AuthError = {
         message:
-          error.response?.data?.message || error.message || 'Erro ao gerar token de serviço',
+          error.response?.data?.message ||
+          error.message ||
+          'Erro ao gerar token de serviço',
         status: error.response?.status || 500,
         code: error.response?.data?.code,
       };

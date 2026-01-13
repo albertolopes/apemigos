@@ -5,12 +5,14 @@ import { getPublicEnv } from '../app/utils/env';
 const api = axios.create({
   // Prefer the explicit NEXT_PUBLIC_API_URL (set in Render); fallback to getPublicEnv and localhost
   baseURL:
-    process.env.NEXT_PUBLIC_API_URL || getPublicEnv('API_URL', 'http://localhost:8080'),
+    process.env.NEXT_PUBLIC_API_URL ||
+    getPublicEnv('API_URL', 'http://localhost:8080'),
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
   },
+  withCredentials: true,
 });
 
 // Flag para evitar loops de requisição
@@ -42,11 +44,14 @@ api.interceptors.request.use(
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
         console.log('🔐 Token adicionado à requisição:', config.url);
+      } else {
+        console.log(
+          'ℹ️ Nenhum token em storage; enviando cookies se existirem'
+        );
       }
     } catch (error) {
       console.error('❌ Erro ao obter token para requisição:', error);
       // Não quebra a requisição, apenas segue sem token
-      // A API retornará 401 se o endpoint exigir autenticação
     }
 
     // Se o body for FormData, remover Content-Type para que o browser
@@ -105,26 +110,19 @@ api.interceptors.response.use(
       try {
         console.log('🔄 Token expirado/inválido. Tentando renovar...');
 
-        // Tenta gerar um novo token
         const newToken = await authService.refreshToken();
 
-        // Processa a fila de requisições pendentes
         processQueue(null, newToken);
 
-        // Retry da requisição original com novo token
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return api(originalRequest);
       } catch (refreshError) {
         console.error('❌ Falha ao renovar token:', refreshError);
 
-        // Processa a fila com erro
         processQueue(refreshError, null);
 
-        // Limpa o token inválido do storage
         authService.logout();
 
-        // Não redireciona automaticamente para login pois é token de serviço
-        // A aplicação pode decidir o que fazer (mostrar erro, tentar novamente, etc.)
         console.log('🔒 Token de serviço inválido - necessário intervenção');
       } finally {
         isRefreshing = false;

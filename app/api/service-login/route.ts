@@ -1,32 +1,63 @@
 import { NextResponse } from 'next/server';
 
-// Rota server-side que realiza login de serviço usando a chave guardada no
-// ambiente do servidor (NEXT_PUBLIC_SERVICE_KEY) e API apontada por
-// NEXT_PUBLIC_API_URL. Não usar fallbacks para produção.
-
 export async function POST(request: Request) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  const serviceKey = process.env.NEXT_PUBLIC_SERVICE_KEY;
+  const isProd = process.env.NODE_ENV === 'production';
 
-  // Logs booleanos para confirmar presença das vars sem expor valores
-  console.log('service-login: NEXT_PUBLIC_API_URL presente?', !!apiUrl);
-  console.log('service-login: NEXT_PUBLIC_SERVICE_KEY presente?', !!serviceKey);
+  const apiUrl =
+    process.env.NEXT_PUBLIC_API_URL ||
+    process.env.API_URL ||
+    (!isProd ? 'http://localhost:8080' : undefined);
+
+  const serviceKey =
+    process.env.NEXT_PUBLIC_SERVICE_KEY ||
+    (!isProd ? 'apemigos-service-key-2025-secure-version' : undefined);
+
+  console.log('service-login: NODE_ENV=', process.env.NODE_ENV);
+  console.log('service-login: using apiUrl=', !!apiUrl);
+  console.log(
+    'service-login: NEXT_PUBLIC_SERVICE_KEY presente?',
+    !!process.env.NEXT_PUBLIC_SERVICE_KEY
+  );
+  console.log(
+    'service-login: using fallback key?',
+    !!(serviceKey && !process.env.NEXT_PUBLIC_SERVICE_KEY)
+  );
 
   if (!apiUrl) {
     return NextResponse.json(
-      { message: 'NEXT_PUBLIC_API_URL não configurada no servidor' },
+      {
+        message:
+          'NEXT_PUBLIC_API_URL ou API_URL não configurada. Defina NEXT_PUBLIC_API_URL em produção (ou API_URL/localmente) e reinicie a aplicação.',
+      },
       { status: 500 }
     );
   }
 
   if (!serviceKey) {
     return NextResponse.json(
-      { message: 'NEXT_PUBLIC_SERVICE_KEY não configurada no servidor' },
+      {
+        message:
+          'NEXT_PUBLIC_SERVICE_KEY não configurada. Defina a variável de ambiente NEXT_PUBLIC_SERVICE_KEY e reinicie a aplicação.',
+      },
       { status: 500 }
     );
   }
 
   try {
+    // First: if the request already includes the APEMIGOS_AUTH cookie, return it
+    const cookieHeader = request.headers.get('cookie') || '';
+    const match = cookieHeader.match(/APEMIGOS_AUTH=([^;\s]+)/);
+    if (match && match[1]) {
+      const existingToken = match[1];
+      console.log('service-login: token recovered from cookie');
+      const safeResp: any = {
+        serviceLogin: true,
+        expiresIn: null,
+        token: existingToken,
+      };
+      return NextResponse.json(safeResp, { status: 200 });
+    }
+
     const resp = await fetch(`${apiUrl}/api/auth/login`, {
       method: 'POST',
       headers: {
@@ -76,12 +107,9 @@ export async function POST(request: Request) {
     const cookie = `APEMIGOS_AUTH=${token}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${maxAge}; Secure`;
 
     // Determine if caller is authorized to receive token in body
-    const callerAuth =
-      request.headers.get('authorization') ||
-      request.headers.get('Authorization') ||
-      '';
+    const callerAuth = request.headers.get('authorization') || '';
     const callerProvidesServiceKey =
-      callerAuth.trim() === `Bearer ${serviceKey}`;
+      callerAuth.trim() === `Bearer ${process.env.NEXT_PUBLIC_SERVICE_KEY}`;
 
     const safeResp: any = { serviceLogin: true, expiresIn: maxAge };
     if (callerProvidesServiceKey) {
@@ -90,9 +118,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(safeResp, {
       status: 200,
-      headers: {
-        'Set-Cookie': cookie,
-      },
+      headers: { 'Set-Cookie': cookie },
     });
   } catch (err: any) {
     console.error('Erro na rota /api/service-login:', err);
