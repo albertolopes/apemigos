@@ -1,18 +1,27 @@
 import { NextResponse } from 'next/server';
 
 // Rota server-side que realiza login de serviço usando a chave guardada no
-// ambiente do servidor (process.env.SERVICE_KEY). Não usar fallback público.
+// ambiente do servidor (NEXT_PUBLIC_SERVICE_KEY) e API apontada por
+// NEXT_PUBLIC_API_URL. Não usar fallbacks para produção.
 
 export async function POST(request: Request) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const serviceKey = process.env.NEXT_PUBLIC_SERVICE_KEY;
 
-  console.log('service-login: SERVICE_KEY presente?', !!serviceKey);
+  // Logs booleanos para confirmar presença das vars sem expor valores
+  console.log('service-login: NEXT_PUBLIC_API_URL presente?', !!apiUrl);
+  console.log('service-login: NEXT_PUBLIC_SERVICE_KEY presente?', !!serviceKey);
+
+  if (!apiUrl) {
+    return NextResponse.json(
+      { message: 'NEXT_PUBLIC_API_URL não configurada no servidor' },
+      { status: 500 }
+    );
+  }
 
   if (!serviceKey) {
     return NextResponse.json(
-      { message: 'SERVICE_KEY não configurada no servidor' },
+      { message: 'NEXT_PUBLIC_SERVICE_KEY não configurada no servidor' },
       { status: 500 }
     );
   }
@@ -35,6 +44,7 @@ export async function POST(request: Request) {
     const text = await resp.text();
 
     if (!resp.ok) {
+      // tenta parsear JSON de erro
       try {
         const parsed = text
           ? JSON.parse(text)
@@ -65,7 +75,8 @@ export async function POST(request: Request) {
 
     const cookie = `APEMIGOS_AUTH=${token}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${maxAge}; Secure`;
 
-    const safeResp = { serviceLogin: true, expiresIn: maxAge };
+    // Retorna token no corpo para compatibilidade com o cliente (authService)
+    const safeResp = { serviceLogin: true, expiresIn: maxAge, token };
 
     return NextResponse.json(safeResp, {
       status: 200,
