@@ -32,7 +32,10 @@ function normalizeOrigin(o: string) {
 
 function originHostOnly(o: string) {
   if (!o) return '';
-  return o.replace(/^https?:\/\//i, '').replace(/\/$/, '').toLowerCase();
+  return o
+    .replace(/^https?:\/\//i, '')
+    .replace(/\/$/, '')
+    .toLowerCase();
 }
 
 function isOriginAllowed(incomingOrigin: string) {
@@ -55,14 +58,22 @@ function maskSecret(s?: string) {
 function validateEnv(): NextResponse | null {
   if (!API_URL) {
     console.error('service-login: API_URL not configured');
-    return NextResponse.json({ message: 'API_URL not configured' }, { status: 500 });
+    return NextResponse.json(
+      { message: 'API_URL not configured' },
+      { status: 500 }
+    );
   }
   if (!PUBLIC_SERVICE_KEY && !SERVER_SERVICE_KEY) {
     console.error('service-login: service keys not configured');
-    return NextResponse.json({ message: 'Service key not configured' }, { status: 500 });
+    return NextResponse.json(
+      { message: 'Service key not configured' },
+      { status: 500 }
+    );
   }
   if (!ALLOWED_ORIGINS || ALLOWED_ORIGINS.length === 0) {
-    console.warn('service-login: no NEXT_ALLOWED_ORIGINS configured - origin checks disabled');
+    console.warn(
+      'service-login: no NEXT_ALLOWED_ORIGINS configured - origin checks disabled'
+    );
   }
   return null;
 }
@@ -72,9 +83,16 @@ export async function POST(request: Request) {
   if (envErr) return envErr;
 
   const incomingOrigin = request.headers.get('origin') || '';
-  if (incomingOrigin && ALLOWED_ORIGINS.length > 0 && !isOriginAllowed(incomingOrigin)) {
+  if (
+    incomingOrigin &&
+    ALLOWED_ORIGINS.length > 0 &&
+    !isOriginAllowed(incomingOrigin)
+  ) {
     console.warn('service-login: rejected origin', incomingOrigin);
-    return NextResponse.json({ message: 'Origin not allowed' }, { status: 403 });
+    return NextResponse.json(
+      { message: 'Origin not allowed' },
+      { status: 403 }
+    );
   }
 
   try {
@@ -82,7 +100,10 @@ export async function POST(request: Request) {
     const cookieHeader = request.headers.get('cookie') || '';
     const match = cookieHeader.match(/APEMIGOS_AUTH=([^;\s]+)/);
     if (match && match[1]) {
-      return NextResponse.json({ serviceLogin: true, token: match[1] }, { status: 200 });
+      return NextResponse.json(
+        { serviceLogin: true, token: match[1] },
+        { status: 200 }
+      );
     }
 
     // Determine which public key to send in the body: favor what client sent, else NEXT_PUBLIC_SERVICE_KEY
@@ -108,10 +129,22 @@ export async function POST(request: Request) {
     if (SERVER_SERVICE_KEY) headers['X-Service-Token'] = SERVER_SERVICE_KEY;
 
     // Debug log (masked) - safe in dev
-    if (process.env.NODE_ENV !== 'production' || process.env.DEBUG_PROXY === 'true') {
-      console.log('service-login: calling backend', API_URL + '/api/auth/login');
-      console.log('service-login: headers', { ...headers, 'X-Service-Token': maskSecret(headers['X-Service-Token']) });
-      console.log('service-login: body.serviceKey', maskSecret(bodyJson.serviceKey));
+    if (
+      process.env.NODE_ENV !== 'production' ||
+      process.env.DEBUG_PROXY === 'true'
+    ) {
+      console.log(
+        'service-login: calling backend',
+        API_URL + '/api/auth/login'
+      );
+      console.log('service-login: headers', {
+        ...headers,
+        'X-Service-Token': maskSecret(headers['X-Service-Token']),
+      });
+      console.log(
+        'service-login: body.serviceKey',
+        maskSecret(bodyJson.serviceKey)
+      );
     }
 
     const resp = await fetch(`${API_URL}/api/auth/login`, {
@@ -123,8 +156,13 @@ export async function POST(request: Request) {
     const text = await resp.text();
     if (!resp.ok) {
       // return snippet for debug in dev
-      const parsed = tryParseJson(text) || { message: text || 'Service login error' };
-      if (process.env.NODE_ENV !== 'production' || process.env.DEBUG_PROXY === 'true') {
+      const parsed = tryParseJson(text) || {
+        message: text || 'Service login error',
+      };
+      if (
+        process.env.NODE_ENV !== 'production' ||
+        process.env.DEBUG_PROXY === 'true'
+      ) {
         const snippet = (text || '').slice(0, 400);
         return new NextResponse(JSON.stringify(parsed), {
           status: resp.status,
@@ -141,17 +179,24 @@ export async function POST(request: Request) {
     const data = tryParseJson(text) || {};
     const token = data.token;
     if (!token) {
-      return NextResponse.json({ message: 'Token not received from backend' }, { status: 500 });
+      return NextResponse.json(
+        { message: 'Token not received from backend' },
+        { status: 500 }
+      );
     }
 
-    const expiresIn = Number.isFinite(Number(data.expiresIn)) ? Number(data.expiresIn) : 3600;
+    const expiresIn = Number.isFinite(Number(data.expiresIn))
+      ? Number(data.expiresIn)
+      : 3600;
     const isProd = process.env.NODE_ENV === 'production';
     const secureFlag = isProd ? '; Secure' : '';
     const cookie = `APEMIGOS_AUTH=${token}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${expiresIn}${secureFlag}`;
 
     // If caller provided the actual service key in Authorization header (less common), include token in response
     const callerAuth = request.headers.get('authorization') || '';
-    const callerProvidedServiceKey = callerAuth.trim() === `Bearer ${SERVER_SERVICE_KEY}` || callerAuth.trim() === `Bearer ${PUBLIC_SERVICE_KEY}`;
+    const callerProvidedServiceKey =
+      callerAuth.trim() === `Bearer ${SERVER_SERVICE_KEY}` ||
+      callerAuth.trim() === `Bearer ${PUBLIC_SERVICE_KEY}`;
 
     const respBody: any = { serviceLogin: true, expiresIn };
     if (callerProvidedServiceKey) respBody.token = token;
@@ -166,7 +211,13 @@ export async function POST(request: Request) {
       },
     });
   } catch (err: any) {
-    console.error('service-login: unexpected error', err && err.stack ? err.stack : err);
-    return NextResponse.json({ message: err?.message || 'Internal error' }, { status: 500 });
+    console.error(
+      'service-login: unexpected error',
+      err && err.stack ? err.stack : err
+    );
+    return NextResponse.json(
+      { message: err?.message || 'Internal error' },
+      { status: 500 }
+    );
   }
 }

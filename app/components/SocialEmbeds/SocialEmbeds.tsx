@@ -28,64 +28,104 @@ export default function SocialEmbeds() {
   }, []);
 
   return (
-    // restore larger container and aspect ratios (before diminutions)
-    <section className="max-w-7xl mx-auto mt-12 px-4 sm:px-0 pb-20">
-      <h2 className="text-center font-site text-2xl text-orange-500 mb-6">
-        Acompanhe nas redes
-      </h2>
-      <div className="max-w-3xl mx-auto text-center mb-8 px-4 sm:px-0">
-        <p className="text-slate-600 text-sm">
-          Acompanhe nossas ações nas redes sociais e participe da causa: curta,
-          compartilhe — sua participação faz a diferença.
-        </p>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-        {/* YouTube embed (single video) - fixed identical heights with Instagram */}
-        <div className="bg-white border rounded-lg overflow-hidden shadow-sm">
-          <div className="relative h-[220px] md:h-[420px]">
-            <iframe
-              title="Vídeo YouTube Apemigos"
-              src="https://www.youtube.com/embed/r0tIISAZTQY"
-              className="absolute inset-0 w-full h-full"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          </div>
-          <div className="p-4">
-            <h3 className="font-site text-lg text-slate-700">YouTube</h3>
-            <p className="text-slate-500 my-2 text-sm">
-              Inscreva-se no nosso canal para acompanhar vídeos, eventos e
-              gravações das nossas ações.
-            </p>
-            <a
-              href="https://www.youtube.com/@apemigosbrasilia413/videos"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block btn-main bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
-            >
-              Visitar canal
-            </a>
-          </div>
+    // Use parent container's width so SocialEmbeds aligns with DonateBanner
+    <section className="w-full py-8">
+      <div className="w-full">
+        <h2 className="text-center font-site text-2xl text-orange-500 mb-4">
+          Acompanhe nas redes
+        </h2>
+
+        <div className="max-w-3xl mx-auto text-center mb-6 px-4 sm:px-0">
+          <p className="text-slate-600 text-sm">
+            Acompanhe nossas ações nas redes sociais e participe da causa.
+            Curta, compartilhe e ajude a dar voz às pessoas com Esclerose
+            Múltipla.
+          </p>
         </div>
 
-        {/* Instagram embed (Reel) - only the post, aligned and larger */}
-        <div className="bg-white border rounded-lg overflow-hidden shadow-sm p-4 flex items-start justify-center h-[220px] md:h-[572px] overflow-auto">
-          <blockquote
-            className="instagram-media"
-            data-instgrm-permalink="https://www.instagram.com/reel/DOHUpJ2kqkG/"
-            data-instgrm-version="14"
-            style={{ background: '#FFF', border: 0, margin: 0, padding: 0 }}
-          >
-            <a
-              href="https://www.instagram.com/reel/DOHUpJ2kqkG/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-slate-700 text-sm"
-            >
-              Veja no Instagram
-            </a>
-          </blockquote>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+          {/* YouTube card */}
+          <article className="bg-white border rounded-lg overflow-hidden shadow-sm flex flex-col">
+            <div className="relative w-full h-56 md:h-80 lg:h-96 bg-black">
+              <iframe
+                title="Vídeo YouTube Apemigos"
+                src="https://www.youtube.com/embed/r0tIISAZTQY"
+                className="absolute inset-0 w-full h-full"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+
+            <div className="p-4 flex-1 flex flex-col">
+              <h3 className="font-site text-lg text-slate-700">YouTube</h3>
+              <p className="text-slate-500 my-2 text-sm flex-1">
+                Inscreva-se no nosso canal para acompanhar vídeos, eventos e
+                gravações das nossas ações.
+              </p>
+              <div className="mt-2 flex items-center justify-between">
+                <a
+                  href="https://www.youtube.com/@apemigosbrasilia413/videos"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block btn-main bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm"
+                >
+                  Visitar canal
+                </a>
+                <span className="text-xs text-slate-500">
+                  Assista e compartilhe
+                </span>
+              </div>
+            </div>
+          </article>
+
+          {/* Instagram card */}
+          <article className="bg-white border rounded-lg overflow-hidden shadow-sm flex flex-col">
+            <div className="relative w-full h-56 md:h-80 lg:h-96 flex items-center justify-center bg-black">
+              <figure className="w-full h-full flex items-center justify-center">
+                <blockquote
+                  className="instagram-media m-0 w-full h-full flex items-center justify-center"
+                  data-instgrm-permalink="https://www.instagram.com/p/DNQrREWOEVa"
+                  data-instgrm-version="14"
+                  style={{
+                    background: '#FFF',
+                    border: 0,
+                    margin: 0,
+                    padding: 0,
+                  }}
+                >
+                  <a
+                    href="https://www.instagram.com/p/DNQrREWOEVa"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-slate-700 text-sm"
+                  >
+                    Veja no Instagram
+                  </a>
+                </blockquote>
+              </figure>
+            </div>
+
+            <div className="p-4 flex-1 flex flex-col">
+              <h3 className="font-site text-lg text-slate-700">Instagram</h3>
+              <p className="text-slate-500 my-2 text-sm flex-1">
+                Compartilhe para ajudar a ampliar nossa mensagem.
+              </p>
+              <div className="mt-2 flex items-center justify-between">
+                <a
+                  href="https://www.instagram.com/p/DNQrREWOEVa"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block btn-main bg-slate-800 hover:bg-slate-900 text-white px-3 py-2 rounded text-sm"
+                >
+                  Abrir post
+                </a>
+                <span className="text-xs text-slate-500">
+                  Siga e compartilhe
+                </span>
+              </div>
+            </div>
+          </article>
         </div>
       </div>
     </section>

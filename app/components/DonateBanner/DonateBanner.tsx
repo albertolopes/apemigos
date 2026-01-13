@@ -148,45 +148,48 @@ export default function DonateBanner() {
   }
 
   return (
-    <section className="max-w-7xl mx-auto mt-12 px-4 sm:px-0 pb-8">
-      <div className="bg-white border rounded-lg shadow-sm p-6 flex flex-col gap-6">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="flex-1">
-            <h3 className="font-site text-2xl text-orange-500 mb-2">Doe</h3>
-            <p className="text-slate-600 text-sm">
-              Sua contribuição ajuda a manter projetos, apoio e informação para
-              pessoas com esclerose múltipla. Toda doação faz diferença — mesmo
-              valores pequenos nos ajudam a continuar o trabalho.
-            </p>
-            <p className="text-slate-500 text-sm mt-2">
-              Doe ou{' '}
-              <a href="/contact" className="text-orange-500 underline">
-                entre em contato
-              </a>{' '}
-              para saber mais.
-            </p>
-          </div>
+    // occupy full width of parent container (parent already provides page padding)
+    <section className="w-full py-8">
+      <div className="w-full">
+        <div className="bg-white border rounded-lg shadow-sm p-6 flex flex-col gap-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex-1">
+              <h3 className="font-site text-2xl text-orange-500 mb-2">Doe</h3>
+              <p className="text-slate-600 text-sm">
+                Sua contribuição ajuda a manter projetos, apoio e informação
+                para pessoas com esclerose múltipla. Toda doação faz diferença —
+                mesmo valores pequenos nos ajudam a continuar o trabalho.
+              </p>
+              <p className="text-slate-500 text-sm mt-2">
+                Doe ou{' '}
+                <a href="/contact" className="text-orange-500 underline">
+                  entre em contato
+                </a>{' '}
+                para saber mais.
+              </p>
+            </div>
 
-          <div className="flex items-center gap-3">
-            <a
-              // open modal instead of direct link
-              href="#doar"
-              onClick={(e) => {
-                e.preventDefault();
-                setModalAmount(amount || '');
-                setModalOpen(true);
-              }}
-              className="btn-main bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded"
-            >
-              Doar agora
-            </a>
+            <div className="flex items-center gap-3">
+              <a
+                // open modal instead of direct link
+                href="#doar"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setModalAmount(amount || '');
+                  setModalOpen(true);
+                }}
+                className="btn-main bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded"
+              >
+                Doar agora
+              </a>
 
-            <a
-              href="/contact"
-              className="text-slate-700 px-4 py-2 rounded border border-slate-200 hover:bg-slate-50 text-sm"
-            >
-              Fale conosco
-            </a>
+              <a
+                href="/contact"
+                className="text-slate-700 px-4 py-2 rounded border border-slate-200 hover:bg-slate-50 text-sm"
+              >
+                Fale conosco
+              </a>
+            </div>
           </div>
         </div>
       </div>
