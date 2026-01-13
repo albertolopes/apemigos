@@ -71,12 +71,18 @@ async function forward(request: Request, params: { path: string[] }) {
   const search = incomingUrl.search || '';
   const target = `${(API_URL as string).replace(/\/+$/, '')}/${path}${search}`;
 
-  // Validate origin
+  // Determine incoming origin (browser sent) and proxy origin (host that called this function)
   const incomingOrigin = request.headers.get('origin') || '';
-  if (incomingOrigin && !ALLOWED_ORIGINS.includes(incomingOrigin)) {
+  const proxyOrigin = incomingUrl.origin; // e.g. http://localhost:3000
+
+  // Effective origin we will send to backend (prefer client origin, fallback to proxy origin)
+  const effectiveOrigin = incomingOrigin || proxyOrigin;
+
+  // Validate effective origin against allowed list
+  if (effectiveOrigin && !ALLOWED_ORIGINS.includes(effectiveOrigin)) {
     console.warn(
       'proxy: rejected request from disallowed origin',
-      incomingOrigin
+      effectiveOrigin
     );
     return NextResponse.json(
       { message: 'Origin not allowed' },
@@ -86,8 +92,8 @@ async function forward(request: Request, params: { path: string[] }) {
 
   const headers: Record<string, string> = {};
 
-  // Origin: forward the client origin exactly when present, otherwise use API origin
-  headers['Origin'] = incomingOrigin || API_ORIGIN;
+  // Forward the effective origin exactly (important for backend CORS checks)
+  headers['Origin'] = effectiveOrigin || API_ORIGIN;
 
   // Authorization: forward if present
   const authorization = request.headers.get('authorization');
@@ -169,27 +175,21 @@ async function forward(request: Request, params: { path: string[] }) {
 }
 
 export async function GET(request: Request, { params }: any) {
-  const resolved = await params;
-  return forward(request, { path: resolved?.path || [] });
+  return forward(request, { path: (await params)?.path || [] });
 }
 export async function POST(request: Request, { params }: any) {
-  const resolved = await params;
-  return forward(request, { path: resolved?.path || [] });
+  return forward(request, { path: (await params)?.path || [] });
 }
 export async function PUT(request: Request, { params }: any) {
-  const resolved = await params;
-  return forward(request, { path: resolved?.path || [] });
+  return forward(request, { path: (await params)?.path || [] });
 }
 export async function PATCH(request: Request, { params }: any) {
-  const resolved = await params;
-  return forward(request, { path: resolved?.path || [] });
+  return forward(request, { path: (await params)?.path || [] });
 }
 export async function DELETE(request: Request, { params }: any) {
-  const resolved = await params;
-  return forward(request, { path: resolved?.path || [] });
+  return forward(request, { path: (await params)?.path || [] });
 }
 export async function OPTIONS(request: Request, { params }: any) {
-  const resolved = await params;
   const corsHeaders: Record<string, string> = {};
   corsHeaders['Access-Control-Allow-Origin'] =
     request.headers.get('origin') || '*';
