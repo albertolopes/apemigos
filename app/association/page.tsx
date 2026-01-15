@@ -644,7 +644,7 @@ export default function AssociesePage() {
     <div className="relative">
       <div className="w-full h-[320px] relative">
         <Image
-          src="https://i.imgur.com/wEJANFi.png"
+          src="https://i.imgur.com/ZN56KWD.png"
           alt="Cartão da pessoa com EM - Apemigos"
           fill
           style={{ objectFit: 'cover' }}

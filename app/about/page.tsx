@@ -5,7 +5,7 @@ export default async function About() {
     <div className="relative">
       <div className="w-full h-[400px] relative">
         <Image
-          src="https://i.imgur.com/IW2oiMl.jpeg"
+          src="https://i.imgur.com/80zkthg.jpeg"
           alt="banner ONG Esclerose Múltipla"
           fill
           style={{ objectFit: 'cover' }}

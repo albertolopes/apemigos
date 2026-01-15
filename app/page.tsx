@@ -68,14 +68,14 @@ export default function Home() {
         <div className="basis-2/3">
           <div className="h-[370px] relative">
             <Image
-              src="https://i.imgur.com/IW2oiMl.jpeg"
+              src="https://i.imgur.com/80zkthg.jpeg"
               alt="projects"
               fill
               style={{ objectFit: 'cover' }}
             />
           </div>
           <div className="border-y-4 border-orange-500 p-8 sm:w-60 relative bg-white sm:ml-32 sm:mt-[-430px]">
-            <h3 className="text-2xl font-site">Saiba mais</h3>
+            <h3 className="text-2xl font-site">Sobre a Apemigos</h3>
             <p className="text-slate-500 my-6 text-sm">
               Fundada e presidida por Ana Paula Morais, a Apemigos oferece
               suporte biopsicossocial, promove inclusão social e dissemina
@@ -115,7 +115,7 @@ export default function Home() {
         <div className="basis-1/3">
           <div className="h-[370px] sm:h-[470px] relative">
             <Image
-              src="https://i.imgur.com/wEJANFi.png"
+              src="https://i.imgur.com/ZN56KWD.png"
               alt="projects"
               fill
               style={{ objectFit: 'cover' }}
