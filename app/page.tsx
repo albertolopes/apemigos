@@ -28,7 +28,7 @@ export default function Home() {
             href="/contact"
             className="btn-main sm:text-2xl sm:p-8 hover:bg-slate-600 w-fit"
           >
-            SAIBA MAIS
+            Clique aqui
           </a>
         </div>
       </div>
@@ -59,7 +59,7 @@ export default function Home() {
               className="text-slate-500 py-6 font-site"
               data-testid={testIds.HOME_PAGE.OUR_INITIATIVES_CTA}
             >
-              Saiba Mais
+              Clique aqui
             </a>
           </div>
         </div>
@@ -73,16 +73,17 @@ export default function Home() {
             />
           </div>
           <div className="border-y-4 border-orange-500 p-8 sm:w-60 relative bg-white sm:ml-32 sm:mt-[-430px]">
-            <h3 className="text-2xl font-site">Nossa Missão</h3>
+            <h3 className="text-2xl font-site">Saiba mais</h3>
             <p className="text-slate-500 my-6 text-sm">
-              Promover a qualidade de vida e a inclusão social das pessoas com
-              esclerose múltipla e doenças raras no Distrito Federal, oferecendo
-              apoio biopsicossocial, disseminando informações qualificadas e
-              lutando pela garantia de direitos e pelo acesso universal a
-              tratamentos adequados.
+              Fundada e presidida por Ana Paula Morais, a Apemigos oferece
+              suporte biopsicossocial, promove inclusão social e dissemina
+              informação qualificada para pessoas com esclerose múltipla e
+              doenças raras no Distrito Federal, defendendo direitos e o acesso
+              a tratamentos com base em empatia, ética, ciência, solidariedade e
+              protagonismo do paciente.
             </p>
             <a href="/about" className="text-slate-500 py-6 font-site">
-              Saiba Mais
+              Clique aqui
             </a>
           </div>
         </div>
@@ -105,7 +106,7 @@ export default function Home() {
               tudo que pode impactar sua qualidade de vida.
             </p>
             <a href="/news" className="text-slate-500 py-6 font-site">
-              Read More
+              Clique aqui
             </a>
           </div>
         </div>
@@ -119,14 +120,14 @@ export default function Home() {
             />
           </div>
           <div className="border-y-4 border-orange-500 p-8 sm:w-60 relative bg-white sm:ml-32 sm:mt-[-530px]">
-            <h3 className="text-2xl font-site">Associe-se</h3>
+            <h3 className="text-2xl font-site">Cartão da pessoa com EM</h3>
             <p className="text-slate-500 my-6 text-sm">
-              Sua participação faz a diferença. Seja como voluntário, parceiro
-              ou apoiador, cada contribuição ajuda a fortalecer a comunidade e a
-              levar esperança a quem convive com a esclerose múltipla.
+              O Cartão da Pessoa com Esclerose Múltipla auxilia na identificação
+              da condição em estabelecimentos públicos e privados. Solicite o
+              seu e tenha mais segurança e facilidade no acesso a serviços.
             </p>
             <a href="/association" className="text-slate-500 py-6 font-site">
-              Read More
+              Clique aqui
             </a>
           </div>
         </div>

@@ -198,7 +198,6 @@ export default function AssociesePage() {
     if (!cidade) newErrors.cidade = 'Cidade é obrigatória.';
     if (!estado) newErrors.estado = 'Estado é obrigatório.';
     if (!logradouro) newErrors.logradouro = 'Logradouro é obrigatório.';
-    if (!complemento) newErrors.complemento = 'Complemento é obrigatório.';
     if (!cep) newErrors.cep = 'CEP é obrigatório.';
     else if (onlyDigits(cep).length !== 8)
       newErrors.cep = 'CEP inválido. Deve conter 8 dígitos.';
@@ -653,7 +652,7 @@ export default function AssociesePage() {
         />
       </div>
 
-      <div className="max-w-7xl mx-auto mt-[-100px] relative bg-white px-6 sm:px-20 pb-12">
+      <div className="max-w-7xl mx-auto mt-[-50px] sm:mt-[-100px] relative bg-white px-4 sm:px-20 pb-12">
         <h1 className="text-center py-8 text-orange-500 font-site text-3xl">
           Cartão da pessoa com EM
         </h1>
@@ -679,15 +678,15 @@ export default function AssociesePage() {
           </p>
         </div>
 
-        <div className="max-w-4xl mx-auto mb-16">
+        <div className="max-w-4xl mx-auto mb-16 px-2 sm:px-0">
           <form
             ref={formRef}
             onSubmit={handleSubmit}
-            className="border-2 text-slate-500 p-8 rounded-lg bg-white shadow-sm w-full max-w-4xl"
+            className="border-2 text-slate-500 p-6 sm:p-8 rounded-lg bg-white shadow-sm w-full max-w-4xl"
             aria-labelledby="associe-title"
           >
             <div className="flex flex-col gap-4">
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <label
                     className="text-xs text-slate-500 font-semibold"
@@ -739,7 +738,7 @@ export default function AssociesePage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <label
                     className="text-xs text-slate-500 font-semibold"
@@ -795,7 +794,7 @@ export default function AssociesePage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <label
                     className="text-xs text-slate-500 font-semibold"
@@ -845,7 +844,7 @@ export default function AssociesePage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <label
                     className="text-xs text-slate-500 font-semibold"
@@ -878,7 +877,7 @@ export default function AssociesePage() {
                 <legend className="text-sm font-site text-slate-700 px-1">
                   Endereço
                 </legend>
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
                     <label
                       className="text-xs text-slate-500 font-semibold"
@@ -937,8 +936,8 @@ export default function AssociesePage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-6 mt-4">
-                  <div className="col-span-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-4">
+                  <div className="col-span-1 sm:col-span-2">
                     <label
                       className="text-xs text-slate-500 font-semibold"
                       htmlFor="logradouro"
@@ -972,11 +971,9 @@ export default function AssociesePage() {
                       className="text-xs text-slate-500 font-semibold"
                       htmlFor="complemento"
                     >
-                      Complemento <span className="text-orange-500">*</span>
+                      Complemento
                     </label>
                     <input
-                      aria-required="true"
-                      required
                       onInput={() =>
                         setErrors((s) => {
                           const c = { ...s };
@@ -989,11 +986,6 @@ export default function AssociesePage() {
                       name="complemento"
                       id="complemento"
                     />
-                    {errors.complemento && (
-                      <div className="text-xs text-red-600 mt-1">
-                        {errors.complemento}
-                      </div>
-                    )}
                   </div>
 
                   <div className="mt-4">
@@ -1027,7 +1019,7 @@ export default function AssociesePage() {
                 </div>
               </fieldset>
 
-              <div className="grid grid-cols-2 gap-6 items-end">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-end">
                 <div>
                   <label
                     className="text-xs text-slate-500 font-semibold flex items-center gap-2"
@@ -1082,7 +1074,7 @@ export default function AssociesePage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <label
                     className="text-xs text-slate-500 font-semibold"
@@ -1123,7 +1115,7 @@ export default function AssociesePage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-6 items-end">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-end">
                 <div>
                   <label className="text-xs text-slate-500 font-semibold">
                     Possui convênio?

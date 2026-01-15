@@ -104,7 +104,7 @@ export default function Projects() {
         >
           Nossos Projetos
         </h1>
-        <p className="pt-6 max-w-3xl text-sm text-center mx-auto">
+        <p className="pt-6 max-w-3xl text-slate-500 text-sm text-center mx-auto">
           Conheça as iniciativas da nossa ONG voltadas para o acolhimento,
           informação e conscientização sobre esclerose múltipla. Trabalhamos
           para promover qualidade de vida, inclusão e apoio a pacientes e
@@ -145,7 +145,9 @@ export default function Projects() {
 
                 <div className="bg-white sm:mt-[-50px] border-t-4 relative mx-6 px-2 pt-3 border-orange-500 text-center">
                   <h2 className="mb-10 font-site">{item.title}</h2>
-                  <p className="text-sm mb-6">{item.shortDescription}</p>
+                  <p className="text-sm text-slate-500 mb-6">
+                    {item.shortDescription}
+                  </p>
                   <Link
                     data-testid={testIds.PROJECTS_PAGE.PROJECT_ITEM_CTA}
                     href={
@@ -155,7 +157,7 @@ export default function Projects() {
                     }
                     className="text-slate-500 py-6 font-site"
                   >
-                    Saiba Mais
+                    Clique aqui
                   </Link>
                 </div>
               </div>
