@@ -154,9 +154,9 @@ export default function NewsPage() {
   return (
     <div className="relative">
       {/* Banner */}
-      <div className="w-full h-[400px] relative">
+      <div className="w-full h-[320px] relative">
         <Image
-          src="https://picsum.photos/1920/492?random=10"
+          src="https://i.imgur.com/khWgFyK.jpeg"
           alt="banner ONG Esclerose Múltipla"
           fill
           style={{ objectFit: 'cover' }}

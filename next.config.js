@@ -9,7 +9,12 @@ const nextConfig = {
     dirs: ['app'],
   },
   images: {
-    domains: ['images.unsplash.com', 'picsum.photos', 'static.wixstatic.com'],
+    domains: [
+      'images.unsplash.com',
+      'picsum.photos',
+      'static.wixstatic.com',
+      'i.imgur.com',
+    ],
     formats: ['image/webp'],
   },
   webpack: (config) => {

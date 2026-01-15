@@ -5,12 +5,8 @@ import { useRef, useState } from 'react';
 import {
   FaEnvelope,
   FaInstagram,
-  FaLinkedin,
   FaFacebook,
-  FaTwitter,
-  FaTelegram,
   FaYoutube,
-  FaTiktok,
   FaWhatsapp,
 } from 'react-icons/fa';
 import Notification from '../components/Notification/Notification';
@@ -56,7 +52,7 @@ export default function Page() {
     setMessage(null);
 
     try {
-      const subject = `Novo voluntário: ${nome}${
+      const subject = `Novo Contato: ${nome}${
         sobrenome ? ' ' + sobrenome : ''
       }`;
       const body = buildVolunteerEmail({
@@ -70,7 +66,7 @@ export default function Page() {
 
       try {
         await emailService.sendEmail({
-          to: email,
+          to: 'apemigos.em@gmail.com',
           subject,
           body,
         });
@@ -98,7 +94,7 @@ export default function Page() {
     <div className="relative">
       <div className="w-full h-[400px] relative">
         <Image
-          src="https://static.wixstatic.com/media/0b340f_a5c250a81aed4d7fa68e005cff2132c8~mv2_d_3840_1960_s_2.jpg/v1/fill/w_3456,h_984,al_c,q_90,usm_0.66_1.00_0.01,enc_auto/0b340f_a5c250a81aed4d7fa68e005cff2132c8~mv2_d_3840_1960_s_2.jpg"
+          src="https://i.imgur.com/cns7Cv4.jpeg"
           alt="Contato - Apemigos"
           fill
           style={{ objectFit: 'cover' }}
@@ -134,12 +130,12 @@ export default function Page() {
             />
             <span className="text-sm font-semibold mb-1">WhatsApp</span>
             <span className="text-xs text-gray-600 text-center">
-              +55 11 99999-9999
+              +55 61 99217-6669
             </span>
           </a>
 
           <a
-            href="mailto:seuemail@exemplo.com"
+            href="mailto: apemigos.em@gmail.com"
             className="flex flex-col items-center p-6 hover:bg-orange-50 transition-colors cursor-pointer w-full sm:w-[200px] no-underline text-inherit hover:text-inherit"
             aria-label="Email Apemigos"
           >
@@ -149,7 +145,7 @@ export default function Page() {
             />
             <span className="text-sm font-semibold mb-1">Email</span>
             <span className="text-xs text-gray-600 text-center">
-              seuemail@exemplo.com
+              apemigos.em@gmail.com
             </span>
           </a>
         </div>
@@ -159,12 +155,12 @@ export default function Page() {
             Mídias sociais
           </h3>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="w-full grid grid-cols-1 sm:grid-cols-3 gap-6 place-items-center">
             <a
               href="https://www.instagram.com/apemigos?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-col items-center"
+              className="flex flex-col items-center justify-center text-center"
               aria-label="Instagram"
             >
               <FaInstagram
@@ -178,10 +174,10 @@ export default function Page() {
             </a>
 
             <a
-              href="https://facebook.com/seu-usuario"
+              href="https://facebook.com/apemigos"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-col items-center"
+              className="flex flex-col items-center justify-center text-center"
               aria-label="Facebook"
             >
               <FaFacebook
@@ -190,66 +186,15 @@ export default function Page() {
               />
               <span className="text-sm font-semibold mb-1">Facebook</span>
               <span className="text-xs text-gray-600 text-center">
-                /Apemigos
+                /apemigos
               </span>
             </a>
 
             <a
-              href="https://twitter.com/seu-usuario"
+              href="https://youtube.com/apemigos"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-col items-center"
-              aria-label="Twitter"
-            >
-              <FaTwitter
-                className="text-3xl text-blue-400 mb-2"
-                aria-hidden="true"
-              />
-              <span className="text-sm font-semibold mb-1">Twitter</span>
-              <span className="text-xs text-gray-600 text-center">
-                @Apemigos
-              </span>
-            </a>
-
-            <a
-              href="https://linkedin.com/in/seu-usuario"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-col items-center"
-              aria-label="LinkedIn"
-            >
-              <FaLinkedin
-                className="text-3xl text-blue-700 mb-2"
-                aria-hidden="true"
-              />
-              <span className="text-sm font-semibold mb-1">LinkedIn</span>
-              <span className="text-xs text-gray-600 text-center">
-                /company/apemigos
-              </span>
-            </a>
-
-            <a
-              href="https://t.me/seu-canal"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-col items-center"
-              aria-label="Telegram"
-            >
-              <FaTelegram
-                className="text-3xl text-blue-500 mb-2"
-                aria-hidden="true"
-              />
-              <span className="text-sm font-semibold mb-1">Telegram</span>
-              <span className="text-xs text-gray-600 text-center">
-                @Apemigos
-              </span>
-            </a>
-
-            <a
-              href="https://youtube.com/c/seu-canal"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-col items-center"
+              className="flex flex-col items-center justify-center text-center"
               aria-label="YouTube"
             >
               <FaYoutube
@@ -259,23 +204,6 @@ export default function Page() {
               <span className="text-sm font-semibold mb-1">YouTube</span>
               <span className="text-xs text-gray-600 text-center">
                 Apemigos Oficial
-              </span>
-            </a>
-
-            <a
-              href="https://tiktok.com/@seu-usuario"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-col items-center"
-              aria-label="TikTok"
-            >
-              <FaTiktok
-                className="text-3xl text-slate-500 mb-2"
-                aria-hidden="true"
-              />
-              <span className="text-sm font-semibold mb-1">TikTok</span>
-              <span className="text-xs text-gray-600 text-center">
-                @Apemigos
               </span>
             </a>
           </div>

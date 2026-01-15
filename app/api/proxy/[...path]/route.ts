@@ -183,14 +183,70 @@ async function forward(request: Request, params: { path: string[] }) {
     }
   }
 
-  const resp = await fetch(target, {
+  let resp = await fetch(target, {
     method: request.method,
     headers,
     body: body as any,
     credentials: 'include',
   });
 
-  const respBody = await resp.arrayBuffer();
+  let respBody = await resp.arrayBuffer();
+
+  // If backend rejected due to invalid/expired token (401/403), attempt
+  // a server-side service login using SERVER_KEY to obtain a fresh token
+  // and retry the original request once. This keeps token management on
+  // the server and prevents exposing credentials in the client.
+  let setCookieFromLogin: string | null = null;
+  if ((resp.status === 401 || resp.status === 403) && SERVER_KEY) {
+    try {
+      const loginUrl =
+        (API_URL as string).replace(/\/+$/, '') + '/api/auth/login';
+      const loginResp = await fetch(loginUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ serviceKey: SERVER_KEY }),
+      });
+
+      if (loginResp.ok) {
+        const loginData = (await loginResp.json().catch(() => null)) as any;
+        const token =
+          (loginData &&
+            (loginData.token || loginData.accessToken || loginData.payload)) ||
+          null;
+        const expiresIn =
+          loginData && (loginData.expiresIn || loginData.expires || null);
+
+        if (token) {
+          // set cookie (HttpOnly) with reasonable defaults; secure in production
+          const secure =
+            process.env.NODE_ENV === 'production' ? '; Secure' : '';
+          const maxAge =
+            typeof expiresIn === 'number'
+              ? `; Max-Age=${expiresIn}`
+              : `; Max-Age=3600`;
+          setCookieFromLogin =
+            'APEMIGOS_AUTH=' +
+            encodeURIComponent(token) +
+            '; Path=/; HttpOnly; SameSite=Lax' +
+            secure +
+            maxAge;
+
+          // retry original request with new bearer token
+          headers['Authorization'] = 'Bearer ' + token;
+          resp = await fetch(target, {
+            method: request.method,
+            headers,
+            body: body as any,
+            credentials: 'include',
+          });
+          respBody = await resp.arrayBuffer();
+        }
+      }
+    } catch (e) {
+      // ignore login failures — we'll return the original error to client
+      console.warn('proxy: failed automatic service login', e);
+    }
+  }
 
   const resHeaders: Record<string, string> = {};
   resp.headers.forEach((value, key) => {
@@ -198,13 +254,25 @@ async function forward(request: Request, params: { path: string[] }) {
     resHeaders[key] = value;
   });
 
-  const response = new NextResponse(Buffer.from(respBody), {
+  const isNoContentStatus =
+    resp.status === 204 || resp.status === 205 || resp.status === 304;
+  const hasBody = !isNoContentStatus && respBody && respBody.byteLength > 0;
+
+  if (!hasBody) {
+    delete resHeaders['content-length'];
+    delete resHeaders['transfer-encoding'];
+    delete resHeaders['content-type'];
+  }
+
+  const response = new NextResponse(hasBody ? Buffer.from(respBody) : null, {
     status: resp.status,
     headers: resHeaders,
   });
 
   const setCookie = resp.headers.get('set-cookie');
-  if (setCookie) response.headers.set('Set-Cookie', setCookie);
+  if (setCookie) response.headers.append('Set-Cookie', setCookie);
+  if (setCookieFromLogin)
+    response.headers.append('Set-Cookie', setCookieFromLogin);
 
   // Expose a small snippet for debugging in dev only
   const debug =
@@ -249,7 +317,7 @@ export async function DELETE(request: Request, { params }: any) {
   await params;
   return forward(request, { path: (await params)?.path || [] });
 }
-export async function OPTIONS(request: Request, { params }: any) {
+export async function OPTIONS(request: Request) {
   const corsHeaders: Record<string, string> = {};
   corsHeaders['Access-Control-Allow-Origin'] =
     request.headers.get('origin') || '*';

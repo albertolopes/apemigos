@@ -89,7 +89,7 @@ export default function Projects() {
     <div className="relative">
       <div className="w-full h-[400px] relative">
         <Image
-          src="https://static.wixstatic.com/media/0b340f_d146a1cff38b4503ae5e6ccc9aa86368~mv2_d_5184_3456_s_4_2.jpg/v1/fill/w_1920,h_492,al_b,q_85,usm_0.66_1.00_0.01,enc_auto/0b340f_d146a1cff38b4503ae5e6ccc9aa86368~mv2_d_5184_3456_s_4_2.jpg"
+          src="https://i.imgur.com/c9pi1XC.jpeg"
           alt="projects"
           fill
           style={{ objectFit: 'cover' }}

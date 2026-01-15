@@ -279,7 +279,7 @@ export function buildAssociateEmail(data: AssociateData) {
 
             <tr>
               <td style="padding:20px 28px;">
-                <p style="margin:0 0 12px 0;">Um novo formulário de associação foi enviado com os dados abaixo:</p>
+                <p style="margin:0 0 12px 0;">Um novo formulário foi enviado com os dados abaixo:</p>
 
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:18px;">
                   <tr>
