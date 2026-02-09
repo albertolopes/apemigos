@@ -29,7 +29,7 @@ const Footer = () => (
         </div>
       </div>
     </div>
-    <div className="mx-auto text-center sm:text-xs mt-4">
+    <div className="mx-auto text-center text-[12px] sm:text-xs mt-4">
       {/*<Logo />*/}
       <p className="font-default mb-4 text-slate-500">
         © 2025 Apemigos. Desenvolvido por{' '}
