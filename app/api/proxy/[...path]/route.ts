@@ -35,14 +35,6 @@ function validateEnv(): NextResponse | null {
     );
   }
 
-  if (!SERVER_KEY) {
-    console.error('proxy: SERVICE_KEY is not configured');
-    return NextResponse.json(
-      { message: 'SERVICE_KEY not configured' },
-      { status: 500 }
-    );
-  }
-
   if (!ALLOWED_ORIGINS || ALLOWED_ORIGINS.length === 0) {
     console.error('proxy: NEXT_ALLOWED_ORIGINS is not configured');
     return NextResponse.json(
@@ -132,8 +124,14 @@ async function forward(request: Request, params: { path: string[] }) {
   // Forward cookie (so backend can also read it if needed)
   if (cookieHeader) headers['Cookie'] = cookieHeader;
 
-  // Inject server-side X-Service-Token (must be present exactly as server key)
-  headers['X-Service-Token'] = SERVER_KEY as string;
+  // Repassa o X-Service-Token recebido do frontend
+  const serviceToken = request.headers.get('x-service-token');
+  if (serviceToken) {
+    headers['X-Service-Token'] = serviceToken;
+  } else if (SERVER_KEY) {
+    // Fallback para a chave do servidor se o frontend não enviar
+    headers['X-Service-Token'] = SERVER_KEY;
+  }
 
   // Debug: show minimal headers being sent (mask sensitive values)
   const debugHeaders = (() => {

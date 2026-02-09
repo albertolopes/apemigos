@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { LongDescription } from './LongDescription';
 import { newsService, NewsContentResponse } from '@services';
+import axios from 'axios';
 
 export default function New({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -14,17 +15,22 @@ export default function New({ params }: { params: Promise<{ slug: string }> }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     async function fetchData() {
       try {
         setIsLoading(true);
         setError(null);
 
-        // Busca o conteúdo usando slug via endpoint /conteudo/slug/{slug}
         const response: NewsContentResponse =
-          await newsService.getNewsContentBySlug(slug);
+          await newsService.getNewsContentBySlug(slug, controller.signal);
 
         setItem(response);
       } catch (err) {
+        if (axios.isCancel(err)) {
+          // A requisição foi cancelada, não é um erro real
+          return;
+        }
         console.error('Erro ao carregar notícia:', err);
         setError('Erro ao carregar a notícia. Tente novamente.');
       } finally {
@@ -33,6 +39,12 @@ export default function New({ params }: { params: Promise<{ slug: string }> }) {
     }
 
     fetchData();
+
+    // Função de limpeza que será chamada quando o componente for desmontado
+    // ou antes de o efeito ser executado novamente.
+    return () => {
+      controller.abort();
+    };
   }, [slug, router]);
 
   if (isLoading) {

@@ -1,9 +1,7 @@
 import axios from 'axios';
 import { authService } from './auth-service';
-import { getPublicEnv } from '../app/utils/env';
 
 const api = axios.create({
-  // Force all frontend requests through the server-side proxy at /api/proxy
   baseURL: '/api/proxy',
   timeout: 30000,
   headers: {
@@ -13,7 +11,6 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// Flag para evitar loops de requisição
 let isRefreshing = false;
 let failedQueue: any[] = [];
 
@@ -30,54 +27,28 @@ const processQueue = (error: any, token: string | null = null) => {
 
 api.interceptors.request.use(
   async (config) => {
-    // Não tenta adicionar token para a rota de login para evitar loop
+    const serviceKey = process.env.NEXT_PUBLIC_SERVICE_KEY;
+    if (serviceKey) {
+      if (!config.headers) config.headers = {} as any;
+      config.headers['X-Service-Token'] = serviceKey;
+    }
+
     if (config.url?.includes('/api/auth/login')) {
       return config;
     }
 
     try {
-      // Primeiro tenta ler o cookie APEMIGOS_AUTH diretamente (útil em produção quando o
-      // backend setou o cookie e o frontend não tem localStorage preenchido).
-      let cookieToken: string | null = null;
-      try {
-        if (typeof document !== 'undefined' && document.cookie) {
-          const m = document.cookie.match(/(?:^|; )APEMIGOS_AUTH=([^;\s]+)/);
-          if (m && m[1]) cookieToken = decodeURIComponent(m[1]);
-        }
-      } catch (e) {
-        console.warn('Erro lendo cookie APEMIGOS_AUTH diretamente:', e);
-      }
-
-      if (cookieToken) {
-        // Se temos token no cookie, usa ele diretamente (prioridade)
-        if (!config.headers) config.headers = {} as any;
-        config.headers.Authorization = `Bearer ${cookieToken}`;
-        console.log(
-          '🔐 Token obtido via cookie e adicionado à requisição:',
-          config.url
-        );
-        return config;
-      }
-
-      // Obtém token válido (renova automaticamente se expirado)
       const token = await authService.getValidToken();
 
       if (token) {
         if (!config.headers) config.headers = {} as any;
         config.headers.Authorization = `Bearer ${token}`;
-        console.log('🔐 Token adicionado à requisição:', config.url);
-      } else {
-        console.log(
-          'ℹ️ Nenhum token em storage; enviando cookies se existirem'
-        );
       }
     } catch (error) {
-      console.error('❌ Erro ao obter token para requisição:', error);
-      // Não quebra a requisição, apenas segue sem token
+      // A falha na obtenção do token já é tratada no authService
+      // A requisição prosseguirá sem o token de autorização
     }
 
-    // Se o body for FormData, remover Content-Type para que o browser
-    // ou axios definam o header 'multipart/form-data; boundary=...'
     if (
       config.data &&
       typeof FormData !== 'undefined' &&
@@ -85,7 +56,6 @@ api.interceptors.request.use(
     ) {
       if (config.headers) {
         delete config.headers['Content-Type'];
-        delete config.headers['content-type'];
       }
     }
 
@@ -98,22 +68,13 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response) => {
-    console.log('✅ Resposta recebida:', response.status, response.config.url);
     return response;
   },
   async (error) => {
     const originalRequest = error.config;
 
-    console.error('❌ Erro na resposta:', {
-      url: originalRequest?.url,
-      status: error.response?.status,
-      message: error.message,
-    });
-
-    // Se for erro 401 (Unauthorized) e não for uma tentativa de refresh
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
-        // Se já está refrescando, adiciona à fila
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
@@ -130,30 +91,16 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        console.log('🔄 Token expirado/inválido. Tentando renovar...');
-
         const newToken = await authService.refreshToken();
-
         processQueue(null, newToken);
-
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return api(originalRequest);
       } catch (refreshError) {
-        console.error('❌ Falha ao renovar token:', refreshError);
-
         processQueue(refreshError, null);
-
         authService.logout();
-
-        console.log('🔒 Token de serviço inválido - necessário intervenção');
       } finally {
         isRefreshing = false;
       }
-    }
-
-    // Outros erros (403, 404, 500, etc.)
-    if (error.response?.status >= 500) {
-      console.error('🚨 Erro do servidor:', error.response.status);
     }
 
     return Promise.reject(error);

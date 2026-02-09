@@ -1,4 +1,5 @@
 import { getPublicEnv } from '../app/utils/env';
+
 const BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || (getPublicEnv('API_URL') as string);
 
@@ -74,43 +75,14 @@ export class AuthService {
 
   private async generateServiceToken(): Promise<string> {
     try {
-      try {
-        const resCookie = await fetch('/api/service-login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          credentials: 'same-origin',
-          body: JSON.stringify({}),
-        });
-
-        if (resCookie.ok) {
-          const dataCookie = await resCookie.json().catch(() => null);
-          if (dataCookie && dataCookie.token) {
-            this.saveToken(dataCookie.token, dataCookie.expiresIn);
-            return dataCookie.token;
-          }
-
-          const cookieToken = this.getTokenFromCookie();
-          if (cookieToken) {
-            this.saveToken(cookieToken, undefined);
-            return cookieToken;
-          }
-        }
-      } catch (e) {
-        console.warn('service-login: could not recover token from cookie', e);
-      }
-
       const res = await fetch('/api/service-login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
-          Authorization: `Bearer ${this.SERVICE_KEY}`,
         },
         credentials: 'same-origin',
-        body: JSON.stringify({}),
+        body: JSON.stringify({ serviceKey: this.SERVICE_KEY }),
       });
 
       if (!res.ok) {
@@ -121,7 +93,13 @@ export class AuthService {
       const loginData: LoginResponse = await res.json();
 
       if (!loginData.token) {
-        throw new Error('Token não recebido na resposta');
+        // Tenta recuperar do cookie como fallback
+        const cookieToken = this.getTokenFromCookie();
+        if (cookieToken) {
+          this.saveToken(cookieToken, undefined);
+          return cookieToken;
+        }
+        throw new Error('Token não recebido na resposta nem encontrado no cookie');
       }
 
       this.saveToken(loginData.token, loginData.expiresIn);
@@ -136,8 +114,7 @@ export class AuthService {
         status: error.response?.status || 500,
         code: error.response?.data?.code,
       };
-
-      console.error('Erro na geração do token:', authError);
+      // O erro já é logado pelo interceptor do api-service, não precisa logar aqui
       throw authError;
     }
   }
@@ -152,11 +129,6 @@ export class AuthService {
           Date.now() + (expiresIn ? expiresIn * 1000 : defaultExpiry);
 
         localStorage.setItem(this.TOKEN_EXPIRY_KEY, expiryTime.toString());
-
-        console.log(
-          'Token salvo. Expira em:',
-          new Date(expiryTime).toLocaleString()
-        );
       } catch (storageError) {
         console.error('Erro ao salvar token no storage:', storageError);
       }
@@ -166,26 +138,21 @@ export class AuthService {
   async getValidToken(): Promise<string> {
     if (this.isTokenValid()) {
       const currentToken = localStorage.getItem(this.STORAGE_KEY);
-      console.log('Token atual ainda válido');
       return currentToken!;
     }
 
     try {
       const cookieToken = this.getTokenFromCookie();
       if (cookieToken) {
-        console.log('Token obtido via cookie APEMIGOS_AUTH');
         this.saveToken(cookieToken, undefined);
         return cookieToken;
       }
     } catch (e) {}
 
-    console.log('Token expirado ou não encontrado. Gerando novo...');
-
     return await this.generateServiceToken();
   }
 
   async refreshToken(): Promise<string> {
-    console.log('Forçando renovação do token...');
     return await this.generateServiceToken();
   }
 
@@ -193,7 +160,6 @@ export class AuthService {
     if (typeof window !== 'undefined') {
       localStorage.removeItem(this.STORAGE_KEY);
       localStorage.removeItem(this.TOKEN_EXPIRY_KEY);
-      console.log('Token removido do storage');
     }
   }
 

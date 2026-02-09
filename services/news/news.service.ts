@@ -30,6 +30,10 @@ export class NewsService {
 
       return response.data;
     } catch (error: any) {
+      if (api.isCancel(error)) {
+        console.log('Requisição de notícias cancelada:', error.message);
+        throw error;
+      }
       console.error('Erro ao buscar notícias:', error);
       throw new Error(
         error.response?.data?.message || 'Erro ao carregar notícias'
@@ -45,6 +49,10 @@ export class NewsService {
       const response = await api.get(`/api/noticias/${id}`);
       return response.data;
     } catch (error: any) {
+      if (api.isCancel(error)) {
+        console.log('Requisição de notícia por ID cancelada:', error.message);
+        throw error;
+      }
       console.error(`Erro ao buscar notícia ${id}:`, error);
       throw new Error(
         error.response?.data?.message || 'Erro ao carregar notícia'
@@ -60,6 +68,13 @@ export class NewsService {
       const response = await api.get(`/api/noticias/slug/${slug}`);
       return response.data;
     } catch (error: any) {
+      if (api.isCancel(error)) {
+        console.log(
+          `Requisição de notícia por slug ${slug} cancelada:`,
+          error.message
+        );
+        throw error;
+      }
       console.error(`Erro ao buscar notícia por slug ${slug}:`, error);
       throw new Error(
         error.response?.data?.message || 'Erro ao carregar notícia'
@@ -70,14 +85,25 @@ export class NewsService {
   /**
    * Busca o conteúdo completo de uma notícia específica
    */
-  async getNewsContent(newsId: string | number): Promise<NewsContentResponse> {
+  async getNewsContent(
+    newsId: string | number,
+    signal?: AbortSignal
+  ): Promise<NewsContentResponse> {
     try {
       const response = await api.get(`/api/noticias/conteudo/${newsId}`, {
         headers: { Accept: 'application/json' },
+        signal,
       });
 
       return response.data;
     } catch (error: any) {
+      if (api.isCancel(error)) {
+        console.log(
+          `Requisição de conteúdo da notícia ${newsId} cancelada:`,
+          error.message
+        );
+        throw error;
+      }
       console.error(`Erro ao buscar conteúdo da notícia ${newsId}:`, error);
       throw new Error(
         error.response?.data?.message || 'Erro ao carregar conteúdo da notícia'
@@ -88,14 +114,22 @@ export class NewsService {
   /**
    * Busca o conteúdo completo de uma notícia por slug
    */
-  async getNewsContentBySlug(slug: string): Promise<NewsContentResponse> {
+  async getNewsContentBySlug(
+    slug: string,
+    signal?: AbortSignal
+  ): Promise<NewsContentResponse> {
     try {
       const response = await api.get(`/api/noticias/conteudo/slug/${slug}`, {
         headers: { Accept: 'application/json' },
+        signal,
       });
 
       return response.data;
     } catch (error: any) {
+      if (api.isCancel(error)) {
+        // Não loga como erro, pois é uma operação normal
+        throw error;
+      }
       console.error(
         `Erro ao buscar conteúdo da notícia por slug ${slug}:`,
         error

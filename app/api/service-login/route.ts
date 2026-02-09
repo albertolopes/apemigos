@@ -9,9 +9,9 @@ if (process.env.NODE_ENV !== 'production') {
   }
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL;
-const SERVER_SERVICE_KEY = process.env.SERVICE_KEY; // server-only secret
-const PUBLIC_SERVICE_KEY = process.env.NEXT_PUBLIC_SERVICE_KEY; // public value expected in body
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const SERVER_SERVICE_KEY = process.env.SERVICE_KEY;
+const PUBLIC_SERVICE_KEY = process.env.NEXT_PUBLIC_SERVICE_KEY;
 const ALLOWED_ORIGINS: string[] = (process.env.NEXT_ALLOWED_ORIGINS || '')
   .split(',')
   .map((s) => s.trim())
