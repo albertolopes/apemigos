@@ -1,4 +1,5 @@
 import api from '../api-service';
+import axios from 'axios'; // Importa o módulo principal do axios
 import { NewsItem } from './interfaces/news-item.interface';
 import { NewsResponse } from './interfaces/news-response.interface';
 import { NewsContentResponse } from './interfaces/news-content.interface';
@@ -30,8 +31,8 @@ export class NewsService {
 
       return response.data;
     } catch (error: any) {
-      if (api.isCancel(error)) {
-        console.log('Requisição de notícias cancelada:', error.message);
+      if (axios.isCancel(error)) {
+        // Não loga como erro, pois é uma operação normal
         throw error;
       }
       console.error('Erro ao buscar notícias:', error);
@@ -49,8 +50,8 @@ export class NewsService {
       const response = await api.get(`/api/noticias/${id}`);
       return response.data;
     } catch (error: any) {
-      if (api.isCancel(error)) {
-        console.log('Requisição de notícia por ID cancelada:', error.message);
+      if (axios.isCancel(error)) {
+        // Não loga como erro
         throw error;
       }
       console.error(`Erro ao buscar notícia ${id}:`, error);
@@ -68,11 +69,8 @@ export class NewsService {
       const response = await api.get(`/api/noticias/slug/${slug}`);
       return response.data;
     } catch (error: any) {
-      if (api.isCancel(error)) {
-        console.log(
-          `Requisição de notícia por slug ${slug} cancelada:`,
-          error.message
-        );
+      if (axios.isCancel(error)) {
+        // Não loga como erro
         throw error;
       }
       console.error(`Erro ao buscar notícia por slug ${slug}:`, error);
@@ -97,11 +95,8 @@ export class NewsService {
 
       return response.data;
     } catch (error: any) {
-      if (api.isCancel(error)) {
-        console.log(
-          `Requisição de conteúdo da notícia ${newsId} cancelada:`,
-          error.message
-        );
+      if (axios.isCancel(error)) {
+        // Não loga como erro
         throw error;
       }
       console.error(`Erro ao buscar conteúdo da notícia ${newsId}:`, error);
@@ -126,7 +121,7 @@ export class NewsService {
 
       return response.data;
     } catch (error: any) {
-      if (api.isCancel(error)) {
+      if (axios.isCancel(error)) {
         // Não loga como erro, pois é uma operação normal
         throw error;
       }
