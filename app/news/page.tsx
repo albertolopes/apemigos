@@ -5,150 +5,104 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { formatDate } from '@app/utils/date-formatter';
 import testIds from '@app/utils/test-ids';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { newsService, NewsItem, NewsResponse } from '@services';
 
 const ITEMS_PER_PAGE = 12;
 
-async function getNewsPageData(page: number, keyword?: string) {
-  try {
-    // newsService.getNews expects page (0-based), size, and optionally keyword
-    const response: NewsResponse = await newsService.getNews(
-      page - 1,
-      ITEMS_PER_PAGE,
-      keyword && keyword.trim() ? keyword.trim() : undefined
-    );
-
-    return {
-      total: response.totalElements,
-      pageItems: response.content,
-      currentPage: page,
-      totalPages: response.totalPages,
-    };
-  } catch (err) {
-    console.error('Erro ao buscar notícias:', err);
-    throw new Error('Falha ao carregar notícias');
-  }
-}
-
 export default function NewsPage() {
   const searchParams = useSearchParams();
 
-  // keyword taken from querystring (optional)
-  const initialKeyword = (() =>
-    String(searchParams.get('keyword') || '').trim())();
+  // Keyword inicial da URL
+  const initialKeyword = searchParams.get('keyword') || '';
 
-  const initialPage = (() => {
-    const p = parseInt(String(searchParams.get('page') || '1'), 10);
-    return isNaN(p) || p < 1 ? 1 : p;
-  })();
-
-  const [page, setPage] = useState(initialPage);
   const [items, setItems] = useState<NewsItem[]>([]);
-  const [totalItems, setTotalItems] = useState(0);
-  const [keyword, setKeyword] = useState<string>(initialKeyword);
-  // submittedKeyword controls when a search is actually performed (only on submit or URL load)
-  const [submittedKeyword, setSubmittedKeyword] =
-    useState<string>(initialKeyword);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Controle de busca
+  const [keyword, setKeyword] = useState(initialKeyword);
+  const [submittedKeyword, setSubmittedKeyword] = useState(initialKeyword);
 
-  //  ADICIONADO: Controle de chamadas duplicadas
+  // Refs para controle
+  const observer = useRef<IntersectionObserver | null>(null);
   const isFetchingRef = useRef(false);
 
-  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
-
-  // Atualiza a URL no browser sem forçar navegação do Next.js (evita recarregamento de página)
-  const updateUrlWithoutNavigation = (
-    pageNum: number,
-    kw?: string,
-    replace = false
-  ) => {
-    if (typeof window === 'undefined') return;
-    try {
-      const url = new URL(window.location.href);
-      url.pathname = '/news';
-      url.searchParams.set('page', String(pageNum));
-      if (kw && String(kw).trim())
-        url.searchParams.set('keyword', String(kw).trim());
-      else url.searchParams.delete('keyword');
-      if (replace) window.history.replaceState({}, '', url.toString());
-      else window.history.pushState({}, '', url.toString());
-    } catch (e) {
-      console.warn('Não foi possível atualizar a URL sem navegação', e);
-    }
-  };
-
-  // Sincroniza quando a query string muda (ex.: back/forward)
-  useEffect(() => {
-    const p = parseInt(String(searchParams.get('page') || '1'), 10);
-    const normalized = isNaN(p) || p < 1 ? 1 : p;
-    if (normalized !== page) {
-      setPage(normalized);
-    }
-    // sync keyword from querystring into both input and submittedKeyword (URL load -> perform search)
-    const k = String(searchParams.get('keyword') || '').trim();
-    if (k !== keyword) setKeyword(k);
-    if (k !== submittedKeyword) setSubmittedKeyword(k);
-
-    // também sincroniza quando o usuário usa voltar/avançar (popstate)
-    const onPop = () => {
-      try {
-        const sp = new URL(window.location.href).searchParams;
-        const p2 = parseInt(String(sp.get('page') || '1'), 10);
-        const normalized2 = isNaN(p2) || p2 < 1 ? 1 : p2;
-        const k2 = String(sp.get('keyword') || '').trim();
-        setPage(normalized2);
-        setKeyword(k2);
-        setSubmittedKeyword(k2);
-      } catch (e) {
-        // ignore
-      }
-    };
-    window.addEventListener('popstate', onPop);
-
-    return () => {
-      window.removeEventListener('popstate', onPop);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
-
-  useEffect(() => {
-    // 🔥 ADICIONADO: Previne chamadas duplicadas
+  // Função para buscar dados
+  const fetchNews = useCallback(async (pageNum: number, searchKw: string) => {
     if (isFetchingRef.current) return;
-
+    
     isFetchingRef.current = true;
     setIsLoading(true);
     setError(null);
 
-    // only fetch using the submittedKeyword (search triggered by submit or URL)
-    getNewsPageData(page, submittedKeyword)
-      .then(({ total, pageItems }) => {
-        setTotalItems(total);
-        setItems(pageItems);
-      })
-      .catch((err) => setError(err.message))
-      .finally(() => {
-        setIsLoading(false);
-        isFetchingRef.current = false; // 🔥 ADICIONADO: Libera para próxima chamada
+    try {
+      const response: NewsResponse = await newsService.getNews(
+        pageNum - 1, // API usa 0-based index
+        ITEMS_PER_PAGE,
+        searchKw.trim() || undefined
+      );
+
+      setItems(prev => {
+        // Se for a primeira página, substitui. Se não, concatena.
+        return pageNum === 1 ? response.content : [...prev, ...response.content];
       });
-  }, [page, submittedKeyword]);
 
-  function goToPage(n: number) {
-    const normalized = Math.max(1, Math.min(totalPages || 1, n));
-    // Atualiza estado e URL sem navegação completa
-    setPage(normalized);
-    updateUrlWithoutNavigation(normalized, submittedKeyword, false);
-  }
+      setHasMore(pageNum < response.totalPages);
+    } catch (err: any) {
+      console.error('Erro ao buscar notícias:', err);
+      setError('Falha ao carregar notícias. Tente novamente.');
+    } finally {
+      setIsLoading(false);
+      isFetchingRef.current = false;
+    }
+  }, []);
 
+  // Efeito para resetar e buscar quando a keyword muda (nova busca)
+  useEffect(() => {
+    setPage(1);
+    setHasMore(true);
+    setItems([]); // Limpa lista visualmente para nova busca
+    fetchNews(1, submittedKeyword);
+  }, [submittedKeyword, fetchNews]);
+
+  // Efeito para carregar mais páginas quando 'page' muda (scroll infinito)
+  useEffect(() => {
+    if (page > 1) {
+      fetchNews(page, submittedKeyword);
+    }
+  }, [page, submittedKeyword, fetchNews]);
+
+  // Callback para o IntersectionObserver (elemento sentinela)
+  const lastNewsElementRef = useCallback((node: HTMLDivElement) => {
+    if (isLoading) return;
+    
+    if (observer.current) observer.current.disconnect();
+    
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        setPage(prevPage => prevPage + 1);
+      }
+    });
+    
+    if (node) observer.current.observe(node);
+  }, [isLoading, hasMore]);
+
+  // Handler para o formulário de busca
   function handleSearchSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // set submittedKeyword (triggers effect) and update URL
-    const k = keyword && keyword.trim() ? keyword.trim() : '';
-    setSubmittedKeyword(k);
-    setPage(1);
-    // atualiza apenas a URL no histórico (sem recarregar a página)
-    updateUrlWithoutNavigation(1, k, false);
+    // Atualiza a URL sem recarregar
+    const url = new URL(window.location.href);
+    if (keyword.trim()) {
+      url.searchParams.set('keyword', keyword.trim());
+    } else {
+      url.searchParams.delete('keyword');
+    }
+    window.history.pushState({}, '', url.toString());
+    
+    setSubmittedKeyword(keyword);
   }
 
   return (
@@ -179,129 +133,111 @@ export default function NewsPage() {
         </p>
 
         {/* Search */}
-        <div className="mt-8 flex justify-center">
-          <form onSubmit={handleSearchSubmit} className="w-full max-w-md">
-            <div className="flex gap-2 items-start">
-              <div className="relative w-full">
-                <input
-                  id="newsKeyword"
-                  value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
-                  placeholder="Buscar por palavra-chave"
-                  className="w-full pr-12 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-3 focus:ring-orange-500"
-                  aria-label="Buscar notícias"
-                />
-                {(keyword || submittedKeyword) && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!keyword && !submittedKeyword) return;
-                      setKeyword('');
-                      setSubmittedKeyword('');
-                      updateUrlWithoutNavigation(1, '', false);
-                      setPage(1);
-                      // focus the input after clearing
-                      const el = document.getElementById(
-                        'newsKeyword'
-                      ) as HTMLInputElement | null;
-                      if (el) el.focus();
-                    }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors text-base leading-none z-20 bg-transparent border-0"
-                    aria-label="Limpar busca"
-                    title="Limpar"
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
-              <div className="flex gap-2">
+        <div className="mt-8 flex justify-center mb-10">
+          <form onSubmit={handleSearchSubmit} className="w-full max-w-md flex gap-2">
+            <div className="relative w-full">
+              <input
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                placeholder="Buscar por palavra-chave"
+                className="w-full pr-10 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+              {keyword && (
                 <button
-                  type="submit"
-                  className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors"
+                  type="button"
+                  onClick={() => {
+                    setKeyword('');
+                    setSubmittedKeyword('');
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete('keyword');
+                    window.history.pushState({}, '', url.toString());
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  Buscar
+                  ✕
                 </button>
-              </div>
+              )}
             </div>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors"
+            >
+              Buscar
+            </button>
           </form>
         </div>
 
-        {/* Erro */}
-        {error && (
-          <div className="text-red-500 text-center mt-6">⚠️ {error}</div>
-        )}
-
-        {/* Carregando */}
-        {isLoading && (
-          <div className="text-center mt-10 text-slate-400">Carregando...</div>
-        )}
-
         {/* Lista de notícias */}
-        {!isLoading && !error && (
-          <div
-            className="grid grid-cols-1 sm:grid-cols-3 gap-7 grid-flow-row mt-10"
-            data-testid={testIds.NEWS_PAGE.NEWS_LIST}
-          >
-            {items.map((item) => (
-              <div
-                key={item.id}
-                className="relative border"
-                data-testid={testIds.NEWS_PAGE.NEWS_ITEM_CONTAINER}
-              >
-                <div className="h-[320px] relative">
-                  <Image
-                    src={item.image}
-                    alt={item.title}
-                    fill
-                    style={{ objectFit: 'cover' }}
-                    unoptimized
-                  />
-                  <span className="bg-orange-500 text-white px-6 py-2 absolute bottom-[-20px] left-4">
-                    {formatDate(new Date(item.date))}
-                  </span>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-7 grid-flow-row">
+          {items.map((item, index) => {
+            // Se for o último elemento, anexa a ref para o observer
+            if (items.length === index + 1) {
+              return (
+                <div
+                  ref={lastNewsElementRef}
+                  key={item.id}
+                  className="relative border flex flex-col"
+                >
+                  <NewsCardContent item={item} />
                 </div>
-
-                <div className="bg-white relative mt-10 px-8 pb-10">
-                  <h2 className="mb-10 font-site">{item.title}</h2>
-                  <p className="text-slate-600 text-sm mb-6">
-                    {item.shortDescription}
-                  </p>
-                  <Link
-                    data-testid={testIds.NEWS_PAGE.NEWS_ITEM_CTA}
-                    href={item.slug ? `/news/${item.slug}` : `/news/${item.id}`}
-                    className="text-slate-600 py-6 font-site"
-                  >
-                    Saiba Mais
-                  </Link>
+              );
+            } else {
+              return (
+                <div key={item.id} className="relative border flex flex-col">
+                  <NewsCardContent item={item} />
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              );
+            }
+          })}
+        </div>
 
-        {/* Paginação */}
-        {!isLoading && !error && (
-          <div className="flex justify-center items-center gap-4 mt-8">
-            <button
-              onClick={() => goToPage(page - 1)}
-              disabled={page === 1}
-              className="px-4 py-2 bg-slate-200 rounded disabled:opacity-50 hover:bg-slate-300 transition-colors"
-            >
-              Anterior
-            </button>
-            <span>
-              Página {page} de {totalPages || 1}
-            </span>
-            <button
-              onClick={() => goToPage(page + 1)}
-              disabled={page === totalPages || totalPages === 0}
-              className="px-4 py-2 bg-slate-200 rounded disabled:opacity-50 hover:bg-slate-300 transition-colors"
-            >
-              Próxima
-            </button>
-          </div>
-        )}
+        {/* Loading Indicator & Error */}
+        <div className="mt-10 text-center">
+          {isLoading && <p className="text-slate-500">Carregando mais notícias...</p>}
+          {error && <p className="text-red-500">{error}</p>}
+          {!hasMore && items.length > 0 && (
+            <p className="text-slate-400 text-sm mt-4">Você chegou ao fim da lista.</p>
+          )}
+          {!isLoading && !error && items.length === 0 && (
+            <p className="text-slate-500">Nenhuma notícia encontrada.</p>
+          )}
+        </div>
       </div>
     </div>
+  );
+}
+
+// Componente auxiliar para o card de notícia
+function NewsCardContent({ item }: { item: NewsItem }) {
+  return (
+    <>
+      <div className="h-[240px] relative w-full">
+        <Image
+          src={item.image}
+          alt={item.title}
+          fill
+          style={{ objectFit: 'cover' }}
+          unoptimized
+        />
+        <span className="bg-orange-500 text-white px-4 py-1 text-sm absolute bottom-[-15px] left-4 z-10">
+          {formatDate(new Date(item.date))}
+        </span>
+      </div>
+
+      <div className="bg-white pt-8 px-6 pb-6 flex flex-col flex-grow">
+        <h2 className="font-site text-xl mb-4 line-clamp-2 min-h-[3.5rem]">
+          {item.title}
+        </h2>
+        <p className="text-slate-600 text-sm mb-6 line-clamp-3 flex-grow">
+          {item.shortDescription}
+        </p>
+        <Link
+          href={item.slug ? `/news/${item.slug}` : `/news/${item.id}`}
+          className="text-orange-500 font-site hover:underline mt-auto inline-block"
+        >
+          Saiba Mais
+        </Link>
+      </div>
+    </>
   );
 }

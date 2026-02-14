@@ -185,10 +185,78 @@ curl -i -H "Accept: application/json" "${NEXT_PUBLIC_API_URL:-http://localhost:8
 
 ---
 
-## Boas práticas e notas
+## Mapa do site (rotas importantes)
 
-- Prefira usar `slug` nas URLs públicas (`/news/outubro-laranja`) para SEO; o frontend já suporta busca por slug no endpoint `/api/noticias/conteudo/slug/{slug}`.
-- Mantenha slugs únicos no backend e implemente redirects 301 se um slug mudar.
+Páginas públicas (frontend):
+
+- /  — Página inicial
+- /about  — Sobre a associação
+- /association  — Página "Associe-se" (formulário de adesão)
+- /contact  — Contato
+- /news  — Lista de notícias
+- /news/[slug]  — Página de notícia (acessa por slug)
+- /projects  — Lista de projetos
+- /projects/[slug]  — Página de projeto
+- /projects/rifa  — Página específica (rifa)
+- /team  — Equipe
+
+APIs (backend / proxied endpoints):
+
+- GET  /api/noticias?page={page}&size={size}  — Busca paginada de notícias
+- GET  /api/noticias/conteudo/slug/{slug}  — Buscar conteúdo da notícia por slug
+- GET  /api/projetos?page={page}&size={size}  — Busca paginada de projetos (padrão 9 por página no frontend)
+- POST /api/associados  — Cadastro de associados (multipart/form-data)
+- POST /api/email  — Envio de e‑mail (aceita HTML no corpo)
+- POST /api/pix/static  — Gera payload + QR Pix (retorno: payload, qrCodeBase64, txid)
+- POST /api/service-login  — Geração de token de serviço (protegido)
+- /api/proxy/...  — Proxy local para encaminhar requisições ao backend e injetar X-Service-Token (side-by-side)
+
+> Observação: algumas rotas são chamadas via proxy do frontend para manter o X-Service-Token no servidor (não exposto ao cliente). Consulte o código em `app/api/proxy/[...path]/route.ts`.
+
+## Resumo das mudanças recentes (o que foi implementado)
+
+- Serviços (frontend): adicionado/ajustado o service para `projects` seguindo o padrão do projeto.
+- Paginação: projetos e notícias passaram a suportar paginação; o padrão de páginas no frontend para projetos é 9 itens por página.
+- Notícias: a busca por conteúdo agora suporta buscar por `id` (para o backend) e por `slug` usando o endpoint `/api/noticias/conteudo/slug/{slug}` — o frontend foi ajustado para usar o endpoint adequado.
+- Associação (formulário): novo formulário "Associe-se" com upload de arquivos (aceita JPG, PNG, PDF), validação de CPF/email/telefone, campos de endereço (todos obrigatórios exceto complemento) e envio multipart/form-data para `/api/associados`. A lista de arquivos é enviada ao backend e o backend é responsável por enviar o e‑mail de confirmação.
+- Uploads/arquivos: prevenção de duplicatas por nome+size (foi adicionada verificação; evolução futura para hash no cliente/servidor é suportada no fluxo).
+- Email: criado template de e‑mail HTML simples e robusto (inclui enviado por "Avocado Desenvolvimento de Software"). O frontend envia apenas os dados ao backend; o backend dispara o envio.
+- Doações (pix): adicionada integração com `/api/pix/static` — o frontend pede ao backend o payload/qrCodeBase64 e exibe o QR recebido; o valor do `amount` aceita floats (ex.: 123.25). O frontend não gera mais a lógica do payload/CRC — isso ocorre no backend.
+- Autenticação de serviço: variáveis de ambiente usadas pelo frontend/backend: `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SERVICE_KEY`, `JWT_SECRET`. As chamadas protegidas usam Bearer token; chamadas entre frontend e backend que precisam do X-Service-Token são feitas via proxy (side-by-side) para que o token do serviço não apareça no navegador.
+- Proxy: introduzido `app/api/proxy/[...path]/route.ts` para encaminhar chamadas ao backend e injetar `X-Service-Token`. O proxy também repassa o header `Origin` corretamente para evitar problemas de CORS (configurável por `.env`).
+- Variáveis de ambiente e .env: adicionado suporte para `.env`/`.env.local` (não comitar o arquivo). Variáveis principais: `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SERVICE_KEY`, `JWT_SECRET`, `ALLOWED_ORIGINS` (lista separada por vírgula) — veja seção abaixo.
+- UI/UX: componentes novos/ajustados: Notification component, feedback no envio de formulários, melhorias visuais no DonateBanner e SocialEmbeds para manter alinhamento e largura consistentes.
+
+## Variáveis de ambiente recomendadas (exemplo `.env` ou `.env.local`)
+
+```env
+# URL da API (backend)
+NEXT_PUBLIC_API_URL=http://localhost:8080
+
+# Chave de serviço que o backend espera (útil para proxy e login de serviço)
+NEXT_PUBLIC_SERVICE_KEY=apemigos-service-key-2025-secure-version
+
+# Secret usado pelo backend (não necessário no frontend)
+JWT_SECRET=your_jwt_secret_here
+
+# Origens permitidas para o proxy (separadas por vírgula)
+ALLOWED_ORIGINS=http://localhost:3000,https://apemigos.vercel.app
+
+# Chave do serviço usada em ambiente local apenas para testes (não versionar)
+DEV_SERVICE_TOKEN=7f8e7a2d3c4b5a6f9e8d7c6b5a4f3e2d
+```
+
+Não adicione o `.env` ao repositório (adicione ao `.gitignore` se necessário).
+
+## Dicas rápidas de debug
+
+- Se a API retornar 403/401 para chamadas que funcionam via curl: verifique os headers `Origin`, `Authorization` (Bearer) e se o proxy está enviando `X-Service-Token`.
+- Para problemas com upload multipart/form-data: verifique se o formulário no frontend está enviando `FormData` (sem transformar arquivos em string) e se o backend aceita `multipart/form-data` no `@PostMapping`.
+- Se encontrar erros de build relacionados a ESLint/Prettier: rode `npm run lint` e ajuste as regras locais; o build em produção costuma ser mais rígido.
+
+---
+
+Se quiser, eu faço um PR com esse README atualizado e crio um `.env.example` com as variáveis acima para facilitar o setup local.
 
 ---
 
