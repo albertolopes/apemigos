@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Notification from '../components/Notification/Notification';
 import api from '../../services/api-service';
@@ -9,6 +9,8 @@ import { buildAssociateEmail } from '../utils/email-template';
 
 export default function AssociesePage() {
   const formRef = useRef<HTMLFormElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null); // Ref para o Canvas
+
   const [status, setStatus] = useState<
     'idle' | 'sending' | 'success' | 'error'
   >('idle');
@@ -21,7 +23,76 @@ export default function AssociesePage() {
   const [laudoName, setLaudoName] = useState<string | null>(null);
   const [docName, setDocName] = useState<string | null>(null);
 
+  // CAPTCHA state
+  const [captchaAnswer, setCaptchaAnswer] = useState<number>(0);
+
   const maxFileSize = 5 * 1024 * 1024; // 5MB
+
+  // Generate CAPTCHA on mount
+  useEffect(() => {
+    drawCaptcha();
+  }, []);
+
+  // Função para desenhar o CAPTCHA no Canvas
+  const drawCaptcha = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Limpar canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Fundo com cor aleatória suave
+    ctx.fillStyle = '#f3f4f6';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Gerar números
+    const num1 = Math.floor(Math.random() * 10) + 1;
+    const num2 = Math.floor(Math.random() * 10) + 1;
+    const answer = num1 + num2;
+    setCaptchaAnswer(answer);
+
+    const text = `${num1} + ${num2} = ?`;
+
+    // Adicionar ruído (linhas aleatórias) para confundir OCR
+    for (let i = 0; i < 7; i++) {
+      ctx.strokeStyle = `rgba(0,0,0,${Math.random() * 0.2})`;
+      ctx.beginPath();
+      ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+      ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+      ctx.stroke();
+    }
+
+    // Adicionar ruído (pontos)
+    for (let i = 0; i < 30; i++) {
+      ctx.fillStyle = `rgba(0,0,0,${Math.random() * 0.2})`;
+      ctx.beginPath();
+      ctx.arc(
+        Math.random() * canvas.width,
+        Math.random() * canvas.height,
+        1,
+        0,
+        2 * Math.PI
+      );
+      ctx.fill();
+    }
+
+    // Desenhar o texto
+    ctx.font = 'bold 24px Arial';
+    ctx.fillStyle = '#f97316'; // Laranja (cor da marca)
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    
+    // Leve rotação e distorção para dificultar leitura automática
+    ctx.save();
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate((Math.random() - 0.5) * 0.2); // Rotação aleatória leve
+    ctx.fillText(text, 0, 0);
+    ctx.restore();
+
+  }, []);
 
   // --- validações utilitárias ---
   function onlyDigits(s: string) {
@@ -151,6 +222,19 @@ export default function AssociesePage() {
     if (!form) return;
 
     const fd = new FormData(form);
+    
+    // --- HONEYPOT CHECK ---
+    // Se o campo oculto '_honey' estiver preenchido, é um bot.
+    const honey = String(fd.get('_honey') || '');
+    if (honey) {
+      console.warn('Bot detectado via honeypot.');
+      // Simula sucesso para enganar o bot, mas não envia nada
+      setStatus('success');
+      setMessage('Cadastro enviado com sucesso.');
+      return;
+    }
+    // ----------------------
+
     const nome = String(fd.get('nome') || '').trim();
     const sobrenome = String(fd.get('sobrenome') || '').trim();
     const email = String(fd.get('email') || '').trim();
@@ -177,6 +261,7 @@ export default function AssociesePage() {
     const convenio = String(fd.get('convenio') || '').trim();
     const convenioNome = String(fd.get('convenioNome') || '').trim();
     const observacoes = String(fd.get('observacoes') || '').trim();
+    const captchaInput = String(fd.get('captcha') || '').trim();
 
     // validações
     const newErrors: Record<string, string> = {};
@@ -218,12 +303,28 @@ export default function AssociesePage() {
     if (!docFile || docFile.size === 0)
       newErrors.documento = 'Documento é obrigatório.';
 
+    // Validação do CAPTCHA
+    if (!captchaInput) {
+      newErrors.captcha = 'Responda a verificação de segurança.';
+    } else if (parseInt(captchaInput, 10) !== captchaAnswer) {
+      newErrors.captcha = 'Resposta incorreta. Tente novamente.';
+    }
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       setStatus('error');
       const fields = Object.keys(newErrors).join(', ');
       setMessage(`Corrija os campos em destaque: ${fields}`);
       console.warn('Validação falhou:', newErrors);
+      
+      // Se o captcha estiver errado, gera um novo para evitar força bruta
+      if (newErrors.captcha) {
+        drawCaptcha();
+        // Limpa o campo de captcha
+        const captchaEl = document.getElementById('captcha') as HTMLInputElement;
+        if (captchaEl) captchaEl.value = '';
+      }
+      
       return;
     }
     setErrors({});
@@ -545,6 +646,7 @@ export default function AssociesePage() {
           setFotoPreview(null);
           setLaudoName(null);
           setDocName(null);
+          drawCaptcha(); // Reset captcha for next submission
         } else {
           throw new Error('Resposta inesperada do servidor');
         }
@@ -658,21 +760,21 @@ export default function AssociesePage() {
         </h1>
 
         <div className="max-w-3xl mx-auto text-center mb-6">
-          <p className="text-slate-600 mt-3">
+          <p className="pt-6 max-w-3xl text-slate-500 text-sm text-center mx-auto">
             O Cartão da Pessoa com Esclerose Múltipla é um instrumento que
             auxilia na identificação da condição em estabelecimentos públicos e
             privados. Para sua validade, é necessário apresentá-lo juntamente
             com um documento oficial com foto.
           </p>
 
-          <p className="text-slate-600 mt-2">
+          <p className="pt-6 max-w-3xl text-slate-500 text-sm text-center mx-auto">
             Além disso, o cartão pode garantir benefícios como descontos ou
             condições especiais para acesso a shows, cinemas, parques e outros
             eventos, conforme a legislação vigente do estado em que você
             estiver.
           </p>
 
-          <p className="text-slate-600 mt-4">
+          <p className="pt-6 max-w-3xl text-slate-500 text-sm text-center mx-auto">
             Preencha o formulário abaixo para se associar à Apemigos. Campos com
             <span className="text-orange-500"> *</span> são obrigatórios.
           </p>
@@ -685,6 +787,12 @@ export default function AssociesePage() {
             className="border-2 text-slate-500 p-6 sm:p-8 rounded-lg bg-white shadow-sm w-full max-w-4xl"
             aria-labelledby="associe-title"
           >
+            {/* HONEYPOT FIELD (Invisible to humans) */}
+            <div style={{ opacity: 0, position: 'absolute', top: 0, left: 0, height: 0, width: 0, zIndex: -1 }}>
+              <label htmlFor="_honey">Não preencha este campo se for humano:</label>
+              <input type="text" name="_honey" id="_honey" tabIndex={-1} autoComplete="off" />
+            </div>
+
             <div className="flex flex-col gap-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
@@ -1285,6 +1393,61 @@ export default function AssociesePage() {
                   className="mt-1 w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500 resize-vertical"
                   placeholder="Informações adicionais que julgar relevantes"
                 />
+              </div>
+
+              {/* CAPTCHA Field */}
+              <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <label
+                  className="text-xs text-slate-500 font-semibold block mb-2"
+                  htmlFor="captcha"
+                >
+                  Verificação de segurança: <span className="text-orange-500">*</span>
+                </label>
+                
+                <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                  <div className="relative">
+                    <canvas 
+                      ref={canvasRef} 
+                      width={200} 
+                      height={60} 
+                      className="border border-gray-300 rounded bg-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={drawCaptcha}
+                      className="absolute -right-8 top-1/2 -translate-y-1/2 text-slate-400 hover:text-orange-500"
+                      title="Gerar novo código"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  <div className="w-full sm:w-auto flex-grow">
+                    <input
+                      className="input w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      type="number"
+                      name="captcha"
+                      id="captcha"
+                      placeholder="Digite o resultado da soma"
+                      required
+                      onChange={() => {
+                        setErrors((s) => {
+                          const copy = { ...s };
+                          delete copy.captcha;
+                          return copy;
+                        });
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {errors.captcha && (
+                  <div className="text-xs text-red-600 mt-1">
+                    {errors.captcha}
+                  </div>
+                )}
               </div>
             </div>
 

@@ -21,7 +21,7 @@ export default function NewsPage() {
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Controle de busca
   const [keyword, setKeyword] = useState(initialKeyword);
   const [submittedKeyword, setSubmittedKeyword] = useState(initialKeyword);
@@ -33,7 +33,7 @@ export default function NewsPage() {
   // Função para buscar dados
   const fetchNews = useCallback(async (pageNum: number, searchKw: string) => {
     if (isFetchingRef.current) return;
-    
+
     isFetchingRef.current = true;
     setIsLoading(true);
     setError(null);
@@ -45,9 +45,11 @@ export default function NewsPage() {
         searchKw.trim() || undefined
       );
 
-      setItems(prev => {
+      setItems((prev) => {
         // Se for a primeira página, substitui. Se não, concatena.
-        return pageNum === 1 ? response.content : [...prev, ...response.content];
+        return pageNum === 1
+          ? response.content
+          : [...prev, ...response.content];
       });
 
       setHasMore(pageNum < response.totalPages);
@@ -76,19 +78,22 @@ export default function NewsPage() {
   }, [page, submittedKeyword, fetchNews]);
 
   // Callback para o IntersectionObserver (elemento sentinela)
-  const lastNewsElementRef = useCallback((node: HTMLDivElement) => {
-    if (isLoading) return;
-    
-    if (observer.current) observer.current.disconnect();
-    
-    observer.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasMore) {
-        setPage(prevPage => prevPage + 1);
-      }
-    });
-    
-    if (node) observer.current.observe(node);
-  }, [isLoading, hasMore]);
+  const lastNewsElementRef = useCallback(
+    (node: HTMLDivElement) => {
+      if (isLoading) return;
+
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setPage((prevPage) => prevPage + 1);
+        }
+      });
+
+      if (node) observer.current.observe(node);
+    },
+    [isLoading, hasMore]
+  );
 
   // Handler para o formulário de busca
   function handleSearchSubmit(e: React.FormEvent) {
@@ -101,7 +106,7 @@ export default function NewsPage() {
       url.searchParams.delete('keyword');
     }
     window.history.pushState({}, '', url.toString());
-    
+
     setSubmittedKeyword(keyword);
   }
 
@@ -126,7 +131,7 @@ export default function NewsPage() {
         >
           Notícias e Atualizações
         </h1>
-        <p className="text-slate-600 pt-6 max-w-3xl text-center mx-auto">
+        <p className="pt-6 max-w-3xl text-slate-500 text-sm text-center mx-auto">
           Fique por dentro das últimas notícias, reportagens e comunicados.
           Acompanhe coberturas de eventos, novidades de projetos e ações da ONG.
           Informações atualizadas para manter a comunidade bem informada.
@@ -134,7 +139,10 @@ export default function NewsPage() {
 
         {/* Search */}
         <div className="mt-8 flex justify-center mb-10">
-          <form onSubmit={handleSearchSubmit} className="w-full max-w-md flex gap-2">
+          <form
+            onSubmit={handleSearchSubmit}
+            className="w-full max-w-md flex gap-2"
+          >
             <div className="relative w-full">
               <input
                 value={keyword}
@@ -193,10 +201,14 @@ export default function NewsPage() {
 
         {/* Loading Indicator & Error */}
         <div className="mt-10 text-center">
-          {isLoading && <p className="text-slate-500">Carregando mais notícias...</p>}
+          {isLoading && (
+            <p className="text-slate-500">Carregando mais notícias...</p>
+          )}
           {error && <p className="text-red-500">{error}</p>}
           {!hasMore && items.length > 0 && (
-            <p className="text-slate-400 text-sm mt-4">Você chegou ao fim da lista.</p>
+            <p className="text-slate-400 text-sm mt-4">
+              Você chegou ao fim da lista.
+            </p>
           )}
           {!isLoading && !error && items.length === 0 && (
             <p className="text-slate-500">Nenhuma notícia encontrada.</p>
@@ -211,14 +223,20 @@ export default function NewsPage() {
 function NewsCardContent({ item }: { item: NewsItem }) {
   return (
     <>
-      <div className="h-[240px] relative w-full">
-        <Image
-          src={item.image}
-          alt={item.title}
-          fill
-          style={{ objectFit: 'cover' }}
-          unoptimized
-        />
+      <div className="h-[240px] relative w-full bg-gray-200">
+        {item.image ? (
+          <Image
+            src={item.image}
+            alt={item.title}
+            fill
+            style={{ objectFit: 'cover' }}
+            unoptimized
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold text-xl">
+            N/A
+          </div>
+        )}
         <span className="bg-orange-500 text-white px-4 py-1 text-sm absolute bottom-[-15px] left-4 z-10">
           {formatDate(new Date(item.date))}
         </span>

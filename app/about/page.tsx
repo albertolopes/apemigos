@@ -14,7 +14,7 @@ export default async function About() {
       </div>
       <div className="max-w-7xl mx-auto mt-[-120px] relative bg-white px-8 sm:px-20">
         <h1 className="text-center py-8 font-site">Sobre a Apemigos</h1>
-        <p className="text-slate-600 pt-6 max-w-3xl text-center mx-auto">
+        <p className="pt-6 max-w-3xl text-slate-500 text-sm text-center mx-auto">
           Fundada e presidida por Ana Paula Morais, a associação nasceu da
           necessidade de unir pacientes que enfrentam os desafios de uma doença
           crônica e, muitas vezes, &quot;invisível&quot;. A EM é uma doença
@@ -27,7 +27,7 @@ export default async function About() {
             <h2 className="text-orange-500 text-lg font-site mb-2 text-center">
               Missão
             </h2>
-            <p className="text-slate-600 pt-6 max-w-3xl text-center mx-auto">
+            <p className="pt-6 max-w-3xl text-slate-500 text-sm text-center mx-auto">
               Promover a qualidade de vida e a inclusão social das pessoas com
               esclerose múltipla e doenças raras no Distrito Federal, oferecendo
               apoio biopsicossocial, disseminando informações qualificadas e
@@ -40,7 +40,7 @@ export default async function About() {
             <h2 className="text-orange-500 text-lg font-site mb-2 text-center">
               Visão
             </h2>
-            <p className="text-slate-600 pt-6 max-w-3xl text-center mx-auto">
+            <p className="pt-6 max-w-3xl text-slate-500 text-sm text-center mx-auto">
               Ser a principal referência no Distrito Federal no suporte e defesa
               de pacientes com doenças raras e desmielinizantes, sendo
               reconhecida pela excelência no acolhimento, pela influência em
@@ -53,7 +53,7 @@ export default async function About() {
             <h2 className="text-orange-500 text-lg font-site mb-2 text-center">
               Valores
             </h2>
-            <div className="text-slate-600 pt-6 max-w-3xl text-center mx-auto">
+            <div className="pt-6 max-w-3xl text-slate-500 text-sm text-center mx-auto">
               <p>
                 <strong>Empatia e Acolhimento:</strong> Olhar para cada
                 indivíduo com humanidade, entendendo suas limitações e
