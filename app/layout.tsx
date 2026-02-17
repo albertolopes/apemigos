@@ -22,7 +22,7 @@ export default function RootLayout({
           content="Associação de pessoas com Esclerose Multipla"
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="https://picsum.photos/1920/492?random=10" />
+        <link rel="icon" href="/images/logo.png" type="image/png" />
       </head>
       <body className="text-orange-500 bg-white">
         <Header />

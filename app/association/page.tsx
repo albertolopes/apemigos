@@ -653,7 +653,13 @@ export default function AssociesePage() {
       } catch (apiErr: any) {
         console.error('Erro ao enviar para /api/associados:', apiErr);
         setStatus('error');
-        setMessage(apiErr?.message || 'Erro ao enviar cadastro');
+        
+        // Verifica se é erro 413 (Payload Too Large)
+        if (apiErr?.response?.status === 413 || apiErr?.message?.includes('413')) {
+          setMessage('Os arquivos anexados são muito grandes. O limite total é de 4.5MB. Por favor, reduza o tamanho dos arquivos ou envie menos anexos.');
+        } else {
+          setMessage(apiErr?.message || 'Erro ao enviar cadastro');
+        }
       }
     } catch (err: any) {
       setStatus('error');
