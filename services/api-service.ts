@@ -73,7 +73,8 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Trata 401 (Unauthorized) e 403 (Forbidden) como possíveis tokens expirados
+    if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -93,11 +94,16 @@ api.interceptors.response.use(
       try {
         const newToken = await authService.refreshToken();
         processQueue(null, newToken);
+        
+        // Atualiza o header com o novo token
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        
+        // Retenta a requisição original
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
         authService.logout();
+        return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
       }
