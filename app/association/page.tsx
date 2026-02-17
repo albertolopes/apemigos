@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import Notification from '../components/Notification/Notification';
 import api from '../../services/api-service';
 import { associadosService } from '@services';
@@ -17,6 +18,7 @@ export default function AssociesePage() {
   const [message, setMessage] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [hasConvenio, setHasConvenio] = useState<boolean>(false);
+  const [lgpdAccepted, setLgpdAccepted] = useState<boolean>(false);
 
   // previews
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
@@ -308,6 +310,11 @@ export default function AssociesePage() {
       newErrors.captcha = 'Responda a verificação de segurança.';
     } else if (parseInt(captchaInput, 10) !== captchaAnswer) {
       newErrors.captcha = 'Resposta incorreta. Tente novamente.';
+    }
+
+    // Validação LGPD
+    if (!lgpdAccepted) {
+      newErrors.lgpd = 'Você deve aceitar os termos de uso e privacidade.';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -646,6 +653,7 @@ export default function AssociesePage() {
           setFotoPreview(null);
           setLaudoName(null);
           setDocName(null);
+          setLgpdAccepted(false); // Reset LGPD checkbox
           drawCaptcha(); // Reset captcha for next submission
         } else {
           throw new Error('Resposta inesperada do servidor');
@@ -1401,6 +1409,37 @@ export default function AssociesePage() {
                 />
               </div>
 
+              {/* LGPD Consent */}
+              <div className="flex items-start gap-3 p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                <input
+                  type="checkbox"
+                  id="lgpd"
+                  name="lgpd"
+                  checked={lgpdAccepted}
+                  onChange={(e) => {
+                    setLgpdAccepted(e.target.checked);
+                    setErrors((s) => {
+                      const copy = { ...s };
+                      delete copy.lgpd;
+                      return copy;
+                    });
+                  }}
+                  className="mt-1 h-4 w-4 text-orange-500 focus:ring-orange-500 border-gray-300 rounded"
+                />
+                <label htmlFor="lgpd" className="text-sm text-slate-600">
+                  Declaro que li e concordo com os{' '}
+                  <Link href="/lgpd" target="_blank" className="text-orange-500 hover:underline font-semibold">
+                    Termos de Uso e Privacidade de Dados (LGPD)
+                  </Link>
+                  , autorizando a Apemigos a utilizar meus dados pessoais para a emissão do cartão e comunicações da associação.
+                </label>
+              </div>
+              {errors.lgpd && (
+                <div className="text-xs text-red-600 mt-1 px-1">
+                  {errors.lgpd}
+                </div>
+              )}
+
               {/* CAPTCHA Field */}
               <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
                 <label
@@ -1458,10 +1497,10 @@ export default function AssociesePage() {
             </div>
 
             <button
-              className="btn-main w-full mt-6 bg-orange-500 text-white py-3 rounded hover:bg-orange-600 transition-colors font-semibold"
+              className="btn-main w-full mt-6 bg-orange-500 text-white py-3 rounded hover:bg-orange-600 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               type="submit"
-              aria-disabled={status === 'sending'}
-              disabled={status === 'sending'}
+              aria-disabled={status === 'sending' || !lgpdAccepted}
+              disabled={status === 'sending' || !lgpdAccepted}
             >
               {status === 'sending' ? 'Enviando...' : 'Enviar cadastro'}
             </button>
