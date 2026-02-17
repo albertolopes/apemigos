@@ -5,9 +5,10 @@ export const Logo = () => {
     <Image
       src="/images/logo.png"
       alt="Logo"
-      width={90}
-      height={90}
-      className="inline-block h-10 sm:h-20 w-auto"
+      width={120}
+      height={120}
+      className="inline-block h-5 sm:h-10 w-auto"
+      quality={100}
     />
   );
 };
