@@ -86,14 +86,13 @@ export default function AssociesePage() {
     ctx.fillStyle = '#f97316'; // Laranja (cor da marca)
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
-    
+
     // Leve rotação e distorção para dificultar leitura automática
     ctx.save();
     ctx.translate(canvas.width / 2, canvas.height / 2);
     ctx.rotate((Math.random() - 0.5) * 0.2); // Rotação aleatória leve
     ctx.fillText(text, 0, 0);
     ctx.restore();
-
   }, []);
 
   // --- validações utilitárias ---
@@ -224,7 +223,7 @@ export default function AssociesePage() {
     if (!form) return;
 
     const fd = new FormData(form);
-    
+
     // --- HONEYPOT CHECK ---
     // Se o campo oculto '_honey' estiver preenchido, é um bot.
     const honey = String(fd.get('_honey') || '');
@@ -323,15 +322,17 @@ export default function AssociesePage() {
       const fields = Object.keys(newErrors).join(', ');
       setMessage(`Corrija os campos em destaque: ${fields}`);
       console.warn('Validação falhou:', newErrors);
-      
+
       // Se o captcha estiver errado, gera um novo para evitar força bruta
       if (newErrors.captcha) {
         drawCaptcha();
         // Limpa o campo de captcha
-        const captchaEl = document.getElementById('captcha') as HTMLInputElement;
+        const captchaEl = document.getElementById(
+          'captcha'
+        ) as HTMLInputElement;
         if (captchaEl) captchaEl.value = '';
       }
-      
+
       return;
     }
     setErrors({});
@@ -661,10 +662,15 @@ export default function AssociesePage() {
       } catch (apiErr: any) {
         console.error('Erro ao enviar para /api/associados:', apiErr);
         setStatus('error');
-        
+
         // Verifica se é erro 413 (Payload Too Large)
-        if (apiErr?.response?.status === 413 || apiErr?.message?.includes('413')) {
-          setMessage('Os arquivos anexados são muito grandes. O limite total é de 4.5MB. Por favor, reduza o tamanho dos arquivos ou envie menos anexos.');
+        if (
+          apiErr?.response?.status === 413 ||
+          apiErr?.message?.includes('413')
+        ) {
+          setMessage(
+            'Os arquivos anexados são muito grandes. O limite total é de 4.5MB. Por favor, reduza o tamanho dos arquivos ou envie menos anexos.'
+          );
         } else {
           setMessage(apiErr?.message || 'Erro ao enviar cadastro');
         }
@@ -802,9 +808,27 @@ export default function AssociesePage() {
             aria-labelledby="associe-title"
           >
             {/* HONEYPOT FIELD (Invisible to humans) */}
-            <div style={{ opacity: 0, position: 'absolute', top: 0, left: 0, height: 0, width: 0, zIndex: -1 }}>
-              <label htmlFor="_honey">Não preencha este campo se for humano:</label>
-              <input type="text" name="_honey" id="_honey" tabIndex={-1} autoComplete="off" />
+            <div
+              style={{
+                opacity: 0,
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                height: 0,
+                width: 0,
+                zIndex: -1,
+              }}
+            >
+              <label htmlFor="_honey">
+                Não preencha este campo se for humano:
+              </label>
+              <input
+                type="text"
+                name="_honey"
+                id="_honey"
+                tabIndex={-1}
+                autoComplete="off"
+              />
             </div>
 
             <div className="flex flex-col gap-4">
@@ -1428,10 +1452,15 @@ export default function AssociesePage() {
                 />
                 <label htmlFor="lgpd" className="text-sm text-slate-600">
                   Declaro que li e concordo com os{' '}
-                  <Link href="/lgpd" target="_blank" className="text-orange-500 hover:underline font-semibold">
+                  <Link
+                    href="/lgpd"
+                    target="_blank"
+                    className="text-orange-500 hover:underline font-semibold"
+                  >
                     Termos de Uso e Privacidade de Dados (LGPD)
                   </Link>
-                  , autorizando a Apemigos a utilizar meus dados pessoais para a emissão do cartão e comunicações da associação.
+                  , autorizando a Apemigos a utilizar meus dados pessoais para a
+                  emissão do cartão e comunicações da associação.
                 </label>
               </div>
               {errors.lgpd && (
@@ -1446,15 +1475,16 @@ export default function AssociesePage() {
                   className="text-xs text-slate-500 font-semibold block mb-2"
                   htmlFor="captcha"
                 >
-                  Verificação de segurança: <span className="text-orange-500">*</span>
+                  Verificação de segurança:{' '}
+                  <span className="text-orange-500">*</span>
                 </label>
-                
+
                 <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                   <div className="relative">
-                    <canvas 
-                      ref={canvasRef} 
-                      width={200} 
-                      height={60} 
+                    <canvas
+                      ref={canvasRef}
+                      width={200}
+                      height={60}
                       className="border border-gray-300 rounded bg-white"
                     />
                     <button
@@ -1463,12 +1493,22 @@ export default function AssociesePage() {
                       className="absolute -right-8 top-1/2 -translate-y-1/2 text-slate-400 hover:text-orange-500"
                       title="Gerar novo código"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3" />
                       </svg>
                     </button>
                   </div>
-                  
+
                   <div className="w-full sm:w-auto flex-grow">
                     <input
                       className="input w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange-500"
