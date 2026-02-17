@@ -7,7 +7,7 @@ export const Logo = () => {
       alt="Logo"
       width={120}
       height={120}
-      className="inline-block h-5 sm:h-10 w-auto"
+      className="inline-block h-10 sm:h-10 w-auto"
       quality={100}
     />
   );
