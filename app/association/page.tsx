@@ -490,19 +490,20 @@ export default function AssociesePage() {
         appendIf('nome', nome);
         appendIf('sobrenome', sobrenome);
         appendIf('dataNascimento', dataNascimento);
-        appendIf('cpf', cpf);
+        // Limpa CPF e telefones antes de enviar
+        appendIf('cpf', onlyDigits(cpf));
         appendIf('rg', rg);
         appendIf('email', email);
-        appendIf('telefoneContato', telefoneContato);
-        appendIf('telefoneEmergencia', telefoneEmergencia);
+        appendIf('telefoneContato', onlyDigits(telefoneContato));
+        appendIf('telefoneEmergencia', onlyDigits(telefoneEmergencia));
         appendIf('nomeContatoEmergencia', nomeContatoEmergencia);
         appendIf('medicoResponsavel', medicoResponsavel);
         appendIf('cidade', cidade);
         appendIf('estado', estado);
         appendIf('logradouro', logradouro);
         appendIf('complemento', complemento);
-        appendIf('cep', cep);
-        appendIf('telefoneMedico', telefoneMedico);
+        appendIf('cep', onlyDigits(cep));
+        appendIf('telefoneMedico', onlyDigits(telefoneMedico));
         appendIf('observacoes', observacoes);
         appendIf('convenioNome', convenioNome);
 
