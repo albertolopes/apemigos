@@ -22,6 +22,10 @@ export default function RootLayout({
           content="Associação de pessoas com Esclerose Multipla"
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta
+          name="google-site-verification"
+          content="grFN89mmOqNZsnYJ4DDcBBmebApPRNG8ywncvVV07VE"
+        />
         <link rel="icon" href="/images/logo.png" type="image/png" />
       </head>
       <body className="text-orange-500 bg-white">
