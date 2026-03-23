@@ -42,7 +42,7 @@ export default function Home() {
         <div className="basis-1/3">
           <div className="h-[370px] relative">
             <Image
-              src="https://i.imgur.com/c9pi1XC.jpeg"
+              src="https://i.imgur.com/b3jGnWx.jpeg"
               alt="projects"
               fill
               style={{ objectFit: 'cover' }}
@@ -68,7 +68,7 @@ export default function Home() {
         <div className="basis-2/3">
           <div className="h-[370px] relative">
             <Image
-              src="https://i.imgur.com/80zkthg.jpeg"
+              src="https://i.imgur.com/fldeUnR.jpeg"
               alt="projects"
               fill
               style={{ objectFit: 'cover' }}
