@@ -224,7 +224,7 @@ export default function NewsPage() {
     <Suspense fallback={<div>Carregando...</div>}>
       <NewsContent />
     </Suspense>
-  )
+  );
 }
 
 // Componente auxiliar para o card de notícia
