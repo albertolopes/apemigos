@@ -83,15 +83,6 @@ export default function New({ params }: { params: Promise<{ slug: string }> }) {
         <p className="text-slate-600 py-6 max-w-3xl text-lg mx-auto text-center">
           {item.noticia.shortDescription}
         </p>
-        {/*<div className="relative h-[400px]">*/}
-        {/*  <Image*/}
-        {/*    src={item.noticia.image}*/}
-        {/*    alt={item.noticia.title}*/}
-        {/*    fill*/}
-        {/*    style={{ objectFit: 'contain' }}*/}
-        {/*    unoptimized*/}
-        {/*  />*/}
-        {/*</div>*/}
         <LongDescription html={item.longDescription} />
       </div>
     </div>

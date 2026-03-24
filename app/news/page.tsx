@@ -5,12 +5,12 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { formatDate } from '@app/utils/date-formatter';
 import testIds from '@app/utils/test-ids';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { newsService, NewsItem, NewsResponse } from '@services';
 
 const ITEMS_PER_PAGE = 12;
 
-export default function NewsPage() {
+function NewsContent() {
   const searchParams = useSearchParams();
 
   // Keyword inicial da URL
@@ -217,6 +217,14 @@ export default function NewsPage() {
       </div>
     </div>
   );
+}
+
+export default function NewsPage() {
+  return (
+    <Suspense fallback={<div>Carregando...</div>}>
+      <NewsContent />
+    </Suspense>
+  )
 }
 
 // Componente auxiliar para o card de notícia

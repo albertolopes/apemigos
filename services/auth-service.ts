@@ -75,7 +75,11 @@ export class AuthService {
 
   private async generateServiceToken(): Promise<string> {
     try {
-      const res = await fetch('/api/service-login', {
+      const loginUrl = typeof window === 'undefined'
+        ? `${BASE_URL.replace(/\/+$/, '')}/api/auth/login`
+        : '/api/service-login';
+
+      const res = await fetch(loginUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -147,7 +151,7 @@ export class AuthService {
         this.saveToken(cookieToken, undefined);
         return cookieToken;
       }
-    } catch (e) {}
+    } catch (e) { }
 
     return await this.generateServiceToken();
   }

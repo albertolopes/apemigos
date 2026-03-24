@@ -1,8 +1,12 @@
 import axios from 'axios';
 import { authService } from './auth-service';
 
+const baseURL = typeof window === 'undefined'
+  ? process.env.NEXT_PUBLIC_API_URL
+  : '/api/proxy';
+
 const api = axios.create({
-  baseURL: '/api/proxy',
+  baseURL,
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -94,10 +98,10 @@ api.interceptors.response.use(
       try {
         const newToken = await authService.refreshToken();
         processQueue(null, newToken);
-        
+
         // Atualiza o header com o novo token
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
-        
+
         // Retenta a requisição original
         return api(originalRequest);
       } catch (refreshError) {
