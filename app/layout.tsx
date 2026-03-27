@@ -2,6 +2,7 @@ import './globals.css';
 import Footer from '@app/components/Layout/Footer';
 import Header from '@app/components/Layout/Header';
 import { Metadata } from 'next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 /**
  * Using force dynamic so changes in business assets (e.g. services) are immediately reflected.
@@ -90,6 +91,7 @@ export default function RootLayout({
         <div className="mt-10 sm:mt-20">
           <Footer />
         </div>
+        <SpeedInsights />
       </body>
     </html>
   );

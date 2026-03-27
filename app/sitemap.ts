@@ -5,40 +5,40 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = 'https://apemigosbrasil.org.br';
+  const baseUrl = 'https://apemigosbrasil.org.br';
 
-    // Páginas estáticas principais
-    const staticRoutes = [
-        '',
-        '/news',
-        '/projects',
-        '/sobre-nos',
-        '/contato',
-        '/doe',
-        '/associados/cadastro',
-    ].map((route) => ({
-        url: `${baseUrl}${route}`,
-        lastModified: new Date(),
-        changeFrequency: 'weekly' as const,
-        priority: 1.0,
+  // Páginas estáticas principais
+  const staticRoutes = [
+    '',
+    '/news',
+    '/projects',
+    '/sobre-nos',
+    '/contato',
+    '/doe',
+    '/associados/cadastro',
+  ].map((route) => ({
+    url: `${baseUrl}${route}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly' as const,
+    priority: 1.0,
+  }));
+
+  // Notícias dinâmicas
+  let newsRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const newsResponse = await newsService.getNews(0, 100);
+    newsRoutes = newsResponse.content.map((item) => ({
+      url: `${baseUrl}/news/${item.slug || item.id}`,
+      lastModified: new Date(item.date),
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
     }));
+  } catch (error) {
+    console.error('Falha ao gerar sitemap para notícias:', error);
+  }
 
-    // Notícias dinâmicas
-    let newsRoutes: MetadataRoute.Sitemap = [];
-    try {
-        const newsResponse = await newsService.getNews(0, 100);
-        newsRoutes = newsResponse.content.map((item) => ({
-            url: `${baseUrl}/news/${item.slug || item.id}`,
-            lastModified: new Date(item.date),
-            changeFrequency: 'monthly' as const,
-            priority: 0.8,
-        }));
-    } catch (error) {
-        console.error('Falha ao gerar sitemap para notícias:', error);
-    }
+  // Projetos dinâmicos (Assumindo que temos algo similar se houver tempo)
+  // Por enquanto vamos focar nas notícias conforme solicitado.
 
-    // Projetos dinâmicos (Assumindo que temos algo similar se houver tempo)
-    // Por enquanto vamos focar nas notícias conforme solicitado.
-
-    return [...staticRoutes, ...newsRoutes];
+  return [...staticRoutes, ...newsRoutes];
 }
