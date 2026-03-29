@@ -4,7 +4,6 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Notification from '../components/Notification/Notification';
-import api from '../../services/api-service';
 import { associadosService } from '@services';
 import { buildAssociateEmail } from '../utils/email-template';
 
@@ -29,11 +28,6 @@ export default function AssociesePage() {
   const [captchaAnswer, setCaptchaAnswer] = useState<number>(0);
 
   const maxFileSize = 5 * 1024 * 1024; // 5MB
-
-  // Generate CAPTCHA on mount
-  useEffect(() => {
-    drawCaptcha();
-  }, []);
 
   // Função para desenhar o CAPTCHA no Canvas
   const drawCaptcha = useCallback(() => {
@@ -94,6 +88,11 @@ export default function AssociesePage() {
     ctx.fillText(text, 0, 0);
     ctx.restore();
   }, []);
+
+  // Generate CAPTCHA on mount
+  useEffect(() => {
+    drawCaptcha();
+  }, [drawCaptcha]);
 
   // --- validações utilitárias ---
   function onlyDigits(s: string) {
@@ -243,8 +242,6 @@ export default function AssociesePage() {
     // endereço
     const cidade = String(fd.get('cidade') || '').trim();
     const estado = String(fd.get('estado') || '').trim();
-    const bairro = undefined; // removed field
-    const numero = undefined; // removed field
     const logradouro = String(fd.get('logradouro') || '').trim();
     const complemento = String(fd.get('complemento') || '').trim();
     const cep = String(fd.get('cep') || '').trim();
@@ -431,7 +428,7 @@ export default function AssociesePage() {
         });
       }
 
-      const subject = `Novo cadastro: ${nome} ${sobrenome}`;
+      // const subject = `Novo cadastro: ${nome} ${sobrenome}`;
 
       // DEBUG: log valores antes de gerar o email para ajudar a diagnosticar problemas
       console.debug(

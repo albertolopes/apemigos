@@ -2,6 +2,7 @@ import Image from 'next/image';
 import testIds from '@app/utils/test-ids';
 import SocialEmbeds from './components/SocialEmbeds/SocialEmbeds';
 import DonateBanner from './components/DonateBanner/DonateBanner';
+import Link from 'next/link';
 
 export default function Home() {
   return (
@@ -26,12 +27,12 @@ export default function Home() {
           <h3 className="flex-1 sm:text-3xl py-4 px-8 text-center sm:text-left">
             Juntos por mais informação, apoio e esperança
           </h3>
-          <a
+          <Link
             href="/contact"
             className="btn-main sm:text-2xl sm:p-8 hover:bg-slate-600 w-fit"
           >
             Clique aqui
-          </a>
+          </Link>
         </div>
       </div>
 
@@ -56,13 +57,13 @@ export default function Home() {
               múltipla. Conheça nossos projetos e veja como você pode participar
               dessa rede de solidariedade.
             </p>
-            <a
+            <Link
               href="/projects"
               className="text-slate-500 py-6 font-site"
               data-testid={testIds.HOME_PAGE.OUR_INITIATIVES_CTA}
             >
               Clique aqui
-            </a>
+            </Link>
           </div>
         </div>
         <div className="basis-2/3">
@@ -84,9 +85,9 @@ export default function Home() {
               a tratamentos com base em empatia, ética, ciência, solidariedade e
               protagonismo do paciente.
             </p>
-            <a href="/about" className="text-slate-500 py-6 font-site">
+            <Link href="/about" className="text-slate-500 py-6 font-site">
               Clique aqui
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -107,9 +108,9 @@ export default function Home() {
               no tratamento da esclerose múltipla. Mantemos você informado sobre
               tudo que pode impactar sua qualidade de vida.
             </p>
-            <a href="/news" className="text-slate-500 py-6 font-site">
+            <Link href="/news" className="text-slate-500 py-6 font-site">
               Clique aqui
-            </a>
+            </Link>
           </div>
         </div>
         <div className="basis-1/3">
@@ -128,9 +129,9 @@ export default function Home() {
               da condição em estabelecimentos públicos e privados. Solicite o
               seu e tenha mais segurança e facilidade no acesso a serviços.
             </p>
-            <a href="/association" className="text-slate-500 py-6 font-site">
+            <Link href="/association" className="text-slate-500 py-6 font-site">
               Clique aqui
-            </a>
+            </Link>
           </div>
         </div>
       </div>

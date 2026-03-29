@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { newsService, NewsItem, NewsResponse } from '@services';
-import { NewsCard } from './page';
+import { NewsCard } from './NewsCard';
 
 interface NewsClientProps {
   initialItems: NewsItem[];
@@ -66,10 +66,11 @@ export default function NewsClient({
   useEffect(() => {
     // Se a keyword submetida for diferente da inicial ou se já houve navegação, busca novamente
     if (submittedKeyword !== initialKeyword || page > 1) {
-        setPage(1);
-        setHasMore(true);
-        fetchNews(1, submittedKeyword);
+      setPage(1);
+      setHasMore(true);
+      fetchNews(1, submittedKeyword);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [submittedKeyword, fetchNews]);
 
   // Efeito para carregar mais páginas quando 'page' muda (scroll infinito)

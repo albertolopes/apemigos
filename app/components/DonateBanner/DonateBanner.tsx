@@ -131,30 +131,15 @@ export default function DonateBanner() {
       setError('Não foi possível copiar o payload');
     }
   }
-
-  function handleGenerate() {
-    // call and ignore result (state updated in function)
-    void generatePixFor(amount);
-  }
-
-  async function handleCopyKey() {
-    try {
-      await navigator.clipboard.writeText(pixKey);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (e) {
-      setError('Não foi possível copiar a chave');
-    }
-  }
-
   return (
-    // occupy full width of parent container (parent already provides page padding)
     <section className="w-full py-8">
       <div className="w-full">
         <div className="bg-white border rounded-lg shadow-sm p-6 flex flex-col gap-6">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="flex-1">
-              <h3 className="font-site text-2xl text-orange-500 mb-2">Doação e Solidariedade</h3>
+              <h3 className="font-site text-2xl text-orange-500 mb-2">
+                Doação e Solidariedade
+              </h3>
               <p className="text-slate-600 text-sm">
                 Sua contribuição ajuda a manter projetos, apoio e informação
                 para pessoas com esclerose múltipla. Toda doação faz diferença —
@@ -171,7 +156,6 @@ export default function DonateBanner() {
 
             <div className="flex items-center gap-3">
               <a
-                // open modal instead of direct link
                 href="#doar"
                 onClick={(e) => {
                   e.preventDefault();
