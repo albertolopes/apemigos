@@ -40,7 +40,6 @@ export class AuthService {
     'token_expiry';
 
   private readonly SERVICE_KEY =
-    process.env.SERVICE_KEY ??
     process.env.NEXT_PUBLIC_SERVICE_KEY ??
     (getPublicEnv('SERVICE_KEY') as string) ??
     'apemigos-service-key-2025-secure-version';
@@ -76,24 +75,16 @@ export class AuthService {
 
   private async generateServiceToken(): Promise<string> {
     try {
-      const isServer = typeof window === 'undefined';
-      const loginUrl = isServer
+      const loginUrl = typeof window === 'undefined'
         ? `${BASE_URL.replace(/\/+$/, '')}/api/auth/login`
         : '/api/service-login';
 
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      };
-
-      // No servidor, podemos enviar a SERVICE_KEY diretamente no header se necessário
-      if (isServer && process.env.SERVICE_KEY) {
-        headers['X-Service-Token'] = process.env.SERVICE_KEY;
-      }
-
       const res = await fetch(loginUrl, {
         method: 'POST',
-        headers,
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
         credentials: 'same-origin',
         body: JSON.stringify({ serviceKey: this.SERVICE_KEY }),
       });
@@ -127,6 +118,7 @@ export class AuthService {
         status: error.response?.status || 500,
         code: error.response?.data?.code,
       };
+      // O erro já é logado pelo interceptor do api-service, não precisa logar aqui
       throw authError;
     }
   }
@@ -156,9 +148,7 @@ export class AuthService {
     try {
       const cookieToken = this.getTokenFromCookie();
       if (cookieToken) {
-        if (typeof window !== 'undefined') {
-            this.saveToken(cookieToken, undefined);
-        }
+        this.saveToken(cookieToken, undefined);
         return cookieToken;
       }
     } catch (e) { }
