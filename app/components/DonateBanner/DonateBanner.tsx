@@ -154,7 +154,7 @@ export default function DonateBanner() {
         <div className="bg-white border rounded-lg shadow-sm p-6 flex flex-col gap-6">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="flex-1">
-              <h3 className="font-site text-2xl text-orange-500 mb-2">Doe</h3>
+              <h3 className="font-site text-2xl text-orange-500 mb-2">Doação e Solidariedade</h3>
               <p className="text-slate-600 text-sm">
                 Sua contribuição ajuda a manter projetos, apoio e informação
                 para pessoas com esclerose múltipla. Toda doação faz diferença —

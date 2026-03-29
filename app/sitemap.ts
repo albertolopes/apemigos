@@ -7,7 +7,6 @@ export const revalidate = 0;
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = 'https://apemigosbrasil.org.br';
 
-    // Páginas estáticas principais
     const staticRoutes = [
         '',
         '/news',
@@ -36,9 +35,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     } catch (error) {
         console.error('Falha ao gerar sitemap para notícias:', error);
     }
-
-    // Projetos dinâmicos (Assumindo que temos algo similar se houver tempo)
-    // Por enquanto vamos focar nas notícias conforme solicitado.
-
     return [...staticRoutes, ...newsRoutes];
 }
