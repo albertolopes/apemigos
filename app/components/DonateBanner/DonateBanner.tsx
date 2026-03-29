@@ -301,5 +301,6 @@ export default function DonateBanner() {
         </div>
       )}
     </section>
+
   );
 }
