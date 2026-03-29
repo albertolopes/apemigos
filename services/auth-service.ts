@@ -86,15 +86,22 @@ export class AuthService {
         Accept: 'application/json',
       };
 
-      // No servidor, podemos enviar a SERVICE_KEY diretamente no header se necessário
-      if (isServer && process.env.SERVICE_KEY) {
-        headers['X-Service-Token'] = process.env.SERVICE_KEY;
+      if (isServer) {
+        // No servidor, é importante enviar um Origin válido se o backend possuir restrições de CORS
+        // Também enviamos a SERVICE_KEY no header X-Service-Token para autenticação server-to-server
+        const origin =
+          process.env.NEXT_ALLOWED_ORIGINS?.split(',')[0] ||
+          'https://apemigosbrasil.org.br';
+        headers['Origin'] = origin;
+
+        if (process.env.SERVICE_KEY) {
+          headers['X-Service-Token'] = process.env.SERVICE_KEY;
+        }
       }
 
       const res = await fetch(loginUrl, {
         method: 'POST',
         headers,
-        credentials: 'same-origin',
         body: JSON.stringify({ serviceKey: this.SERVICE_KEY }),
       });
 
@@ -112,7 +119,9 @@ export class AuthService {
           this.saveToken(cookieToken, undefined);
           return cookieToken;
         }
-        throw new Error('Token não recebido na resposta nem encontrado no cookie');
+        throw new Error(
+          'Token não recebido na resposta nem encontrado no cookie'
+        );
       }
 
       this.saveToken(loginData.token, loginData.expiresIn);
@@ -157,11 +166,11 @@ export class AuthService {
       const cookieToken = this.getTokenFromCookie();
       if (cookieToken) {
         if (typeof window !== 'undefined') {
-            this.saveToken(cookieToken, undefined);
+          this.saveToken(cookieToken, undefined);
         }
         return cookieToken;
       }
-    } catch (e) { }
+    } catch (e) {}
 
     return await this.generateServiceToken();
   }
