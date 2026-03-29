@@ -34,12 +34,12 @@ const Footer = () => (
       <p className="font-default mb-4 text-slate-500">
         © 2025 Apemigos. Desenvolvido por{' '}
         <a
-          href="https://github.com/albertolopes"
+          href="https://avocadotech.site"
           target="_blank"
           rel="noopener noreferrer"
           className="underline hover:text-slate-500"
         >
-          Avocado Tech
+          Avocado
         </a>
       </p>
     </div>
