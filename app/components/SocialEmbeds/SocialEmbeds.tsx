@@ -39,7 +39,7 @@ export default function SocialEmbeds() {
           <p className="text-slate-600 text-sm">
             Acompanhe nossas ações nas redes sociais e participe da causa.
             Curta, compartilhe e ajude a dar voz às pessoas com Esclerose
-            Múltipla.
+            Múltipla e doenças raras.
           </p>
         </div>
 

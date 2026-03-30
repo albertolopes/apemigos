@@ -92,7 +92,8 @@ export default function AssociesePage() {
   // Generate CAPTCHA on mount
   useEffect(() => {
     drawCaptcha();
-  }, [drawCaptcha]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // --- validações utilitárias ---
   function onlyDigits(s: string) {
@@ -615,7 +616,7 @@ export default function AssociesePage() {
             );
           } catch (e) {
             console.warn(
-              '[Cartão da pessoa com EM] não foi possível ler multipart.logradouro',
+              '[Cartão da pessoal com EM] não foi possível ler multipart.logradouro',
               e
             );
           }

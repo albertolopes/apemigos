@@ -3,6 +3,7 @@ import testIds from '@app/utils/test-ids';
 import SocialEmbeds from './components/SocialEmbeds/SocialEmbeds';
 import DonateBanner from './components/DonateBanner/DonateBanner';
 import Link from 'next/link';
+import RecentNews from '@app/components/RecentNews/RecentNews';
 
 export default function Home() {
   return (
@@ -135,6 +136,7 @@ export default function Home() {
           </div>
         </div>
       </div>
+      <RecentNews />
       <DonateBanner />
       <SocialEmbeds />
     </div>

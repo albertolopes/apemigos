@@ -125,10 +125,6 @@ export class NewsService {
         // Não loga como erro, pois é uma operação normal
         throw error;
       }
-      console.error(
-        `Erro ao buscar conteúdo da notícia por slug ${slug}:`,
-        error
-      );
       throw new Error(
         error.response?.data?.message || 'Erro ao carregar conteúdo da notícia'
       );

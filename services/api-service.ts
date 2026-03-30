@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { authService } from './auth-service';
 
-const baseURL = typeof window === 'undefined'
-  ? process.env.NEXT_PUBLIC_API_URL
-  : '/api/proxy';
+const baseURL =
+  typeof window === 'undefined'
+    ? process.env.NEXT_PUBLIC_API_URL
+    : '/api/proxy';
 
 const api = axios.create({
   baseURL,
@@ -78,7 +79,10 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // Trata 401 (Unauthorized) e 403 (Forbidden) como possíveis tokens expirados
-    if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry) {
+    if (
+      (error.response?.status === 401 || error.response?.status === 403) &&
+      !originalRequest._retry
+    ) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });

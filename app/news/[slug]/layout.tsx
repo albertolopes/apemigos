@@ -12,8 +12,13 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
+
+  // Evita buscar metadados se o slug for claramente inválido ou placeholder
+  if (!slug || slug === 'undefined' || slug.includes('favicon')) {
+    return { title: 'Notícia | Apemigos' };
+  }
+
   try {
-    // Tentativa de buscar metadados no servidor. Se falhar, usa fallbacks.
     const item: NewsContentResponse = await newsService.getNewsContentBySlug(
       slug
     );
@@ -52,7 +57,7 @@ export async function generateMetadata({
       },
     };
   } catch (err) {
-    // Se a busca falhar no SSR (ex: rede), retorna título genérico mas funcional
+    // Silencia o erro no log para slugs não encontrados durante a geração de metadados
     return {
       title: 'Notícias | Apemigos',
     };
