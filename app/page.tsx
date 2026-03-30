@@ -4,6 +4,7 @@ import SocialEmbeds from './components/SocialEmbeds/SocialEmbeds';
 import DonateBanner from './components/DonateBanner/DonateBanner';
 import Link from 'next/link';
 import RecentNews from '@app/components/RecentNews/RecentNews';
+import ShopHighlight from './components/ShopHighlight/ShopHighlight';
 
 export default function Home() {
   return (
@@ -136,6 +137,8 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      <ShopHighlight />
       <RecentNews />
       <DonateBanner />
       <SocialEmbeds />

@@ -9,6 +9,7 @@ const navbarItems = [
   { ref: '/about', label: 'Sobre a Apemigos' },
   { ref: '/news', label: 'Notícias' },
   { ref: '/projects', label: 'Projetos' },
+  { ref: '/shop', label: 'Loja Apemigos' },
   //   { ref: '/team', label: 'Equipe' },
   { ref: '/association', label: 'Cartão da pessoa com EM' },
   { ref: '/contact', label: 'Contato' },
