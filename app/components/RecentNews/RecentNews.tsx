@@ -35,7 +35,7 @@ export default function RecentNews() {
             Últimas Notícias
           </h2>
           <p className="text-slate-500 text-sm mt-1">
-            Fique por dentro das novidades da ONG
+            Fique por dentro das novidades
           </p>
         </div>
         <Link
