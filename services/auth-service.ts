@@ -75,9 +75,10 @@ export class AuthService {
 
   private async generateServiceToken(): Promise<string> {
     try {
-      const loginUrl = typeof window === 'undefined'
-        ? `${BASE_URL.replace(/\/+$/, '')}/api/auth/login`
-        : '/api/service-login';
+      const loginUrl =
+        typeof window === 'undefined'
+          ? `${BASE_URL.replace(/\/+$/, '')}/api/auth/login`
+          : '/api/service-login';
 
       const res = await fetch(loginUrl, {
         method: 'POST',
@@ -103,7 +104,9 @@ export class AuthService {
           this.saveToken(cookieToken, undefined);
           return cookieToken;
         }
-        throw new Error('Token não recebido na resposta nem encontrado no cookie');
+        throw new Error(
+          'Token não recebido na resposta nem encontrado no cookie'
+        );
       }
 
       this.saveToken(loginData.token, loginData.expiresIn);
@@ -151,7 +154,7 @@ export class AuthService {
         this.saveToken(cookieToken, undefined);
         return cookieToken;
       }
-    } catch (e) { }
+    } catch (e) {}
 
     return await this.generateServiceToken();
   }

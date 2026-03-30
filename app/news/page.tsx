@@ -180,11 +180,7 @@ function NewsContent() {
             // Se for o último elemento, anexa a ref para o observer
             if (items.length === index + 1) {
               return (
-                <NewsCard
-                  ref={lastNewsElementRef}
-                  key={item.id}
-                  item={item}
-                />
+                <NewsCard ref={lastNewsElementRef} key={item.id} item={item} />
               );
             } else {
               return <NewsCard key={item.id} item={item} />;

@@ -189,27 +189,27 @@ curl -i -H "Accept: application/json" "${NEXT_PUBLIC_API_URL:-http://localhost:8
 
 Páginas públicas (frontend):
 
-- /  — Página inicial
-- /about  — Sobre a associação
-- /association  — Página "Associe-se" (formulário de adesão)
-- /contact  — Contato
-- /news  — Lista de notícias
-- /news/[slug]  — Página de notícia (acessa por slug)
-- /projects  — Lista de projetos
-- /projects/[slug]  — Página de projeto
-- /projects/rifa  — Página específica (rifa)
-- /team  — Equipe
+- / — Página inicial
+- /about — Sobre a associação
+- /association — Página "Associe-se" (formulário de adesão)
+- /contact — Contato
+- /news — Lista de notícias
+- /news/[slug] — Página de notícia (acessa por slug)
+- /projects — Lista de projetos
+- /projects/[slug] — Página de projeto
+- /projects/rifa — Página específica (rifa)
+- /team — Equipe
 
 APIs (backend / proxied endpoints):
 
-- GET  /api/noticias?page={page}&size={size}  — Busca paginada de notícias
-- GET  /api/noticias/conteudo/slug/{slug}  — Buscar conteúdo da notícia por slug
-- GET  /api/projetos?page={page}&size={size}  — Busca paginada de projetos (padrão 9 por página no frontend)
-- POST /api/associados  — Cadastro de associados (multipart/form-data)
-- POST /api/email  — Envio de e‑mail (aceita HTML no corpo)
-- POST /api/pix/static  — Gera payload + QR Pix (retorno: payload, qrCodeBase64, txid)
-- POST /api/service-login  — Geração de token de serviço (protegido)
-- /api/proxy/...  — Proxy local para encaminhar requisições ao backend e injetar X-Service-Token (side-by-side)
+- GET /api/noticias?page={page}&size={size} — Busca paginada de notícias
+- GET /api/noticias/conteudo/slug/{slug} — Buscar conteúdo da notícia por slug
+- GET /api/projetos?page={page}&size={size} — Busca paginada de projetos (padrão 9 por página no frontend)
+- POST /api/associados — Cadastro de associados (multipart/form-data)
+- POST /api/email — Envio de e‑mail (aceita HTML no corpo)
+- POST /api/pix/static — Gera payload + QR Pix (retorno: payload, qrCodeBase64, txid)
+- POST /api/service-login — Geração de token de serviço (protegido)
+- /api/proxy/... — Proxy local para encaminhar requisições ao backend e injetar X-Service-Token (side-by-side)
 
 > Observação: algumas rotas são chamadas via proxy do frontend para manter o X-Service-Token no servidor (não exposto ao cliente). Consulte o código em `app/api/proxy/[...path]/route.ts`.
 
