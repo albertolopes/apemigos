@@ -1,12 +1,11 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { formatDate } from '@app/utils/date-formatter';
 import testIds from '@app/utils/test-ids';
 import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { newsService, NewsItem, NewsResponse } from '@services';
+import { NewsCard } from './NewsCard';
 
 const ITEMS_PER_PAGE = 12;
 
@@ -178,29 +177,17 @@ function NewsContent() {
         {/* Lista de notícias */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-7 grid-flow-row">
           {items.map((item, index) => {
-            const newsUrl = item.slug ? `/news/${item.slug}` : `/news/${item.id}`;
             // Se for o último elemento, anexa a ref para o observer
             if (items.length === index + 1) {
               return (
-                <Link
-                  href={newsUrl}
+                <NewsCard
                   ref={lastNewsElementRef}
                   key={item.id}
-                  className="relative border flex flex-col group hover:shadow-lg transition-shadow"
-                >
-                  <NewsCardContent item={item} />
-                </Link>
+                  item={item}
+                />
               );
             } else {
-              return (
-                <Link
-                  href={newsUrl}
-                  key={item.id}
-                  className="relative border flex flex-col group hover:shadow-lg transition-shadow"
-                >
-                  <NewsCardContent item={item} />
-                </Link>
-              );
+              return <NewsCard key={item.id} item={item} />;
             }
           })}
         </div>
@@ -230,45 +217,5 @@ export default function NewsPage() {
     <Suspense fallback={<div>Carregando...</div>}>
       <NewsContent />
     </Suspense>
-  );
-}
-
-// Componente auxiliar para o card de notícia
-function NewsCardContent({ item }: { item: NewsItem }) {
-  return (
-    <>
-      <div className="h-[240px] relative w-full bg-gray-200">
-        <div className="absolute inset-0 overflow-hidden">
-          {item.image ? (
-            <Image
-              src={item.image}
-              alt={item.title}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-              unoptimized
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold text-xl">
-              N/A
-            </div>
-          )}
-        </div>
-        <span className="bg-orange-500 text-white px-4 py-1 text-sm absolute bottom-[-15px] left-4 z-20 shadow-md">
-          {formatDate(new Date(item.date))}
-        </span>
-      </div>
-
-      <div className="bg-white pt-8 px-6 pb-6 flex flex-col flex-grow relative z-10">
-        <h2 className="font-site text-xl mb-4 line-clamp-2 min-h-[3.5rem] group-hover:text-orange-600 transition-colors">
-          {item.title}
-        </h2>
-        <p className="text-slate-600 text-sm mb-6 line-clamp-3 flex-grow">
-          {item.shortDescription}
-        </p>
-        <span className="text-orange-500 font-site hover:underline mt-auto inline-block">
-          Saiba Mais
-        </span>
-      </div>
-    </>
   );
 }
