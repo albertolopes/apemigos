@@ -1,67 +1,23 @@
-'use client';
-
-import { use, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { LongDescription } from './LongDescription';
-import { newsService, NewsContentResponse } from '@services';
-import axios from 'axios';
+import { newsService } from '@services';
+import { notFound } from 'next/navigation';
 
-export default function New({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = use(params);
-  const router = useRouter();
-  const [item, setItem] = useState<NewsContentResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
-  useEffect(() => {
-    const controller = new AbortController();
+export default async function New({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
 
-    async function fetchData() {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        const response: NewsContentResponse =
-          await newsService.getNewsContentBySlug(slug, controller.signal);
-
-        setItem(response);
-      } catch (err) {
-        if (axios.isCancel(err)) {
-          return;
-        }
-        console.error('Erro ao carregar notícia:', err);
-        setError('Erro ao carregar a notícia. Tente novamente.');
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      controller.abort();
-    };
-  }, [slug, router]);
-
-  if (isLoading) {
-    return (
-      <div className="text-center py-20 text-slate-600">
-        Carregando notícia...
-      </div>
-    );
-  }
-
-  if (error) {
-    return <div className="text-center py-20 text-red-500">⚠️ {error}</div>;
-  }
+  // No servidor, o cache() unifica esta chamada com a do layout (generateMetadata)
+  const item = await newsService.getNewsContentBySlug(slug);
 
   if (!item) {
-    return (
-      <div className="text-center py-20 text-slate-600">
-        Notícia não encontrada.
-      </div>
-    );
+    notFound();
   }
 
   // Esquema de Dados Estruturados (JSON-LD) para o Google
@@ -84,7 +40,6 @@ export default function New({ params }: { params: Promise<{ slug: string }> }) {
 
   return (
     <div className="relative">
-      {/* Script para o Google ler os metadados estruturados */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -108,12 +63,10 @@ export default function New({ params }: { params: Promise<{ slug: string }> }) {
       </div>
       <div className="max-w-7xl mx-auto mt-[-120px] relative bg-white px-8 sm:px-20 pb-20 rounded-t-3xl shadow-sm">
         <article className="pt-12">
-          {/* Título Principal SEO H1 - Cor Laranja */}
           <h1 className="text-center py-6 font-site text-2xl md:text-4xl text-orange-500 leading-tight">
             {item.noticia.title}
           </h1>
 
-          {/* Resumo/Descrição Curta - Cor Slate-600 */}
           <p className="text-slate-600 py-4 max-w-3xl text-base md:text-lg mx-auto text-center font-normal leading-relaxed border-b border-slate-100 mb-6">
             {item.noticia.shortDescription}
           </p>
