@@ -7,7 +7,7 @@ import RecentNews from '@app/components/RecentNews/RecentNews';
 
 export default function Home() {
   return (
-    <div className="mx-auto relative sm:px-20 py-5">
+    <div className="mx-auto relative sm:px-20 py-2">
       <div className="text-center w-full relative">
         <div className="absolute top-0 left-0 h-[200px] sm:h-[calc(100%-55px)] w-full bg-black opacity-50"></div>
         <video
@@ -38,7 +38,7 @@ export default function Home() {
       </div>
 
       <div
-        className="flex mt-12 sm:mt-32 sm:gap-12 flex-col sm:flex-row"
+        className="flex mt-6 sm:mt-16 sm:gap-6 flex-col sm:flex-row"
         data-testid={testIds.HOME_PAGE.HIGHLIGHTS}
       >
         <div className="basis-1/3">
