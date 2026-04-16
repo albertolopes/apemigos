@@ -4,7 +4,7 @@ import testIds from '@app/utils/test-ids';
 
 const Footer = () => (
   <footer
-    className="m-h-56 leading-7 sm:px-14 sm:pt-14 font-site"
+    className="m-h-56 leading-7 sm:px-20 sm:pt-2 font-site"
     data-testid={testIds.LAYOUT.FOOTER}
   >
     <div className="flex flex-col sm:flex-row">
