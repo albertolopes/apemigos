@@ -29,7 +29,7 @@ const StyledNavLink = ({
   <NavLink
     className={`${className ?? ''} ${
       highlighted
-        ? 'bg-orange-500 px-4 py-2 font-site text-white transition hover:bg-orange-600'
+        ? 'bg-orange-500 px-5 py-3 text-base font-site text-white transition hover:bg-orange-600'
         : isActive
         ? 'text-orange-500'
         : 'hover:text-orange-500'
