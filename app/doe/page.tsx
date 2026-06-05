@@ -31,7 +31,7 @@ export default function DonatePage() {
     <div className="relative pb-16">
       <div className="relative h-[320px] w-full sm:h-[460px]">
         <Image
-          src="https://i.imgur.com/khWgFyK.jpeg"
+          src="https://i.imgur.com/80zkthg.jpeg"
           alt="Pessoa recebendo apoio em ação da Apemigos"
           fill
           style={{ objectFit: 'cover' }}
@@ -43,13 +43,8 @@ export default function DonatePage() {
             Doações
           </p>
           <h1 className="mt-4 max-w-4xl font-site text-4xl leading-tight sm:text-6xl">
-            Uma página direta para apoiar a Apemigos
+            Sua doação transforma cuidado em presença.
           </h1>
-          <p className="mt-4 max-w-2xl text-sm text-slate-100 sm:text-lg">
-            Doe de forma simples e ajude a manter acolhimento, informação e
-            mobilização em defesa de pessoas com esclerose múltipla e doenças
-            raras.
-          </p>
         </div>
       </div>
 
@@ -61,10 +56,11 @@ export default function DonatePage() {
                 Sua contribuição mantém a rede ativa
               </h2>
               <p className="mt-4 text-sm text-slate-500 sm:text-base">
-                A referência da ABEM mostra bem o essencial de uma página de
-                doação: explicar a causa, facilitar a contribuição e reduzir
-                ruído. Aqui, a página segue o padrão visual da Apemigos e
-                concentra só o que importa para converter com clareza.
+                A sua doação é essencial para que a Apemigos continue oferecendo
+                acolhimento, informação qualificada e apoio a pessoas com
+                esclerose múltipla e doenças raras. Cada contribuição ajuda a
+                manter projetos, campanhas, ações de conscientização e a
+                presença ativa da associação ao lado de pacientes e famílias.
               </p>
             </div>
 
@@ -116,16 +112,16 @@ export default function DonatePage() {
               Se quiser entender melhor as frentes da associação antes de doar,
               veja quem é a Apemigos e entre em contato com a equipe.
             </p>
-            <div className="mt-6 flex flex-wrap gap-4">
+            <div className="mt-6 flex flex-col gap-4">
               <Link
                 href="/about"
-                className="border border-white px-5 py-3 text-sm transition hover:bg-white hover:text-slate-800"
+                className="inline-flex min-w-[220px] items-center justify-center border border-white px-5 py-3 text-center text-sm transition hover:bg-white hover:text-slate-800"
               >
                 Conhecer a Apemigos
               </Link>
               <Link
                 href="/contact"
-                className="bg-orange-500 px-5 py-3 text-sm transition hover:bg-orange-600"
+                className="inline-flex min-w-[220px] items-center justify-center bg-orange-500 px-5 py-3 text-center text-sm transition hover:bg-orange-600"
               >
                 Falar com a equipe
               </Link>
