@@ -31,7 +31,7 @@ export default function DonatePage() {
     <div className="relative pb-16">
       <div className="relative h-[320px] w-full sm:h-[460px]">
         <Image
-          src="https://i.imgur.com/80zkthg.jpeg"
+          src="https://i.imgur.com/khWgFyK.jpeg"
           alt="Pessoa recebendo apoio em ação da Apemigos"
           fill
           style={{ objectFit: 'cover' }}
