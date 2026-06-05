@@ -99,7 +99,7 @@ export default function DonatePage() {
         </section>
 
         <section className="mt-16 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <div className="border-y-4 border-orange-500 bg-white px-6 py-8 shadow-sm sm:px-10">
+          <div className="bg-white px-6 py-8 shadow-sm sm:px-10">
             <h2 className="font-site text-3xl text-orange-500">
               Formas de apoiar
             </h2>

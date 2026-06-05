@@ -9,7 +9,7 @@ export default function DonatePixPanel() {
   const [amount, setAmount] = useState('');
   const [qrSrc, setQrSrc] = useState<string | null>(null);
   const [txid, setTxid] = useState('');
-  const [payload, setPayload] = useState('');
+  const [lastResponse, setLastResponse] = useState<any | null>(null);
   const [copiedMessage, setCopiedMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,6 +49,11 @@ export default function DonatePixPanel() {
     return parts[0] + '.' + parts.slice(1).join('').slice(0, 2);
   }
 
+  function normalizePixPayload(value?: string) {
+    if (!value) return '';
+    return String(value).replace(/\s+/g, '').trim();
+  }
+
   async function copyText(text: string, message: string) {
     try {
       await navigator.clipboard.writeText(text);
@@ -59,19 +64,19 @@ export default function DonatePixPanel() {
     }
   }
 
-  async function handleGeneratePix() {
+  async function generatePixFor(value?: string) {
     setCopiedMessage('');
     setError(null);
     setLoading(true);
-
-    const normalizedAmount = normalizeToFloatString(amount);
+    const raw = value ?? amount ?? '';
+    const normalizedAmount = normalizeToFloatString(raw);
 
     if (normalizedAmount) {
       const numeric = Number.parseFloat(normalizedAmount);
       if (Number.isNaN(numeric) || numeric <= 0) {
         setLoading(false);
         setError('Informe um valor válido maior que zero.');
-        return;
+        return null;
       }
     }
 
@@ -80,6 +85,16 @@ export default function DonatePixPanel() {
         ? Number(Number.parseFloat(normalizedAmount).toFixed(2))
         : undefined;
       const data = await pixService.createStatic(numeric);
+      const normalizedPayload = normalizePixPayload(data?.payload);
+
+      setLastResponse(
+        data
+          ? {
+              ...data,
+              payload: normalizedPayload || data.payload || '',
+            }
+          : null
+      );
 
       if (data.qrCodeBase64) {
         setQrSrc(
@@ -87,31 +102,39 @@ export default function DonatePixPanel() {
             ? data.qrCodeBase64
             : `data:image/png;base64,${data.qrCodeBase64}`
         );
-      } else if (data.payload) {
+      } else if (normalizedPayload) {
         setQrSrc(
           `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(
-            data.payload
+            normalizedPayload
           )}`
         );
       } else {
         setQrSrc(null);
       }
 
-      setPayload(data.payload || '');
       setTxid(data.txid || '');
+      if (raw) {
+        setAmount(raw);
+      }
+      return data?.qrCodeBase64 || data?.payload || null;
     } catch (requestError) {
       console.error('Erro ao gerar pix via backend', requestError);
       setError('Não foi possível gerar o QR Pix no momento.');
       setQrSrc(null);
-      setPayload('');
       setTxid('');
+      setLastResponse(null);
+      return null;
     } finally {
       setLoading(false);
     }
   }
 
+  function handleGeneratePix() {
+    void generatePixFor(amount);
+  }
+
   return (
-    <section className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_380px]">
+    <section className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_350px]">
       <div className="border-y-4 border-orange-500 bg-white px-6 py-8 shadow-sm sm:px-10">
         <h2 className="font-site text-3xl text-orange-500">Doe com Pix</h2>
         <p className="mt-4 max-w-2xl text-sm text-slate-500 sm:text-base">
@@ -168,16 +191,20 @@ export default function DonatePixPanel() {
           </div>
         </div>
 
-        {payload ? (
+        {lastResponse?.payload ? (
           <div className="mt-6 border border-slate-200 bg-white p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
               Pix copia e cola
             </p>
-            <p className="mt-3 break-words text-sm text-slate-600">{payload}</p>
+            <p className="mt-3 break-words text-sm text-slate-600">
+              {String(lastResponse.payload)}
+            </p>
             <div className="mt-4 flex flex-wrap items-center gap-4">
               <button
                 type="button"
-                onClick={() => copyText(payload, 'Código Pix copiado.')}
+                onClick={() =>
+                  copyText(String(lastResponse.payload), 'Código Pix copiado.')
+                }
                 className="border border-slate-300 px-4 py-2 text-sm text-slate-700 transition hover:border-orange-500 hover:text-orange-500"
               >
                 Copiar código
@@ -196,30 +223,32 @@ export default function DonatePixPanel() {
         ) : null}
       </div>
 
-      <aside className="border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="relative mx-auto aspect-square w-full max-w-[260px] overflow-hidden border border-slate-200 bg-slate-50">
-          {qrSrc ? (
-            <Image
-              src={qrSrc}
-              alt="QR Code para doação via Pix"
-              fill
-              className="object-contain p-4"
-              unoptimized
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center px-6 text-center text-sm text-slate-400">
-              O QR Pix aparece aqui depois que o valor for gerado.
-            </div>
-          )}
-        </div>
+      <aside className="border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="flex h-full flex-col">
+          <div className="relative mx-auto aspect-square w-full max-w-[300px] overflow-hidden border border-slate-200 bg-slate-50">
+            {qrSrc ? (
+              <Image
+                src={qrSrc}
+                alt="QR Code para doação via Pix"
+                fill
+                className="object-contain p-4"
+                unoptimized
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center px-6 text-center text-sm text-slate-400">
+                O QR Pix aparece aqui depois que o valor for gerado.
+              </div>
+            )}
+          </div>
 
-        <div className="mt-6 space-y-3 text-sm text-slate-500">
-          <p>
-            1. Defina o valor ou deixe em branco para doar diretamente pela
-            chave Pix.
-          </p>
-          <p>2. Gere o QR e escaneie no aplicativo do seu banco.</p>
-          <p>3. Se preferir, use o código copia e cola.</p>
+          <div className="mt-auto pt-10 space-y-5 text-base leading-8 text-slate-500">
+            <p>
+              1. Defina o valor ou deixe em branco para doar diretamente pela
+              chave Pix.
+            </p>
+            <p>2. Gere o QR e escaneie no aplicativo do seu banco.</p>
+            <p>3. Se preferir, use o código copia e cola.</p>
+          </div>
         </div>
       </aside>
     </section>
