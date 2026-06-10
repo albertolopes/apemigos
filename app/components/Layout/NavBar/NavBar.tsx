@@ -8,24 +8,32 @@ const navbarItems = [
   { ref: '/', label: 'Início' },
   { ref: '/about', label: 'Sobre a Apemigos' },
   { ref: '/news', label: 'Notícias' },
-  { ref: '/projects', label: 'Projetos' },
+  // { ref: '/projects', label: 'Projetos' },
+  { ref: '/alto-custo', label: 'Alto Custo' },
   //   { ref: '/team', label: 'Equipe' },
-  { ref: '/association', label: 'Cartão da pessoa com EM' },
+  // { ref: '/association', label: 'Cartão da pessoa com EM' },
   { ref: '/contact', label: 'Contato' },
+  { ref: '/doe', label: 'Doe', highlighted: true },
 ];
 
 const StyledNavLink = ({
   isActive,
+  highlighted,
   className,
   ...linkProps
 }: LinkProps & {
   isActive: boolean;
+  highlighted?: boolean;
   children: React.ReactNode;
   className?: string;
 }) => (
   <NavLink
     className={`${className ?? ''} ${
-      isActive ? 'text-orange-500' : 'hover:text-orange-500'
+      highlighted
+        ? 'inline-flex items-center rounded-full bg-orange-500 px-4 py-2 font-site text-sm text-white shadow-sm shadow-orange-500/20 ring-1 ring-orange-500/20 transition hover:-translate-y-0.5 hover:bg-orange-600 hover:shadow-md'
+        : isActive
+        ? 'text-orange-500'
+        : 'hover:text-orange-500'
     }`}
     {...linkProps}
   />
@@ -73,10 +81,11 @@ export function NavBar() {
         } transition-all duration-500 ease-in-out md:block overflow-hidden max-md:absolute max-md:animate-sideways-once max-md:h-screen max-md:bg-white max-md:pt-24 z-40 top-0 right-0`}
       >
         <ul className="flex flex-col items-center md:flex-row gap-10 md:gap-4 min-[900px]:gap-5 lg:gap-12 justify-end text-sm md:text-[15px] leading-[22px]">
-          {navbarItems.map(({ ref, label }) => (
-            <li key={ref} className="text-slate-500 relative">
+          {navbarItems.map(({ ref, label, highlighted }) => (
+            <li key={ref} className="text-slate-700 relative">
               <StyledNavLink
                 isActive={pathname === ref}
+                highlighted={highlighted}
                 href={ref}
                 onClick={() => {
                   setIsMenuShown(false);

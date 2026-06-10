@@ -88,7 +88,7 @@ export default function RootLayout({
       <body className="text-orange-500 bg-white">
         <Header />
         <main className="bg-white min-h-[600px]">{children}</main>
-        <div className="mt-10 sm:mt-20">
+        <div className="mt-6 sm:mt-10">
           <Footer />
         </div>
         <Analytics />

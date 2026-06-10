@@ -10,12 +10,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Páginas estáticas principais
   const staticRoutes = [
     '',
-    '/news',
-    '/projects',
-    '/sobre-nos',
-    '/contato',
+    '/about',
+    '/contact',
+    // '/association',
     '/doe',
-    '/associados/cadastro',
+    '/alto-custo',
+    '/news',
+    // '/projects',
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),

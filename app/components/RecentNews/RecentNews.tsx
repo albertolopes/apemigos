@@ -74,7 +74,7 @@ export default function RecentNews() {
               </div>
             </div>
             <div className="p-4 flex flex-col flex-grow">
-              <h3 className="font-site text-lg leading-snug mb-2 group-hover:text-orange-500 transition-colors line-clamp-2">
+              <h3 className="font-site text-slate-700 text-lg leading-snug mb-2 group-hover:text-orange-600 transition-colors line-clamp-2">
                 {item.title}
               </h3>
               <p className="text-slate-600 text-xs line-clamp-2 mb-4 flex-grow">

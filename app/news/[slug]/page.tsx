@@ -63,7 +63,7 @@ export default async function New({
       </div>
       <div className="max-w-7xl mx-auto mt-[-120px] relative bg-white px-8 sm:px-20 pb-20 rounded-t-3xl shadow-sm">
         <article className="pt-12">
-          <h1 className="text-center py-6 font-site text-2xl md:text-4xl text-orange-500 leading-tight">
+          <h1 className="text-center py-6 font-site text-2xl md:text-4xl text-orange-600 leading-tight">
             {item.noticia.title}
           </h1>
 

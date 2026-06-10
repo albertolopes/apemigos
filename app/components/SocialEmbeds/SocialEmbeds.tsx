@@ -3,7 +3,6 @@ import { useEffect } from 'react';
 
 export default function SocialEmbeds() {
   useEffect(() => {
-    // Load Instagram embed script if not loaded
     if (typeof window === 'undefined') return;
     const anyWin = window as any;
     if (!anyWin.instgrm) {
@@ -28,63 +27,70 @@ export default function SocialEmbeds() {
   }, []);
 
   return (
-    // Use parent container's width so SocialEmbeds aligns with DonateBanner
     <section className="w-full py-8">
-      <div className="w-full">
-        <h2 className="text-center font-site text-2xl text-orange-500 mb-4">
-          Acompanhe nas redes
-        </h2>
-
-        <div className="max-w-3xl mx-auto text-center mb-6 px-4 sm:px-0">
-          <p className="text-slate-600 text-sm">
-            Acompanhe nossas ações nas redes sociais e participe da causa.
-            Curta, compartilhe e ajude a dar voz às pessoas com Esclerose
-            Múltipla e doenças raras.
+      <div className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
+        <aside className="h-fit border-t-4 border-orange-500 bg-white p-6 shadow-sm sm:p-8">
+          <p className="font-site text-sm uppercase tracking-[0.2em] text-orange-500">
+            Redes sociais
           </p>
-        </div>
+          <h2 className="mt-2 font-site text-3xl text-slate-700">
+            Acompanhe nas redes
+          </h2>
+          <p className="mt-4 text-sm leading-7 text-slate-500">
+            As redes da Apemigos aproximam pacientes, familiares e apoiadores.
+            Use esses canais para acompanhar a rotina da associacao,
+            compartilhar informacao e fortalecer a causa.
+          </p>
+          <div className="mt-6 bg-orange-50 p-4">
+            <p className="font-site text-lg text-slate-700">
+              Compartilhar tambem e apoiar.
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              Um post enviado para a pessoa certa pode virar orientacao,
+              acolhimento ou acesso a uma rede de suporte.
+            </p>
+          </div>
+        </aside>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-          {/* YouTube card */}
-          <article className="bg-white border rounded-lg overflow-hidden shadow-sm flex flex-col">
-            <div className="relative w-full h-56 md:h-80 lg:h-96 bg-black">
+        <div className="grid gap-6 md:grid-cols-2">
+          <article className="bg-white shadow-sm">
+            <div className="relative h-56 w-full bg-black md:h-72 lg:h-80">
               <iframe
                 title="Vídeo YouTube Apemigos"
                 src="https://www.youtube.com/embed/r0tIISAZTQY"
-                className="absolute inset-0 w-full h-full"
+                className="absolute inset-0 h-full w-full"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
             </div>
-
-            <div className="p-4 flex-1 flex flex-col">
-              <h3 className="font-site text-lg text-slate-700">YouTube</h3>
-              <p className="text-slate-500 my-2 text-sm flex-1">
-                Inscreva-se no nosso canal para acompanhar vídeos, eventos e
-                gravações das nossas ações.
+            <div className="p-5 sm:p-6">
+              <p className="font-site text-xs uppercase tracking-[0.2em] text-orange-500">
+                Video
               </p>
-              <div className="mt-2 flex items-center justify-between">
-                <a
-                  href="https://www.youtube.com/@apemigosbrasilia413/videos"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block btn-main bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm"
-                >
-                  Visitar canal
-                </a>
-                <span className="text-xs text-slate-500">
-                  Assista e compartilhe
-                </span>
-              </div>
+              <h3 className="mt-2 font-site text-2xl text-slate-700">
+                YouTube
+              </h3>
+              <p className="mt-3 text-sm leading-6 text-slate-500">
+                Entrevistas, eventos e conversas para assistir, rever e
+                compartilhar com quem precisa de informacao confiavel.
+              </p>
+              <a
+                href="https://www.youtube.com/@apemigosbrasilia413/videos"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-5 inline-block font-site text-sm text-slate-500 underline decoration-orange-500 underline-offset-4 hover:text-orange-500"
+              >
+                Visitar canal
+              </a>
             </div>
           </article>
 
-          {/* Instagram card */}
-          <article className="bg-white border rounded-lg overflow-hidden shadow-sm flex flex-col">
-            <div className="relative w-full h-56 md:h-80 lg:h-96 flex items-center justify-center bg-black">
-              <figure className="w-full h-full flex items-center justify-center">
+          <article className="bg-white shadow-sm">
+            <div className="relative flex h-56 w-full items-center justify-center bg-black md:h-72 lg:h-80">
+              <figure className="flex h-full w-full items-center justify-center">
                 <blockquote
-                  className="instagram-media m-0 w-full h-full flex items-center justify-center"
+                  className="instagram-media m-0 flex h-full w-full items-center justify-center"
                   data-instgrm-permalink="https://www.instagram.com/p/DNQrREWOEVa"
                   data-instgrm-version="14"
                   style={{
@@ -98,32 +104,32 @@ export default function SocialEmbeds() {
                     href="https://www.instagram.com/p/DNQrREWOEVa"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-slate-700 text-sm"
+                    className="text-sm text-slate-700"
                   >
                     Veja no Instagram
                   </a>
                 </blockquote>
               </figure>
             </div>
-
-            <div className="p-4 flex-1 flex flex-col">
-              <h3 className="font-site text-lg text-slate-700">Instagram</h3>
-              <p className="text-slate-500 my-2 text-sm flex-1">
-                Compartilhe para ajudar a ampliar nossa mensagem.
+            <div className="p-5 sm:p-6">
+              <p className="font-site text-xs uppercase tracking-[0.2em] text-orange-500">
+                Comunidade
               </p>
-              <div className="mt-2 flex items-center justify-between">
-                <a
-                  href="https://www.instagram.com/p/DNQrREWOEVa"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block btn-main bg-slate-800 hover:bg-slate-900 text-white px-3 py-2 rounded text-sm"
-                >
-                  Abrir post
-                </a>
-                <span className="text-xs text-slate-500">
-                  Siga e compartilhe
-                </span>
-              </div>
+              <h3 className="mt-2 font-site text-2xl text-slate-700">
+                Instagram
+              </h3>
+              <p className="mt-3 text-sm leading-6 text-slate-500">
+                Campanhas, bastidores e chamados para participacao em uma
+                linguagem simples, feita para circular.
+              </p>
+              <a
+                href="https://www.instagram.com/p/DNQrREWOEVa"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-5 inline-block font-site text-sm text-slate-500 underline decoration-orange-500 underline-offset-4 hover:text-orange-500"
+              >
+                Abrir post
+              </a>
             </div>
           </article>
         </div>

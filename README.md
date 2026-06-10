@@ -191,6 +191,7 @@ Páginas públicas (frontend):
 
 - / — Página inicial
 - /about — Sobre a associação
+- /doe — Página dedicada de doações
 - /association — Página "Associe-se" (formulário de adesão)
 - /contact — Contato
 - /news — Lista de notícias
