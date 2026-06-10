@@ -134,8 +134,8 @@ export default function DonatePixPanel() {
   }
 
   return (
-    <section className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_350px]">
-      <div className="border-y-4 border-orange-500 bg-white px-6 py-8 shadow-sm sm:px-10">
+    <section className="grid min-w-0 gap-8 lg:grid-cols-[minmax(0,1.1fr)_350px]">
+      <div className="min-w-0 border-y-4 border-orange-500 bg-white px-6 py-8 shadow-sm sm:px-10">
         <h2 className="font-site text-3xl text-orange-500">Doe com Pix</h2>
         <p className="mt-4 max-w-2xl text-sm text-slate-500 sm:text-base">
           Gere um QR Pix com o valor que desejar ou use a chave direta da
@@ -180,7 +180,9 @@ export default function DonatePixPanel() {
             Chave Pix
           </p>
           <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <strong className="break-all text-slate-700">{pixKey}</strong>
+            <strong className="min-w-0 break-all text-slate-700">
+              {pixKey}
+            </strong>
             <button
               type="button"
               onClick={() => copyText(pixKey, 'Chave Pix copiada.')}
@@ -196,7 +198,7 @@ export default function DonatePixPanel() {
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
               Pix copia e cola
             </p>
-            <p className="mt-3 break-words text-sm text-slate-600">
+            <p className="mt-3 break-all text-sm text-slate-600">
               {String(lastResponse.payload)}
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-4">
@@ -223,9 +225,9 @@ export default function DonatePixPanel() {
         ) : null}
       </div>
 
-      <aside className="border border-slate-200 bg-white p-5 shadow-sm">
+      <aside className="min-w-0 border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex h-full flex-col">
-          <div className="relative mx-auto aspect-square w-full max-w-[300px] overflow-hidden border border-slate-200 bg-slate-50">
+          <div className="relative mx-auto aspect-square w-full max-w-full overflow-hidden border border-slate-200 bg-slate-50 sm:max-w-[300px]">
             {qrSrc ? (
               <Image
                 src={qrSrc}
