@@ -51,7 +51,9 @@ export default function Home() {
             />
           </div>
           <div className="border-y-4 border-orange-500 p-8 sm:w-60 relative bg-white sm:mt-[-300px]">
-            <h3 className="text-2xl font-site">Nossas Iniciativas</h3>
+            <h3 className="text-2xl text-slate-700 font-site">
+              Nossas Iniciativas
+            </h3>
             <p className="text-slate-500 my-6 text-sm">
               Trabalhamos para oferecer informação clara, apoio emocional e
               oportunidades de conexão para pessoas que convivem com a esclerose
@@ -60,7 +62,7 @@ export default function Home() {
             </p>
             <Link
               href="/projects"
-              className="text-slate-500 py-6 font-site"
+              className="text-orange-500 py-6 font-site"
               data-testid={testIds.HOME_PAGE.OUR_INITIATIVES_CTA}
             >
               Clique aqui
@@ -77,7 +79,9 @@ export default function Home() {
             />
           </div>
           <div className="border-y-4 border-orange-500 p-8 sm:w-60 relative bg-white sm:ml-32 sm:mt-[-430px]">
-            <h3 className="text-2xl font-site">Sobre a Apemigos</h3>
+            <h3 className="text-2xl text-slate-700 font-site">
+              Sobre a Apemigos
+            </h3>
             <p className="text-slate-500 my-6 text-sm">
               Fundada e presidida por Ana Paula Morais, a Apemigos oferece
               suporte biopsicossocial, promove inclusão social e dissemina
@@ -86,7 +90,7 @@ export default function Home() {
               a tratamentos com base em empatia, ética, ciência, solidariedade e
               protagonismo do paciente.
             </p>
-            <Link href="/about" className="text-slate-500 py-6 font-site">
+            <Link href="/about" className="text-orange-500 py-6 font-site">
               Clique aqui
             </Link>
           </div>
@@ -103,13 +107,15 @@ export default function Home() {
             />
           </div>
           <div className="border-y-4 border-orange-500 p-8 sm:w-60 relative bg-white sm:ml-44 sm:mt-[-230px]">
-            <h3 className="text-2xl font-site">Notícias Recentes</h3>
+            <h3 className="text-2xl text-slate-700 font-site">
+              Notícias Recentes
+            </h3>
             <p className="text-slate-500 my-6 text-sm">
               Acompanhe as últimas notícias, descobertas científicas e avanços
               no tratamento da esclerose múltipla. Mantemos você informado sobre
               tudo que pode impactar sua qualidade de vida.
             </p>
-            <Link href="/news" className="text-slate-500 py-6 font-site">
+            <Link href="/news" className="text-orange-500 py-6 font-site">
               Clique aqui
             </Link>
           </div>
@@ -124,13 +130,15 @@ export default function Home() {
             />
           </div>
           <div className="border-y-4 border-orange-500 p-8 sm:w-60 relative bg-white sm:ml-32 sm:mt-[-530px]">
-            <h3 className="text-2xl font-site">Alto Custo sem labirinto</h3>
+            <h3 className="text-2xl text-slate-700 font-site">
+              Alto Custo sem labirinto
+            </h3>
             <p className="text-slate-500 my-6 text-sm">
               Guia facilitado para entender o CEAF/Alto Custo no Distrito
               Federal, encontrar formularios oficiais, conferir sua condicao e
               organizar os documentos antes de protocolar ou agendar.
             </p>
-            <Link href="/alto-custo" className="text-slate-500 py-6 font-site">
+            <Link href="/alto-custo" className="text-orange-500 py-6 font-site">
               Clique aqui
             </Link>
           </div>

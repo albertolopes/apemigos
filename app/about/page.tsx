@@ -124,7 +124,7 @@ export default async function About() {
           {pillars.map((pillar) => (
             <article
               key={pillar.title}
-              className="border-t-4 border-orange-500 bg-white p-6 shadow-sm"
+              className="border border-slate-100 bg-white p-6 shadow-sm"
             >
               <h2 className="font-site text-3xl text-slate-700">
                 {pillar.title}
@@ -155,7 +155,7 @@ export default async function About() {
             {values.map((value) => (
               <article
                 key={value.title}
-                className="border-l-4 border-orange-500 bg-white p-5 shadow-sm"
+                className="border border-slate-100 bg-white p-5 shadow-sm"
               >
                 <h3 className="font-site text-xl text-slate-700">
                   {value.title}

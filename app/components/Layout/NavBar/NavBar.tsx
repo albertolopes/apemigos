@@ -82,7 +82,7 @@ export function NavBar() {
       >
         <ul className="flex flex-col items-center md:flex-row gap-10 md:gap-4 min-[900px]:gap-5 lg:gap-12 justify-end text-sm md:text-[15px] leading-[22px]">
           {navbarItems.map(({ ref, label, highlighted }) => (
-            <li key={ref} className="text-slate-500 relative">
+            <li key={ref} className="text-slate-700 relative">
               <StyledNavLink
                 isActive={pathname === ref}
                 highlighted={highlighted}
