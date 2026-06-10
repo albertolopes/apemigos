@@ -7,7 +7,7 @@
     "debug": "NODE_OPTIONS='--inspect' next dev -p 3005",
     "test": "yarn e2e",
     "e2e": "yarn playwright test",
-    "build": "next build",
+    "build": "NODE_ENV=production next build",
     "start": "next start",
     "lint": "next lint --fix"
   },

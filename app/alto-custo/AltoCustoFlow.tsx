@@ -162,24 +162,51 @@ export default function AltoCustoFlow() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="font-site text-sm uppercase tracking-[0.2em] text-orange-500">
-                Busca por condicao
+                Filtro da lista
               </p>
               <h2 className="mt-2 font-site text-slate-700 text-3xl text-black">
-                Ache sua condicao
+                Encontre sua condicao
               </h2>
+              <p className="mt-3 max-w-xl text-sm leading-6 text-slate-500">
+                Digite parte do nome para filtrar as condicoes abaixo. Depois
+                selecione uma delas para abrir a pagina oficial da SES-DF.
+              </p>
             </div>
             <label className="w-full sm:max-w-sm">
-              <span className="sr-only">Buscar condicao</span>
+              <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                Filtrar condicoes
+              </span>
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Ex.: esclerose, fabry, asma"
+                placeholder="Digite para filtrar: esclerose, fabry, asma..."
                 className="w-full border border-slate-200 px-4 py-3 text-sm text-slate-600 outline-none focus:border-orange-500"
               />
             </label>
           </div>
 
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          <div className="mt-6 flex flex-col gap-2 border border-orange-100 bg-orange-50 px-4 py-3 text-sm text-orange-700 sm:flex-row sm:items-center sm:justify-between">
+            <span>
+              {filteredConditions.length === 1
+                ? '1 condicao encontrada'
+                : `${filteredConditions.length} condicoes encontradas`}
+            </span>
+            {query ? (
+              <button
+                type="button"
+                onClick={() => setQuery('')}
+                className="text-left font-semibold underline underline-offset-4"
+              >
+                Limpar filtro
+              </button>
+            ) : (
+              <span className="text-orange-600">
+                Clique em uma condicao para selecionar.
+              </span>
+            )}
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {filteredConditions.map((condition) => (
               <button
                 key={condition.name}
@@ -206,24 +233,31 @@ export default function AltoCustoFlow() {
 
         <aside className="h-fit border-t-4 border-orange-500 bg-white p-6 shadow-sm sm:p-8">
           <p className="font-site text-sm uppercase tracking-[0.2em] text-orange-500">
-            Condicao selecionada
+            Proximo passo
           </p>
           <h3 className="mt-3 font-site text-slate-700 text-3xl text-black">
             {selectedCondition.name}
           </h3>
           <p className="mt-4 text-sm leading-6 text-slate-500">
-            Esta e a pagina que voce deve conferir antes de preencher a pasta:
-            nela podem estar criterios, formularios, relatorios padronizados,
-            exames e anexos. A Apemigos nao substitui a avaliacao da SES-DF.
+            Abra a pagina oficial desta condicao na SES-DF antes de preencher a
+            pasta. E la que voce confere criterios, formularios, relatorios
+            padronizados, exames e anexos exigidos.
           </p>
+          <div className="mt-5 border-l-4 border-orange-500 bg-orange-50 p-4 text-sm leading-6 text-orange-700">
+            Use este botao para sair da Apemigos e consultar a regra oficial
+            atualizada para <strong>{selectedCondition.name}</strong>.
+          </div>
           <a
             href={selectedCondition.href}
             target="_blank"
             rel="noreferrer"
-            className="btn-main mt-6 inline-block"
+            className="btn-main mt-6 block text-center"
           >
-            Abrir pagina oficial
+            Abrir pagina oficial da condicao
           </a>
+          <p className="mt-3 text-xs leading-5 text-slate-400">
+            O link abre em uma nova aba no site da Secretaria de Saude do DF.
+          </p>
           <a
             href={officialFormsPage}
             target="_blank"
@@ -263,7 +297,9 @@ export default function AltoCustoFlow() {
               rel="noreferrer"
               className="border-t-4 border-orange-500 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
             >
-              <h3 className="font-site text-xl text-slate-700">{document.title}</h3>
+              <h3 className="font-site text-xl text-slate-700">
+                {document.title}
+              </h3>
               <p className="mt-3 text-sm leading-6 text-slate-500">
                 {document.description}
               </p>
