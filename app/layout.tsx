@@ -2,6 +2,7 @@ import './globals.css';
 import Footer from '@app/components/Layout/Footer';
 import Header from '@app/components/Layout/Header';
 import { Metadata } from 'next';
+import Script from 'next/script';
 
 /**
  * Using force dynamic so changes in business assets (e.g. services) are immediately reflected.
@@ -90,6 +91,18 @@ export default function RootLayout({
         <div className="mt-6 sm:mt-10">
           <Footer />
         </div>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-R82SF643GQ"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-R82SF643GQ');
+          `}
+        </Script>
       </body>
     </html>
   );

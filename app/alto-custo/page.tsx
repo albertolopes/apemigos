@@ -159,7 +159,9 @@ export default function AltoCustoPage() {
                 key={step.title}
                 className="border-t-4 border-orange-500 bg-white p-5 shadow-sm"
               >
-                <h3 className="font-site text-slate-700 text-xl text-slate-700">{step.title}</h3>
+                <h3 className="font-site text-slate-700 text-xl text-slate-700">
+                  {step.title}
+                </h3>
                 <p className="mt-3 text-sm leading-6 text-slate-500">
                   {step.text}
                 </p>
@@ -249,7 +251,9 @@ export default function AltoCustoPage() {
               rel="noreferrer"
               className="border-t-4 border-orange-500 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
             >
-              <h3 className="font-site text-xl text-slate-700">Noticia oficial</h3>
+              <h3 className="font-site text-xl text-slate-700">
+                Noticia oficial
+              </h3>
               <p className="mt-3 text-sm leading-6 text-slate-500">
                 Comunicado da SES-DF sobre agendamento on-line sem aguardar
                 renovacao cadastral.
