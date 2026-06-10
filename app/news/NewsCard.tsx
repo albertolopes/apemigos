@@ -39,7 +39,7 @@ export const NewsCard = React.forwardRef<HTMLDivElement, { item: NewsItem }>(
           </div>
 
           <div className="bg-white pt-8 px-6 pb-6 flex flex-col flex-grow relative z-10">
-            <h2 className="font-site text-xl mb-4 line-clamp-2 min-h-[3.5rem] group-hover:text-orange-600 transition-colors">
+            <h2 className="font-site text-slate-600 text-xl mb-4 line-clamp-2 min-h-[3.5rem] group-hover:text-orange-600 transition-colors">
               {item.title}
             </h2>
             <p className="text-slate-600 text-sm mb-6 line-clamp-3 flex-grow">

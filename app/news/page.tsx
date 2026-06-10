@@ -124,17 +124,22 @@ function NewsContent() {
 
       {/* Conteúdo */}
       <div className="max-w-7xl mx-auto mt-[-120px] relative bg-white px-8 sm:px-20 pb-20">
-        <h1
-          className="text-center py-8 text-orange-500 font-site text-3xl"
-          data-testid={testIds.NEWS_PAGE.HEADER}
-        >
-          Notícias e Atualizações
-        </h1>
-        <p className="pt-6 max-w-3xl text-slate-500 text-sm text-center mx-auto">
-          Fique por dentro das últimas notícias, reportagens e comunicados.
-          Acompanhe coberturas de eventos, novidades de projetos e ações da ONG.
-          Informações atualizadas para manter a comunidade bem informada.
-        </p>
+        <div className="max-w-4xl border-t-4 border-orange-500 bg-white p-8 shadow-sm sm:p-12">
+          <p className="font-site text-sm uppercase tracking-[0.25em] text-orange-500">
+            Notícias
+          </p>
+          <h1
+            className="mt-4 font-site text-5xl leading-tight text-slate-700 sm:text-7xl"
+            data-testid={testIds.NEWS_PAGE.HEADER}
+          >
+            Notícias e Atualizações
+          </h1>
+          <p className="mt-6 max-w-3xl text-base leading-8 text-slate-500">
+            Fique por dentro das últimas notícias, reportagens e comunicados.
+            Acompanhe coberturas de eventos, novidades de projetos e ações da
+            ONG. Informações atualizadas para manter a comunidade bem informada.
+          </p>
+        </div>
 
         {/* Search */}
         <div className="mt-8 flex justify-center mb-10">

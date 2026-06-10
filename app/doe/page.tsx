@@ -52,7 +52,7 @@ export default function DonatePage() {
         <section className="border-t-4 border-orange-500 bg-white px-6 py-8 shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:px-10">
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_320px] lg:items-start">
             <div>
-              <h2 className="font-site text-3xl text-orange-500">
+              <h2 className="font-site text-3xl text-slate-700">
                 Sua contribuição mantém a rede ativa
               </h2>
               <p className="mt-4 text-sm text-slate-500 sm:text-base">
@@ -82,7 +82,7 @@ export default function DonatePage() {
         <section className="mt-14 grid gap-6 md:grid-cols-3">
           {donationHighlights.map((item) => (
             <article key={item.title} className="bg-white p-6 shadow-sm">
-              <h2 className="font-site text-2xl text-orange-500">
+              <h2 className="font-site text-2xl text-slate-700">
                 {item.title}
               </h2>
               <p className="mt-4 text-sm text-slate-500">{item.description}</p>
@@ -96,7 +96,7 @@ export default function DonatePage() {
 
         <section className="mt-16 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="bg-white px-6 py-8 shadow-sm sm:px-10">
-            <h2 className="font-site text-3xl text-orange-500">
+            <h2 className="font-site text-3xl text-slate-700">
               Formas de apoiar
             </h2>
             <div className="mt-6 space-y-4 text-sm text-slate-500 sm:text-base">

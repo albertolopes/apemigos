@@ -96,7 +96,7 @@ export default function Home() {
         <div className="basis-2/3">
           <div className="h-[370px] sm:h-[470px] relative">
             <Image
-              src="https://i.imgur.com/khWgFyK.jpeg"
+              src="https://i.imgur.com/imnveaL.png"
               alt="projects"
               fill
               style={{ objectFit: 'cover' }}
@@ -117,20 +117,20 @@ export default function Home() {
         <div className="basis-1/3">
           <div className="h-[370px] sm:h-[470px] relative">
             <Image
-              src="https://i.imgur.com/ZN56KWD.png"
+              src="https://i.imgur.com/8vMvIzd.png"
               alt="projects"
               fill
               style={{ objectFit: 'cover' }}
             />
           </div>
           <div className="border-y-4 border-orange-500 p-8 sm:w-60 relative bg-white sm:ml-32 sm:mt-[-530px]">
-            <h3 className="text-2xl font-site">Cartão da pessoa com EM</h3>
+            <h3 className="text-2xl font-site">Alto Custo sem labirinto</h3>
             <p className="text-slate-500 my-6 text-sm">
-              O Cartão da Pessoa com Esclerose Múltipla auxilia na identificação
-              da condição em estabelecimentos públicos e privados. Solicite o
-              seu e tenha mais segurança e facilidade no acesso a serviços.
+              Guia facilitado para entender o CEAF/Alto Custo no Distrito
+              Federal, encontrar formularios oficiais, conferir sua condicao e
+              organizar os documentos antes de protocolar ou agendar.
             </p>
-            <Link href="/association" className="text-slate-500 py-6 font-site">
+            <Link href="/alto-custo" className="text-slate-500 py-6 font-site">
               Clique aqui
             </Link>
           </div>

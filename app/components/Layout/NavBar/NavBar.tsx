@@ -8,9 +8,10 @@ const navbarItems = [
   { ref: '/', label: 'Início' },
   { ref: '/about', label: 'Sobre a Apemigos' },
   { ref: '/news', label: 'Notícias' },
-  { ref: '/projects', label: 'Projetos' },
+  // { ref: '/projects', label: 'Projetos' },
+  { ref: '/alto-custo', label: 'Alto Custo' },
   //   { ref: '/team', label: 'Equipe' },
-  { ref: '/association', label: 'Cartão da pessoa com EM' },
+  // { ref: '/association', label: 'Cartão da pessoa com EM' },
   { ref: '/contact', label: 'Contato' },
   { ref: '/doe', label: 'Doe', highlighted: true },
 ];
@@ -29,7 +30,7 @@ const StyledNavLink = ({
   <NavLink
     className={`${className ?? ''} ${
       highlighted
-        ? 'bg-orange-500 px-5 py-3 text-base font-site text-white transition hover:bg-orange-600'
+        ? 'inline-flex items-center rounded-full bg-orange-500 px-4 py-2 font-site text-sm text-white shadow-sm shadow-orange-500/20 ring-1 ring-orange-500/20 transition hover:-translate-y-0.5 hover:bg-orange-600 hover:shadow-md'
         : isActive
         ? 'text-orange-500'
         : 'hover:text-orange-500'
