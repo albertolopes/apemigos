@@ -3,8 +3,10 @@ import { LongDescription } from './LongDescription';
 import { newsService } from '@services';
 import { notFound } from 'next/navigation';
 
-export const dynamic = 'force-dynamic';
 export const revalidate = 3600;
+
+const baseUrl = 'https://apemigosbrasil.org.br';
+const fallbackImageUrl = `${baseUrl}/images/logo.png`;
 
 export default async function New({
   params,
@@ -14,20 +16,28 @@ export default async function New({
   const { slug } = await params;
 
   // No servidor, o cache() unifica esta chamada com a do layout (generateMetadata)
-  const item = await newsService.getNewsContentBySlug(slug);
+  const item = await newsService.getNewsContentBySlug(slug).catch(() => null);
 
-  if (!item) {
+  if (!item || !item.noticia) {
     notFound();
   }
+
+  const newsUrl = `${baseUrl}/news/${slug}`;
+  const imageUrl = item.noticia.image || fallbackImageUrl;
 
   // Esquema de Dados Estruturados (JSON-LD) para o Google
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': newsUrl,
+    },
+    url: newsUrl,
     headline: item.noticia.title,
-    image: [item.noticia.image],
+    image: [imageUrl],
     datePublished: item.noticia.date,
-    dateModified: item.noticia.date,
+    dateModified: item.noticia.updatedAt || item.noticia.date,
     author: [
       {
         '@type': 'Organization',
@@ -35,6 +45,14 @@ export default async function New({
         url: 'https://apemigosbrasil.org.br',
       },
     ],
+    publisher: {
+      '@type': 'Organization',
+      name: 'Apemigos Brasil',
+      logo: {
+        '@type': 'ImageObject',
+        url: fallbackImageUrl,
+      },
+    },
     description: item.noticia.shortDescription,
   };
 

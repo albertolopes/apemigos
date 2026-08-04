@@ -1,6 +1,16 @@
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import DonatePixPanel from '@app/components/DonatePixPanel/DonatePixPanel';
+
+export const metadata: Metadata = {
+  title: 'Doe para a Apemigos | Apoie acolhimento e informacao',
+  description:
+    'Contribua com a Apemigos e ajude a manter acolhimento, informacao qualificada e apoio a pessoas com esclerose multipla e doencas raras.',
+  alternates: {
+    canonical: '/doe',
+  },
+};
 
 const donationHighlights = [
   {

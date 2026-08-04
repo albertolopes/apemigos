@@ -4,6 +4,9 @@ export const metadata: Metadata = {
   title: 'Notícias e Atualizações | Apemigos',
   description:
     'Fique por dentro das últimas notícias, reportagens e comunicados da Apemigos. Acompanhe novidades sobre Esclerose Múltipla e doenças raras.',
+  alternates: {
+    canonical: '/news',
+  },
   openGraph: {
     title: 'Notícias e Atualizações | Apemigos',
     description: 'Fique por dentro das últimas notícias da ONG Apemigos.',

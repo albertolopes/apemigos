@@ -1,4 +1,14 @@
+import type { Metadata } from 'next';
 import Image from 'next/image';
+
+export const metadata: Metadata = {
+  title: 'Sobre a Apemigos | Apoio a pessoas com Esclerose Multipla',
+  description:
+    'Conheca a historia, missao e atuacao da Apemigos no apoio a pessoas com esclerose multipla e doencas raras no Distrito Federal.',
+  alternates: {
+    canonical: '/about',
+  },
+};
 
 const pillars = [
   {

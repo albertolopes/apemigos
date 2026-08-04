@@ -1,45 +1,87 @@
 import { MetadataRoute } from 'next';
-import { newsService } from '@services';
+import { NewsItem, newsService } from '@services';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 3600;
+
+const baseUrl = 'https://apemigosbrasil.org.br';
+const newsPageSize = 100;
+
+function getValidDate(...values: Array<string | undefined>) {
+  for (const value of values) {
+    if (!value) continue;
+
+    const date = new Date(value);
+
+    if (!Number.isNaN(date.getTime())) {
+      return date;
+    }
+  }
+
+  return undefined;
+}
+
+async function getAllNews() {
+  const firstPage = await newsService.getNews(0, newsPageSize);
+  const items: NewsItem[] = [...firstPage.content];
+
+  for (let page = 1; page < firstPage.totalPages; page++) {
+    const response = await newsService.getNews(page, newsPageSize);
+    items.push(...response.content);
+  }
+
+  return items;
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://apemigosbrasil.org.br';
-
-  // Páginas estáticas principais
   const staticRoutes = [
-    '',
-    '/about',
-    '/contact',
-    // '/association',
-    '/doe',
-    '/alto-custo',
-    '/news',
-    // '/projects',
-  ].map((route) => ({
-    url: `${baseUrl}${route}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly' as const,
-    priority: 1.0,
-  }));
-
-  // Notícias dinâmicas
-  let newsRoutes: MetadataRoute.Sitemap = [];
-  try {
-    const newsResponse = await newsService.getNews(0, 100);
-    newsRoutes = newsResponse.content.map((item) => ({
-      url: `${baseUrl}/news/${item.slug || item.id}`,
-      lastModified: new Date(item.date),
+    {
+      url: baseUrl,
+      changeFrequency: 'weekly' as const,
+      priority: 1.0,
+    },
+    {
+      url: `${baseUrl}/doe`,
       changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/alto-custo`,
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/news`,
+      changeFrequency: 'daily' as const,
       priority: 0.8,
-    }));
+    },
+    {
+      url: `${baseUrl}/about`,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/contact`,
+      changeFrequency: 'yearly' as const,
+      priority: 0.6,
+    },
+  ];
+
+  let newsRoutes: MetadataRoute.Sitemap = [];
+
+  try {
+    const news = await getAllNews();
+
+    newsRoutes = news
+      .filter((item) => item.slug)
+      .map((item) => ({
+        url: `${baseUrl}/news/${encodeURIComponent(item.slug)}`,
+        lastModified: getValidDate(item.updatedAt, item.createdAt, item.date),
+        changeFrequency: 'monthly' as const,
+        priority: 0.7,
+      }));
   } catch (error) {
     console.error('Falha ao gerar sitemap para notícias:', error);
   }
-
-  // Projetos dinâmicos (Assumindo que temos algo similar se houver tempo)
-  // Por enquanto vamos focar nas notícias conforme solicitado.
 
   return [...staticRoutes, ...newsRoutes];
 }

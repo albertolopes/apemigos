@@ -3,6 +3,7 @@ const path = require('path');
 
 const nextConfig = {
   env: {},
+  outputFileTracingRoot: __dirname,
   reactStrictMode: true,
   experimental: {},
   eslint: {
