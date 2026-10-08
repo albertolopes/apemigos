@@ -68,6 +68,10 @@ function getBackendSummary(error: unknown) {
   return 'Erro ao realizar inscrição';
 }
 
+function getFormularioEventoId(formulario: FormularioEvento | null) {
+  return formulario?.evento?.id || formulario?.eventoId;
+}
+
 function validateField(campo: CampoFormularioEvento, value: string | string[]) {
   const normalized = normalizeFieldValue(campo, value);
   const empty = Array.isArray(normalized)
@@ -254,7 +258,7 @@ function FieldControl({
 }
 
 export default function EventoInscricaoPage() {
-  const params = useParams<{ id: string }>();
+  const params = useParams<{ slug: string }>();
   const [formulario, setFormulario] = useState<FormularioEvento | null>(null);
   const [values, setValues] = useState<FormValues>({});
   const [errors, setErrors] = useState<FormErrors>({});
@@ -262,17 +266,38 @@ export default function EventoInscricaoPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [backendError, setBackendError] = useState<string | null>(null);
   const [success, setSuccess] = useState<InscricaoEvento | null>(null);
+  const [activeHelpId, setActiveHelpId] = useState<number | null>(null);
 
   useEffect(() => {
     setIsLoading(true);
     setBackendError(null);
 
     eventosService
-      .getFormulario(params.id)
+      .getFormularioBySlug(params.slug)
       .then(setFormulario)
       .catch((err) => setBackendError(err.message))
       .finally(() => setIsLoading(false));
-  }, [params.id]);
+  }, [params.slug]);
+
+  useEffect(() => {
+    function closeHelp(event: MouseEvent) {
+      const target = event.target as HTMLElement | null;
+      if (target?.closest('[data-field-help]')) return;
+      setActiveHelpId(null);
+    }
+
+    function closeOnEsc(event: KeyboardEvent) {
+      if (event.key === 'Escape') setActiveHelpId(null);
+    }
+
+    document.addEventListener('click', closeHelp);
+    document.addEventListener('keydown', closeOnEsc);
+
+    return () => {
+      document.removeEventListener('click', closeHelp);
+      document.removeEventListener('keydown', closeOnEsc);
+    };
+  }, []);
 
   const camposAtivos = useMemo(
     () =>
@@ -311,13 +336,20 @@ export default function EventoInscricaoPage() {
 
     setIsSubmitting(true);
     try {
+      const eventoId = getFormularioEventoId(formulario);
+      if (!eventoId) {
+        throw new Error(
+          'Não foi possível identificar o evento para inscrição.'
+        );
+      }
+
       const payload = {
         respostas: camposAtivos.map((campo) => ({
           campoId: campo.id,
           valor: normalizeFieldValue(campo, getValue(values, campo)),
         })),
       };
-      const response = await eventosService.criarInscricao(params.id, payload);
+      const response = await eventosService.criarInscricao(eventoId, payload);
       setSuccess(response);
     } catch (err) {
       setBackendError(getBackendSummary(err));
@@ -354,7 +386,7 @@ export default function EventoInscricaoPage() {
           Este evento não está recebendo novas inscrições.
         </p>
         <Link
-          href={`/eventos/${params.id}`}
+          href={`/eventos/${formulario?.evento?.slug || params.slug}`}
           className="mt-8 inline-block text-orange-600"
         >
           Ver detalhes do evento
@@ -412,7 +444,10 @@ export default function EventoInscricaoPage() {
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-12 sm:px-10">
-      <Link href={`/eventos/${params.id}`} className="text-sm text-orange-600">
+      <Link
+        href={`/eventos/${formulario?.evento?.slug || params.slug}`}
+        className="text-sm text-orange-600"
+      >
         Voltar para detalhes
       </Link>
       <h1 className="mt-5 font-site text-slate-800">
@@ -435,23 +470,46 @@ export default function EventoInscricaoPage() {
 
           return (
             <div key={campo.id}>
-              <label className="block text-sm font-semibold text-slate-900">
-                {campo.label}
-                {campo.obrigatorio && (
-                  <span className="text-orange-600"> *</span>
+              <div className="flex items-center gap-2">
+                <label className="block text-sm font-semibold text-slate-900">
+                  {campo.label}
+                  {campo.obrigatorio && (
+                    <span className="text-orange-600"> *</span>
+                  )}
+                </label>
+                {campo.textoAjuda && (
+                  <span className="relative" data-field-help>
+                    <button
+                      type="button"
+                      aria-label={`Ajuda sobre ${campo.label}`}
+                      aria-expanded={activeHelpId === campo.id}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setActiveHelpId((current) =>
+                          current === campo.id ? null : campo.id
+                        );
+                      }}
+                      className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-xs font-bold text-slate-600 hover:border-orange-500 hover:text-orange-600"
+                    >
+                      ?
+                    </button>
+                    {activeHelpId === campo.id && (
+                      <div
+                        role="tooltip"
+                        className="absolute left-0 top-7 z-20 w-64 border border-slate-200 bg-white p-3 text-xs font-normal leading-5 text-slate-600 shadow-lg"
+                      >
+                        {campo.textoAjuda}
+                      </div>
+                    )}
+                  </span>
                 )}
-              </label>
+              </div>
               <FieldControl
                 campo={campo}
                 value={value}
                 error={error}
                 onChange={updateValue}
               />
-              {campo.textoAjuda && (
-                <p className="mt-2 text-xs text-slate-500">
-                  {campo.textoAjuda}
-                </p>
-              )}
               {error && <p className="mt-2 text-xs text-red-600">{error}</p>}
             </div>
           );

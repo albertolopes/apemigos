@@ -55,24 +55,59 @@ export class EventosService {
     }
   }
 
-  async getEventoById(id: string | number): Promise<Evento> {
+  async getEvento(identifier: string | number): Promise<Evento> {
     try {
-      const response = await api.get(`/api/public/eventos/${id}`);
+      const response = await api.get(`/api/public/eventos/${identifier}`);
       return response.data;
     } catch (error: any) {
-      console.error(`Erro ao buscar evento ${id}:`, error);
+      console.error(`Erro ao buscar evento ${identifier}:`, error);
       throw new Error(
         extractErrorMessage(error.response?.data, 'Evento não encontrado')
       );
     }
   }
 
-  async getFormulario(id: string | number): Promise<FormularioEvento> {
+  async getEventoById(id: string | number): Promise<Evento> {
+    return this.getEvento(id);
+  }
+
+  async getEventoBySlug(slug: string): Promise<Evento> {
     try {
-      const response = await api.get(`/api/public/eventos/${id}/formulario`);
+      const response = await api.get(`/api/public/eventos/slug/${slug}`);
       return response.data;
     } catch (error: any) {
-      console.error(`Erro ao buscar formulário do evento ${id}:`, error);
+      console.error(`Erro ao buscar evento por slug ${slug}:`, error);
+      throw new Error(
+        extractErrorMessage(error.response?.data, 'Evento não encontrado')
+      );
+    }
+  }
+
+  async getFormulario(identifier: string | number): Promise<FormularioEvento> {
+    try {
+      const response = await api.get(
+        `/api/public/eventos/${identifier}/formulario`
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error(
+        `Erro ao buscar formulário do evento ${identifier}:`,
+        error
+      );
+      throw new Error(
+        extractErrorMessage(error.response?.data, 'Erro ao carregar formulário')
+      );
+    }
+  }
+
+  async getFormularioBySlug(slug: string): Promise<FormularioEvento> {
+    try {
+      const response = await api.get(
+        `/api/public/eventos/slug/${slug}/formulario`
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error(`Erro ao buscar formulário do evento ${slug}:`, error);
       throw new Error(
         extractErrorMessage(error.response?.data, 'Erro ao carregar formulário')
       );
@@ -80,17 +115,17 @@ export class EventosService {
   }
 
   async criarInscricao(
-    id: string | number,
+    identifier: string | number,
     payload: CriarInscricaoPayload
   ): Promise<InscricaoEvento> {
     try {
       const response = await api.post(
-        `/api/public/eventos/${id}/inscricoes`,
+        `/api/public/eventos/${identifier}/inscricoes`,
         payload
       );
       return response.data;
     } catch (error: any) {
-      console.error(`Erro ao criar inscrição no evento ${id}:`, error);
+      console.error(`Erro ao criar inscrição no evento ${identifier}:`, error);
       throw new Error(
         extractErrorMessage(error.response?.data, 'Erro ao realizar inscrição')
       );

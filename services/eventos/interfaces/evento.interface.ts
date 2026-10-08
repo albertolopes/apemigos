@@ -1,5 +1,6 @@
 export interface Evento {
   id: number | string;
+  slug?: string;
   titulo?: string;
   title?: string;
   descricao?: string;

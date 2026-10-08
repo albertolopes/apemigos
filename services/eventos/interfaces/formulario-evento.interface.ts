@@ -32,11 +32,13 @@ export interface CampoFormularioEvento {
 
 export interface FormularioEvento {
   id?: number;
+  eventoId?: number | string;
   titulo?: string;
   descricao?: string;
   campos: CampoFormularioEvento[];
   evento?: {
     id: number | string;
+    slug?: string;
     titulo?: string;
     inscricoesAbertas?: boolean;
   };

@@ -104,6 +104,7 @@ export default function EventosPage() {
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             {items.map((evento) => {
               const titulo = getEventoTitulo(evento);
+              const eventoUrl = evento.slug ? `/eventos/${evento.slug}` : '';
               const periodoInscricao =
                 evento.inicioInscricoes || evento.fimInscricoes
                   ? `${formatDate(evento.inicioInscricoes) || 'Aberto'} ate ${
@@ -151,15 +152,17 @@ export default function EventosPage() {
                       )}
                     </dl>
                     <div className="mt-6 flex flex-wrap gap-3">
-                      <Link
-                        href={`/eventos/${evento.id}`}
-                        className="border border-slate-300 px-4 py-2 font-site text-sm text-slate-700 transition hover:border-orange-500 hover:text-orange-600"
-                      >
-                        Ver detalhes
-                      </Link>
-                      {evento.inscricoesAbertas && (
+                      {eventoUrl && (
                         <Link
-                          href={`/eventos/${evento.id}/inscricao`}
+                          href={eventoUrl}
+                          className="border border-slate-300 px-4 py-2 font-site text-sm text-slate-700 transition hover:border-orange-500 hover:text-orange-600"
+                        >
+                          Ver detalhes
+                        </Link>
+                      )}
+                      {eventoUrl && evento.inscricoesAbertas && (
+                        <Link
+                          href={`${eventoUrl}/inscricao`}
                           className="btn-main"
                         >
                           Inscrever-se

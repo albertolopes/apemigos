@@ -15,7 +15,7 @@ import {
 } from '../eventos-utils';
 
 export default function EventoDetalhePage() {
-  const params = useParams<{ id: string }>();
+  const params = useParams<{ slug: string }>();
   const [evento, setEvento] = useState<Evento | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,11 +25,11 @@ export default function EventoDetalhePage() {
     setError(null);
 
     eventosService
-      .getEventoById(params.id)
+      .getEventoBySlug(params.slug)
       .then(setEvento)
       .catch((err) => setError(err.message))
       .finally(() => setIsLoading(false));
-  }, [params.id]);
+  }, [params.slug]);
 
   if (isLoading) {
     return (
@@ -54,6 +54,7 @@ export default function EventoDetalhePage() {
   }
 
   const titulo = getEventoTitulo(evento);
+  const eventoUrl = `/eventos/${params.slug}`;
 
   return (
     <main className="bg-white">
@@ -113,11 +114,16 @@ export default function EventoDetalhePage() {
             Voltar
           </Link>
           {evento.inscricoesAbertas && (
-            <Link href={`/eventos/${evento.id}/inscricao`} className="btn-main">
+            <Link href={`${eventoUrl}/inscricao`} className="btn-main">
               Inscrever-se
             </Link>
           )}
         </div>
+        {!evento.inscricoesAbertas && (
+          <div className="mt-6 border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+            Inscrições encerradas ou indisponíveis para este evento.
+          </div>
+        )}
       </section>
     </main>
   );
