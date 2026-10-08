@@ -69,7 +69,12 @@ function getBackendSummary(error: unknown) {
 }
 
 function getFormularioEventoId(formulario: FormularioEvento | null) {
-  return formulario?.evento?.id || formulario?.eventoId;
+  return (
+    formulario?.evento?.id ||
+    formulario?.eventoId ||
+    (formulario as any)?.idEvento ||
+    (formulario as any)?.evento_id
+  );
 }
 
 function validateField(campo: CampoFormularioEvento, value: string | string[]) {
@@ -267,14 +272,27 @@ export default function EventoInscricaoPage() {
   const [backendError, setBackendError] = useState<string | null>(null);
   const [success, setSuccess] = useState<InscricaoEvento | null>(null);
   const [activeHelpId, setActiveHelpId] = useState<number | null>(null);
+  const [eventoId, setEventoId] = useState<string | number | null>(null);
 
   useEffect(() => {
     setIsLoading(true);
     setBackendError(null);
+    setEventoId(null);
 
     eventosService
       .getFormularioBySlug(params.slug)
-      .then(setFormulario)
+      .then(async (data) => {
+        setFormulario(data);
+
+        const id = getFormularioEventoId(data);
+        if (id) {
+          setEventoId(id);
+          return;
+        }
+
+        const evento = await eventosService.getEventoBySlug(params.slug);
+        setEventoId(evento.id);
+      })
       .catch((err) => setBackendError(err.message))
       .finally(() => setIsLoading(false));
   }, [params.slug]);
@@ -336,8 +354,8 @@ export default function EventoInscricaoPage() {
 
     setIsSubmitting(true);
     try {
-      const eventoId = getFormularioEventoId(formulario);
-      if (!eventoId) {
+      const internalEventoId = eventoId || getFormularioEventoId(formulario);
+      if (!internalEventoId) {
         throw new Error(
           'Não foi possível identificar o evento para inscrição.'
         );
@@ -349,7 +367,10 @@ export default function EventoInscricaoPage() {
           valor: normalizeFieldValue(campo, getValue(values, campo)),
         })),
       };
-      const response = await eventosService.criarInscricao(eventoId, payload);
+      const response = await eventosService.criarInscricao(
+        internalEventoId,
+        payload
+      );
       setSuccess(response);
     } catch (err) {
       setBackendError(getBackendSummary(err));
