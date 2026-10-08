@@ -1,10 +1,10 @@
 'use client';
 import { NavLink } from './NavLink';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { LinkProps } from 'next/link';
 import { usePathname } from 'next/navigation';
 
-const navbarItems = [
+const baseNavbarItems = [
   { ref: '/', label: 'Início' },
   { ref: '/about', label: 'Sobre a Apemigos' },
   { ref: '/news', label: 'Notícias' },
@@ -41,12 +41,46 @@ const StyledNavLink = ({
 
 export function NavBar() {
   const [isMenuShown, setIsMenuShown] = useState(false);
+  const [hasPublishedEvents, setHasPublishedEvents] = useState(false);
   const pathname = usePathname();
 
   const toggleOpen = useCallback(
     () => setIsMenuShown(!isMenuShown),
     [isMenuShown]
   );
+
+  useEffect(() => {
+    let isMounted = true;
+
+    fetch('/api/proxy/api/public/eventos?page=0&size=1', {
+      headers: { Accept: 'application/json' },
+      credentials: 'same-origin',
+    })
+      .then(async (response) => {
+        if (!response.ok) return null;
+        return response.json();
+      })
+      .then((data) => {
+        if (!isMounted) return;
+        setHasPublishedEvents(Number(data?.totalElements || 0) > 0);
+      })
+      .catch(() => {
+        if (isMounted) setHasPublishedEvents(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const navbarItems = useMemo(() => {
+    if (!hasPublishedEvents) return baseNavbarItems;
+
+    const newsIndex = baseNavbarItems.findIndex((item) => item.ref === '/news');
+    const nextItems = [...baseNavbarItems];
+    nextItems.splice(newsIndex + 1, 0, { ref: '/eventos', label: 'Eventos' });
+    return nextItems;
+  }, [hasPublishedEvents]);
 
   return (
     <>

@@ -5,3 +5,4 @@ export * from './projects';
 export * from './email';
 export * from './associados';
 export * from './pix/pix.service';
+export * from './eventos';
