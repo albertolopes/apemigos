@@ -60,7 +60,6 @@ export default async function EventoDetalhePage({
             className="h-[520px] w-full border border-slate-200 bg-slate-50"
             imageClassName="object-contain p-3"
           />
-          <EventSharePanel title={titulo} slug={slug} compact />
         </div>
 
         <div>
@@ -150,9 +149,7 @@ export default async function EventoDetalhePage({
             </section>
           )}
 
-          <div className="lg:hidden">
-            <EventSharePanel title={titulo} slug={slug} />
-          </div>
+          <EventSharePanel title={titulo} slug={slug} />
         </div>
       </section>
     </main>
