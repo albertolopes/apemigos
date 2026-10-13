@@ -7,6 +7,8 @@ import {
 } from '../eventos-utils';
 import { Evento } from '@services';
 
+const siteUrl = 'https://apemigosbrasil.org.br';
+
 async function getEventoMetadata(slug: string): Promise<Evento | null> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   if (!apiUrl) return null;
@@ -45,17 +47,37 @@ export async function generateMetadata({
   const titulo = getEventoTitulo(evento);
   const descricao = getEventoResumo(evento) || getEventoDescricao(evento);
   const imagem = getEventoImagem(evento);
-  const canonical = `/eventos/${slug}`;
+  const canonicalPath = `/eventos/${slug}`;
+  const canonical = `${siteUrl}${canonicalPath}`;
 
   return {
     title: `${titulo} | Apemigos`,
     description: descricao,
-    alternates: { canonical },
+    alternates: { canonical: canonicalPath },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
     openGraph: {
       title: titulo,
       description: descricao,
       url: canonical,
+      siteName: 'Apemigos',
+      locale: 'pt_BR',
+      type: 'article',
       images: imagem ? [{ url: imagem, alt: titulo }] : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: titulo,
+      description: descricao,
+      images: imagem ? [imagem] : undefined,
     },
   };
 }

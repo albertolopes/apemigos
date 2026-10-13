@@ -54,6 +54,23 @@ const API_ORIGIN = (() => {
   }
 })();
 
+function isOriginAllowed(origin: string) {
+  if (!origin) return false;
+
+  if (process.env.NODE_ENV !== 'production') {
+    try {
+      const url = new URL(origin);
+      if (['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)) {
+        return true;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+
+  return ALLOWED_ORIGINS.includes(origin);
+}
+
 function parseCookieValue(
   cookieHeader: string | null,
   name: string
@@ -85,7 +102,7 @@ async function forward(request: Request, params: { path: string[] }) {
   const effectiveOrigin = incomingOrigin || proxyOrigin;
 
   // Validate effective origin against allowed list
-  if (effectiveOrigin && !ALLOWED_ORIGINS.includes(effectiveOrigin)) {
+  if (effectiveOrigin && !isOriginAllowed(effectiveOrigin)) {
     console.warn(
       'proxy: rejected request from disallowed origin',
       effectiveOrigin

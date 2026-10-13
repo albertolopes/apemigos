@@ -38,8 +38,21 @@ function originHostOnly(o: string) {
     .toLowerCase();
 }
 
+function isLocalDevelopmentOrigin(incomingOrigin: string) {
+  if (process.env.NODE_ENV === 'production') return false;
+
+  try {
+    const url = new URL(incomingOrigin);
+    return ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
+  } catch (e) {
+    return false;
+  }
+}
+
 function isOriginAllowed(incomingOrigin: string) {
   if (!incomingOrigin) return false;
+  if (isLocalDevelopmentOrigin(incomingOrigin)) return true;
+
   const normIncoming = normalizeOrigin(incomingOrigin);
   const hostIncoming = originHostOnly(incomingOrigin);
   const normalizedAllowed = ALLOWED_ORIGINS.map(normalizeOrigin);
@@ -118,6 +131,9 @@ export async function POST(request: Request) {
     }
     if (!bodyJson.serviceKey) {
       if (PUBLIC_SERVICE_KEY) bodyJson.serviceKey = PUBLIC_SERVICE_KEY;
+    }
+    if (process.env.NODE_ENV !== 'production' && SERVER_SERVICE_KEY) {
+      bodyJson.serviceKey = SERVER_SERVICE_KEY;
     }
 
     // Build headers for server->server call

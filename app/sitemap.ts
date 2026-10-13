@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-import { NewsItem, newsService } from '@services';
+import { Evento, eventosService, NewsItem, newsService } from '@services';
 
 export const revalidate = 3600;
 
@@ -26,6 +26,18 @@ async function getAllNews() {
 
   for (let page = 1; page < firstPage.totalPages; page++) {
     const response = await newsService.getNews(page, newsPageSize);
+    items.push(...response.content);
+  }
+
+  return items;
+}
+
+async function getAllEventos() {
+  const firstPage = await eventosService.getEventos(0, newsPageSize);
+  const items: Evento[] = [...firstPage.content];
+
+  for (let page = 1; page < firstPage.totalPages; page++) {
+    const response = await eventosService.getEventos(page, newsPageSize);
     items.push(...response.content);
   }
 
@@ -67,6 +79,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   let newsRoutes: MetadataRoute.Sitemap = [];
+  let eventRoutes: MetadataRoute.Sitemap = [];
 
   try {
     const news = await getAllNews();
@@ -83,5 +96,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error('Falha ao gerar sitemap para notícias:', error);
   }
 
-  return [...staticRoutes, ...newsRoutes];
+  try {
+    const eventos = await getAllEventos();
+
+    eventRoutes = eventos
+      .filter((item) => item.slug)
+      .map((item) => ({
+        url: `${baseUrl}/eventos/${encodeURIComponent(item.slug || '')}`,
+        lastModified: getValidDate(item.dataInicio, item.dataEvento),
+        changeFrequency: 'weekly' as const,
+        priority: 0.8,
+      }));
+  } catch (error) {
+    console.error('Falha ao gerar sitemap para eventos:', error);
+  }
+
+  return [...staticRoutes, ...newsRoutes, ...eventRoutes];
 }
