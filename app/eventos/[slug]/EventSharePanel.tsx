@@ -7,9 +7,11 @@ const siteUrl = 'https://apemigosbrasil.org.br';
 export function EventSharePanel({
   title,
   slug,
+  compact = false,
 }: {
   title: string;
   slug: string;
+  compact?: boolean;
 }) {
   const fallbackUrl = `${siteUrl}/eventos/${slug}`;
   const [eventUrl, setEventUrl] = useState(fallbackUrl);
@@ -49,8 +51,14 @@ export function EventSharePanel({
   }
 
   return (
-    <aside className="mt-10 border border-slate-200 bg-slate-50 p-5">
-      <div className="grid gap-6 md:grid-cols-[180px_1fr] md:items-center">
+    <aside className="mt-6 border border-slate-200 bg-slate-50 p-5">
+      <div
+        className={
+          compact
+            ? 'grid gap-4'
+            : 'grid gap-6 md:grid-cols-[180px_1fr] md:items-center'
+        }
+      >
         <img
           src={qrCodeUrl}
           alt={`QR code para compartilhar o evento ${title}`}
@@ -64,7 +72,7 @@ export function EventSharePanel({
           <p className="mt-2 break-all text-sm text-slate-600">{eventUrl}</p>
           <div className="mt-4 flex flex-wrap gap-3">
             <button type="button" onClick={shareEvent} className="btn-main">
-              Compartilhar evento
+              Compartilhar
             </button>
             <button
               type="button"
