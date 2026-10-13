@@ -39,8 +39,20 @@ export async function generateMetadata({
 
   if (!evento) {
     return {
-      title: 'Evento não encontrado | Apemigos',
-      robots: { index: false, follow: false },
+      title: 'Evento | Apemigos',
+      description:
+        'Confira os eventos publicados pela Apemigos e acompanhe as informações de inscrição.',
+      alternates: { canonical: `/eventos/${slug}` },
+      robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+          index: true,
+          follow: true,
+          'max-image-preview': 'large',
+          'max-snippet': -1,
+        },
+      },
     };
   }
 
